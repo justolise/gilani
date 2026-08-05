@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import DOMPurify from "dompurify";
 import { FunctionGraphBlock } from "./FunctionGraph";
 import { ExternalLink, AlertCircle, Lightbulb, AlertTriangle, Info } from "lucide-react";
+import { RenderErrorBoundary } from "@/client/components/shared/RenderErrorBoundary";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -149,10 +150,12 @@ function MermaidDiagram({ code, isStreaming }: { code: string; isStreaming?: boo
   }
 
   return (
-    <div
-      ref={ref}
-      className="my-3 overflow-x-auto rounded-xl border border-border/40 bg-muted/20 p-4 flex justify-center [&>svg]:max-w-full [&>svg]:h-auto"
-    />
+    <RenderErrorBoundary label="Mermaid diagram" source={code}>
+      <div
+        ref={ref}
+        className="my-3 overflow-x-auto rounded-xl border border-border/40 bg-muted/20 p-4 flex justify-center [&>svg]:max-w-full [&>svg]:h-auto"
+      />
+    </RenderErrorBoundary>
   );
 }
 
@@ -177,12 +180,14 @@ function SmilesDrawer({ smiles }: { smiles: string }) {
   }, [smiles]);
 
   return (
-    <figure className="my-3 flex flex-col items-center">
-      <canvas ref={canvasRef} className="rounded-xl border border-border max-w-full" />
-      <figcaption className="text-[10px] font-mono text-muted-foreground mt-1 italic">
-        {smiles}
-      </figcaption>
-    </figure>
+    <RenderErrorBoundary label="SMILES structure" source={smiles}>
+      <figure className="my-3 flex flex-col items-center">
+        <canvas ref={canvasRef} className="rounded-xl border border-border max-w-full" />
+        <figcaption className="text-[10px] font-mono text-muted-foreground mt-1 italic">
+          {smiles}
+        </figcaption>
+      </figure>
+    </RenderErrorBoundary>
   );
 }
 
@@ -195,9 +200,11 @@ function DiagramSVG({ svg }: { svg: string }) {
     ref.current.innerHTML = DOMPurify.sanitize(svg, { ADD_TAGS: ["style"] });
   }, [svg]);
   return (
-    <div className="my-3 rounded-xl border border-border bg-white dark:bg-zinc-900 p-3 overflow-x-auto flex justify-center">
-      <div ref={ref} className="max-w-full [&>svg]:max-w-full [&>svg]:h-auto" />
-    </div>
+    <RenderErrorBoundary label="SVG diagram" source={svg}>
+      <div className="my-3 rounded-xl border border-border bg-white dark:bg-zinc-900 p-3 overflow-x-auto flex justify-center">
+        <div ref={ref} className="max-w-full [&>svg]:max-w-full [&>svg]:h-auto" />
+      </div>
+    </RenderErrorBoundary>
   );
 }
 
@@ -206,7 +213,7 @@ function DiagramSVG({ svg }: { svg: string }) {
 /**
  * Helper to recursively extract raw text from a React node.
  */
-function extractText(node: any): string {
+export function extractText(node: any): string {
   if (typeof node === "string" || typeof node === "number") {
     return String(node);
   }
@@ -249,31 +256,41 @@ function splitPracticeChildren(children: React.ReactNode): {
 }
 
 function CustomCallout({ type, children }: { type: string; children: React.ReactNode }) {
+  let content;
   switch (type) {
     case "DEFINITION":
-      return <DefinitionCard>{children}</DefinitionCard>;
+      content = <DefinitionCard>{children}</DefinitionCard>;
+      break;
     case "EXAMPLE":
-      return <ExampleCard>{children}</ExampleCard>;
+      content = <ExampleCard>{children}</ExampleCard>;
+      break;
     case "WARNING":
     case "CAUTION":
-      return <WarningCard>{children}</WarningCard>;
+      content = <WarningCard>{children}</WarningCard>;
+      break;
     case "TIP":
     case "NOTE":
-      return <StudyTipCard>{children}</StudyTipCard>;
+      content = <StudyTipCard>{children}</StudyTipCard>;
+      break;
     case "IMPORTANT":
     case "SUMMARY":
-      return <SummaryCard>{children}</SummaryCard>;
+      content = <SummaryCard>{children}</SummaryCard>;
+      break;
     case "PRACTICE": {
       const { questionNodes, answerNodes } = splitPracticeChildren(children);
       if (answerNodes.length === 0) {
         // No answer section yet — fall back to StudyTipCard so it still looks good
-        return <StudyTipCard>{children}</StudyTipCard>;
+        content = <StudyTipCard>{children}</StudyTipCard>;
+      } else {
+        content = (
+          <PracticeQuestionCard question={<>{questionNodes}</>} answer={<>{answerNodes}</>} />
+        );
       }
-      return <PracticeQuestionCard question={<>{questionNodes}</>} answer={<>{answerNodes}</>} />;
+      break;
     }
     default:
       // Fallback
-      return (
+      content = (
         <div className="my-4 rounded-xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-1.5 font-semibold text-xs uppercase tracking-wider mb-2 text-muted-foreground">
             <Info className="h-4 w-4" />
@@ -282,7 +299,13 @@ function CustomCallout({ type, children }: { type: string; children: React.React
           <div className="text-sm text-foreground">{children}</div>
         </div>
       );
+      break;
   }
+  return (
+    <RenderErrorBoundary label={`${type} callout`} source={extractText(children)}>
+      {content}
+    </RenderErrorBoundary>
+  );
 }
 
 // ─── JS blocklist (avoid auto-wrapping these as formulas) ────────────────────
@@ -746,8 +769,9 @@ const MERMAID_PATTERN =
 const PracticeCounterCtx = React.createContext<Map<number, number> | null>(null);
 //
 // InsidePracticeCardCtx: set to `true` inside a practice card so nested
-// sub-question li items (a, b, c …) are NOT converted into more cards.
-export const InsidePracticeCardCtx = React.createContext(false);
+export const InsidePracticeCardCtx = React.createContext<
+  { isQuestion: boolean; isMultipleChoice?: boolean } | false
+>(false);
 
 // Extract plain text from a HAST node (depth-first, ignores element boundaries)
 function hastText(node: any): string {
@@ -771,25 +795,27 @@ const buildComponents = (isStreaming: boolean): any => ({
   ),
 
   h2: ({ children }: any) => (
-    <h2 className="text-xl font-bold mt-7 mb-3 text-foreground leading-snug">{children}</h2>
+    <h2 className="text-xl font-bold mt-8 mb-4 text-foreground leading-snug">{children}</h2>
   ),
   h3: ({ children }: any) => (
-    <h3 className="text-lg font-semibold mt-6 mb-2 text-foreground leading-snug">{children}</h3>
+    <h3 className="text-lg font-semibold mt-6 mb-3 text-foreground leading-snug">{children}</h3>
   ),
   h4: ({ children }: any) => (
-    <h4 className="text-base font-semibold mt-5 mb-1.5 text-foreground">{children}</h4>
+    <h4 className="text-base font-semibold mt-5 mb-2 text-foreground">{children}</h4>
   ),
   h5: ({ children }: any) => (
-    <h5 className="text-sm font-semibold mt-4 mb-1 text-foreground">{children}</h5>
+    <h5 className="text-sm font-semibold mt-4 mb-2 text-foreground">{children}</h5>
   ),
   h6: ({ children }: any) => (
-    <h6 className="text-xs font-semibold mt-4 mb-1 text-muted-foreground">{children}</h6>
+    <h6 className="text-xs font-semibold mt-4 mb-2 text-muted-foreground uppercase tracking-wide">
+      {children}
+    </h6>
   ),
   p: ({ children }: any) => {
     const { type, newChildren } = extractCallout(children);
     if (type) return <CustomCallout type={type}>{newChildren}</CustomCallout>;
     return (
-      <p className="text-[15px] sm:text-[16px] leading-relaxed sm:leading-7 mb-5 last:mb-0 text-foreground/90">
+      <p className="text-[15px] sm:text-[16px] leading-relaxed sm:leading-7 mb-4 last:mb-0 text-foreground/90">
         {children}
       </p>
     );
@@ -846,7 +872,7 @@ const buildComponents = (isStreaming: boolean): any => ({
     </figure>
   ),
   ul: ({ children }: any) => (
-    <ul className="list-disc pl-6 my-5 space-y-2.5 block w-full marker:text-muted-foreground/70">
+    <ul className="list-disc pl-6 my-4 space-y-1.5 block w-full marker:text-muted-foreground/70">
       {children}
     </ul>
   ),
@@ -870,7 +896,7 @@ const buildComponents = (isStreaming: boolean): any => ({
     }, [node]);
     return (
       <PracticeCounterCtx.Provider value={practiceNumbers}>
-        <ol className="list-decimal pl-6 my-5 space-y-2.5 block w-full marker:text-muted-foreground marker:font-medium [&_ol]:list-[lower-alpha] [&_ol_ol]:list-[lower-roman]">
+        <ol className="list-decimal pl-6 my-4 space-y-1.5 block w-full marker:text-muted-foreground marker:font-medium [&_ol]:list-[lower-alpha] [&_ol_ol]:list-[lower-roman]">
           {children}
         </ol>
       </PracticeCounterCtx.Provider>
@@ -920,10 +946,21 @@ const buildComponents = (isStreaming: boolean): any => ({
     if (!insidePractice && practiceNumbers && looksLikePractice(text)) {
       const offset = node?.position?.start?.offset ?? -1;
       const num = practiceNumbers.get(offset);
+      const { questionNodes, answerNodes } = splitPracticeChildren(children);
+
+      const isMultipleChoice = questionNodes.some(
+        (n: any) => n?.props?.node?.tagName === "ol" || n?.props?.node?.tagName === "ul",
+      );
+
       return (
-        <InsidePracticeCardCtx.Provider value={true}>
+        <InsidePracticeCardCtx.Provider value={{ isMultipleChoice, isQuestion: true }}>
           <li className="list-none -ml-6 my-2">
-            <PracticeQuestionCard number={num} question={<>{children}</>} />
+            <PracticeQuestionCard
+              number={num}
+              question={<>{questionNodes}</>}
+              answer={answerNodes.length > 0 ? <>{answerNodes}</> : undefined}
+              isMultipleChoice={isMultipleChoice}
+            />
           </li>
         </InsidePracticeCardCtx.Provider>
       );
@@ -1022,60 +1059,77 @@ const buildComponents = (isStreaming: boolean): any => ({
       return <MermaidDiagram code={clean} isStreaming={isStreaming} />;
     }
 
+    let parsedBlock;
     switch (rawLang) {
       // Physics
       case "physics:fbd":
       case "fbd":
-        return <FreeBodyDiagram block={createBlock("fbd")} />;
+        parsedBlock = <FreeBodyDiagram block={createBlock("fbd")} />;
+        break;
       case "physics:circuit":
       case "circuit":
-        return <CircuitDiagram block={createBlock("circuit")} />;
+        parsedBlock = <CircuitDiagram block={createBlock("circuit")} />;
+        break;
       case "physics:kinematics":
       case "kinematics":
-        return <KinematicsEquation block={createBlock("kinematics")} />;
+        parsedBlock = <KinematicsEquation block={createBlock("kinematics")} />;
+        break;
 
       // Chemistry
       case "chemistry:reaction":
       case "reaction":
-        return <ChemicalReaction block={createBlock("reaction")} />;
+        parsedBlock = <ChemicalReaction block={createBlock("reaction")} />;
+        break;
       case "chemistry:molecule":
       case "molecule":
-        return <MolecularStructure block={createBlock("molecule")} />;
+        parsedBlock = <MolecularStructure block={createBlock("molecule")} />;
+        break;
       case "chemistry:periodic":
       case "periodic":
-        return <PeriodicTable block={createBlock("periodic")} />;
+        parsedBlock = <PeriodicTable block={createBlock("periodic")} />;
+        break;
 
       // Maths
       case "maths:formula":
       case "formula":
-        return <FormulaCard block={createBlock("formula")} />;
+        parsedBlock = <FormulaCard block={createBlock("formula")} />;
+        break;
       case "maths:graph":
       case "graph":
-        return <FunctionGraphBlock spec={code} />;
+        parsedBlock = <FunctionGraphBlock spec={code} />;
+        break;
       case "maths:geometry":
       case "geometry":
-        return <GeometryRenderer block={createBlock("geometry")} />;
+        parsedBlock = <GeometryRenderer block={createBlock("geometry")} />;
+        break;
       case "maths:matrix":
       case "matrix":
-        return <MatrixRenderer block={createBlock("matrix")} />;
+        parsedBlock = <MatrixRenderer block={createBlock("matrix")} />;
+        break;
       case "maths:unit":
       case "unit":
-        return <UnitRenderer block={createBlock("unit")} />;
+        parsedBlock = <UnitRenderer block={createBlock("unit")} />;
+        break;
 
       // Cards/callouts with explicit block syntax
       case "definition":
-        return <DefinitionCard>{code}</DefinitionCard>;
+        parsedBlock = <DefinitionCard>{code}</DefinitionCard>;
+        break;
       case "example":
       case "worked-example":
-        return <ExampleCard>{code}</ExampleCard>;
+        parsedBlock = <ExampleCard>{code}</ExampleCard>;
+        break;
       case "warning":
       case "common-mistake":
-        return <WarningCard>{code}</WarningCard>;
+        parsedBlock = <WarningCard>{code}</WarningCard>;
+        break;
       case "tip":
       case "study-tip":
-        return <StudyTipCard>{code}</StudyTipCard>;
+        parsedBlock = <StudyTipCard>{code}</StudyTipCard>;
+        break;
       case "summary":
-        return <SummaryCard>{code}</SummaryCard>;
+        parsedBlock = <SummaryCard>{code}</SummaryCard>;
+        break;
       case "practice":
       case "question": {
         // Split raw text at `---` or `Answer:` / `A:` line
@@ -1084,19 +1138,37 @@ const buildComponents = (isStreaming: boolean): any => ({
         const qText = parts[0]?.trim() ?? code;
         const aText = parts[1]?.trim() ?? "";
         if (!aText) {
-          return <StudyTipCard>{qText}</StudyTipCard>;
+          parsedBlock = <StudyTipCard>{qText}</StudyTipCard>;
+        } else {
+          parsedBlock = (
+            <PracticeQuestionCard
+              question={<span style={{ whiteSpace: "pre-wrap" }}>{qText}</span>}
+              answer={<span style={{ whiteSpace: "pre-wrap" }}>{aText}</span>}
+            />
+          );
         }
-        return (
-          <PracticeQuestionCard
-            question={<span style={{ whiteSpace: "pre-wrap" }}>{qText}</span>}
-            answer={<span style={{ whiteSpace: "pre-wrap" }}>{aText}</span>}
-          />
-        );
+        break;
       }
     }
+    if (parsedBlock)
+      return (
+        <RenderErrorBoundary label={`${rawLang} block`} source={code}>
+          {parsedBlock}
+        </RenderErrorBoundary>
+      );
 
-    if (isMath) return <MathBlock block={createBlock("math")} />;
-    if (isChem) return <ChemicalReaction block={createBlock("reaction")} />;
+    if (isMath)
+      return (
+        <RenderErrorBoundary label="Math block" source={code}>
+          <MathBlock block={createBlock("math")} />
+        </RenderErrorBoundary>
+      );
+    if (isChem)
+      return (
+        <RenderErrorBoundary label="Chemical reaction" source={code}>
+          <ChemicalReaction block={createBlock("reaction")} />
+        </RenderErrorBoundary>
+      );
 
     if (isSmiles) return <SmilesDrawer smiles={code} />;
     if (isGraph) return <FunctionGraphBlock spec={code} />;

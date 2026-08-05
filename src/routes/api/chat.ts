@@ -6,7 +6,7 @@ import { supabaseAdmin } from "@/server/supabase";
 import { authenticateRequest } from "@/server/api-auth.server";
 import { withTimeout } from "@/shared/utils/async";
 import {
-  buildSystemPrompt,
+  STATIC_SYSTEM_PROMPT,
   sanitizeUntrustedInput,
   sanitizeCurriculum,
 } from "@/shared/utils/tutor-prompt";
@@ -355,16 +355,9 @@ export const Route = createFileRoute("/api/chat")({
           const { studentName, curriculum, tutorTone, tutorStyle, tutorDepth } = cachedProfile;
 
           // ─── Build Prompt ────────────────────────────────────────────────
-          // studentName is intentionally excluded from the system prompt so it
-          // stays identical across all users with the same profile settings.
-          // This makes Gemini's implicit prefix cache fire consistently (the
-          // system prompt is ~36k chars — well above the 1k-token threshold).
-          const systemPrompt = buildSystemPrompt({
-            curriculum,
-            tutorTone,
-            tutorStyle,
-            tutorDepth,
-          });
+          // We use a 100% static system prompt to maximize Gemini's prefix caching.
+          // All dynamic user preferences are injected below as a preamble message.
+          const systemPrompt = STATIC_SYSTEM_PROMPT;
 
           const cappedMessages = messages?.slice(-20) ?? [];
 
@@ -372,18 +365,21 @@ export const Route = createFileRoute("/api/chat")({
           // Inject per-user context as the first user message so it sits
           // AFTER the stable system prompt prefix (doesn't bust the cache).
           const preambleMessages: { role: "user" | "assistant"; content: string }[] = [];
-          if (studentName) {
-            preambleMessages.push({
-              role: "user",
-              content: `[STUDENT CONTEXT — do not quote back to the user]
-Student name: ${studentName}
+          preambleMessages.push({
+            role: "user",
+            content: `[STUDENT CONTEXT — do not quote back to the user]
+Student name: ${studentName || "Student"}
+Curriculum: ${curriculum || "General"}
+Tutor Tone: ${tutorTone || "encouraging"}
+Tutor Style: ${tutorStyle || "socratic"}
+Tutor Depth: ${tutorDepth || "standard"}
+Please apply the appropriate Curriculum, Tone, Style, and Depth rules defined in your system prompt.
 Use their name occasionally to personalise the experience.`,
-            });
-            preambleMessages.push({
-              role: "assistant",
-              content: `Understood — I'll address ${studentName} by name occasionally throughout our session.`,
-            });
-          }
+          });
+          preambleMessages.push({
+            role: "assistant",
+            content: `Understood — I'll address ${studentName || "Student"} by name occasionally and adapt my teaching to the ${curriculum || "General"} curriculum with a ${tutorTone || "encouraging"}, ${tutorStyle || "socratic"}, and ${tutorDepth || "standard"} approach.`,
+          });
 
           const aiMessages = cappedMessages.map((m: any, index: number) => {
             const textContent = extractText(m);

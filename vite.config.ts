@@ -28,6 +28,32 @@ export default defineConfig({
     build: {
       chunkSizeWarningLimit: 3000,
       rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (
+                id.includes("katex") ||
+                id.includes("jsxgraph") ||
+                id.includes("mermaid") ||
+                id.includes("smiles-drawer")
+              ) {
+                return "vendor-math-diagrams";
+              }
+              if (id.includes("jspdf")) {
+                return "vendor-pdf";
+              }
+              if (id.includes("@ai-sdk") || id.includes("ai")) {
+                return "vendor-ai";
+              }
+              if (id.includes("@tanstack")) {
+                return "vendor-tanstack";
+              }
+              if (id.includes("@radix-ui")) {
+                return "vendor-radix";
+              }
+            }
+          },
+        },
         onwarn(warning, warn) {
           if (warning.code === "MODULE_LEVEL_DIRECTIVE" && warning.message.includes(`"use client"`))
             return;

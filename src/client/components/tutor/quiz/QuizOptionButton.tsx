@@ -12,7 +12,7 @@ export type QuizOptionState =
   | "locked";
 
 interface QuizOptionButtonProps {
-  label: string;
+  label: string | React.ReactNode;
   index: number;
   state: QuizOptionState;
   onClick: () => void;
@@ -61,7 +61,7 @@ export function QuizOptionButton({ label, index, state, onClick }: QuizOptionBut
         {/* "selected" (test mode) and "locked" states intentionally fall through to LETTERS[index] above — no correctness icon shown until results. */}
       </span>
       <div className="text-sm font-medium text-foreground [&>p]:m-0">
-        <MarkdownRenderer content={label} />
+        {typeof label === "string" ? <MarkdownRenderer content={label} /> : label}
       </div>
     </button>
   );

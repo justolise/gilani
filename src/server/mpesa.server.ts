@@ -26,6 +26,30 @@ export async function initiateSTKPush(
   userId: string,
   plan: string,
 ): Promise<{ checkoutRequestId: string }> {
+  // ── Pre-flight validation ─────────────────────────────────────────────────
+  if (!process.env.MPESA_SHORTCODE || !process.env.MPESA_PASSKEY) {
+    throw new Error("[M-Pesa] MPESA_SHORTCODE and MPESA_PASSKEY must be configured.");
+  }
+  if (!process.env.MPESA_CALLBACK_SECRET) {
+    throw new Error("[M-Pesa] MPESA_CALLBACK_SECRET must be set to secure callbacks.");
+  }
+
+  // Validate phone: accepts 07XXXXXXXX, 01XXXXXXXX, +2547XXXXXXXX, 2547XXXXXXXX
+  const phoneClean = phone.replace(/\s+/g, "");
+  const validPhone = /^(0[71]\d{8}|(\+?254)[71]\d{8})$/.test(phoneClean);
+  if (!validPhone) {
+    throw new Error(
+      `[M-Pesa] Invalid phone number format: "${phone}". Expected Kenyan format (07XXXXXXXX / 01XXXXXXXX / +2547...).`,
+    );
+  }
+
+  // Amount must be a positive integer in KES (Safaricom minimum is 1)
+  if (!Number.isInteger(amount) || amount < 1 || amount > 150_000) {
+    throw new Error(
+      `[M-Pesa] Invalid amount: ${amount}. Must be a whole KES value between 1 and 150,000.`,
+    );
+  }
+
   const token = await getMpesaToken();
 
   const timestamp = new Date()
@@ -38,11 +62,11 @@ export async function initiateSTKPush(
   ).toString("base64");
 
   // Normalize phone: 0712345678 → 254712345678
-  const normalized = phone.startsWith("0")
-    ? `254${phone.slice(1)}`
-    : phone.startsWith("+")
-      ? phone.slice(1)
-      : phone;
+  const normalized = phoneClean.startsWith("0")
+    ? `254${phoneClean.slice(1)}`
+    : phoneClean.startsWith("+")
+      ? phoneClean.slice(1)
+      : phoneClean;
 
   const body = {
     BusinessShortCode: process.env.MPESA_SHORTCODE,

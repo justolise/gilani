@@ -34,6 +34,7 @@ dist-ssr
 .env
 .vercel
 .env*
+!.env.example
 supabase/.temp/
 .eslintcache
 

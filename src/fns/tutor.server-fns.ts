@@ -83,7 +83,12 @@ export const generateThreadTitleFn = createServerFn({ method: "POST" })
     const { generateText } = await import("ai");
 
     const gateway = createGoogleAiProvider();
-    const models = gateway.getAllChatModels();
+
+    // Use the fastest/lightest model for title generation — we only need ~20 tokens
+    // so there's no reason to use a heavy model here. This minimises latency so
+    // the title appears in the sidebar before the AI finishes streaming.
+    const TITLE_MODEL_ID = "gemini-2.0-flash-lite";
+    const models = gateway.getAllChatModels(TITLE_MODEL_ID);
 
     let title = "";
     let lastError: unknown;

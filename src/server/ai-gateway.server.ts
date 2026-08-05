@@ -2,6 +2,90 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createFallback } from "ai-fallback";
 
+// ─── Exponential back-off ─────────────────────────────────────────────────────
+// Retries a single provider call up to `maxRetries` times when Safaricom/API
+// returns a transient 429 or 503, with jittered delays, before the ai-fallback
+// layer switches to the next provider.
+
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const RETRYABLE_PATTERNS = [/rate.?limit/i, /too many requests/i, /service.?unavailable/i];
+
+function isRetryableError(err: any): boolean {
+  const status: number | undefined = err?.status ?? err?.statusCode ?? err?.response?.status;
+  if (status && RETRYABLE_STATUSES.has(status)) return true;
+  const msg: string = err?.message ?? "";
+  return RETRYABLE_PATTERNS.some((p) => p.test(msg));
+}
+
+async function withBackoff<T>(fn: () => Promise<T>, maxRetries = 3, baseDelayMs = 500): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      attempt++;
+      if (attempt > maxRetries || !isRetryableError(err)) throw err;
+      // Jittered exponential delay: base * 2^attempt + random jitter
+      const delay = baseDelayMs * Math.pow(2, attempt - 1) + Math.random() * 200;
+      console.warn(
+        `[AI Gateway] Retry ${attempt}/${maxRetries} after ${Math.round(delay)}ms — ${err?.message ?? err}`,
+      );
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+
+// ─── Context truncation ───────────────────────────────────────────────────────
+// Keeps the most recent messages within a rough token budget.
+// Very long study sessions can exceed context windows, causing slow/failed
+// responses. We prune from the oldest non-system messages first.
+
+export interface ContextMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+/**
+ * Trims a messages array so the total estimated token count stays under
+ * `maxTokens`. Always preserves all `system` messages and at least the
+ * last `keepLast` non-system turns.
+ *
+ * Token estimate: ~4 characters per token (conservative).
+ */
+export function truncateMessages(
+  messages: ContextMessage[],
+  maxTokens = 80_000,
+  keepLast = 6,
+): ContextMessage[] {
+  const estimateTokens = (m: ContextMessage) => Math.ceil(m.content.length / 4);
+
+  const systemMessages = messages.filter((m) => m.role === "system");
+  const conversationMessages = messages.filter((m) => m.role !== "system");
+
+  // Always keep the last `keepLast` turns
+  const mustKeep = conversationMessages.slice(-keepLast);
+  const candidates = conversationMessages.slice(0, -keepLast);
+
+  // Count tokens already committed
+  let tokenCount = [...systemMessages, ...mustKeep].reduce((acc, m) => acc + estimateTokens(m), 0);
+
+  // Add older messages from newest to oldest until budget runs out
+  const kept: ContextMessage[] = [];
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    const t = estimateTokens(candidates[i]);
+    if (tokenCount + t > maxTokens) break;
+    kept.unshift(candidates[i]);
+    tokenCount += t;
+  }
+
+  const truncated = candidates.length - kept.length;
+  if (truncated > 0) {
+    console.info(`[AI Gateway] Truncated ${truncated} older message(s) to fit context window.`);
+  }
+
+  return [...systemMessages, ...kept, ...mustKeep];
+}
+
 /**
  * Creates an AI provider dynamically selecting available providers from env keys.
  * Priority: Gemini > Groq > OpenAI > Mistral

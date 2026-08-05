@@ -115,19 +115,21 @@ function TutorThreadInner({
   ) => {
     try {
       const currentThread = chatState.threads.find((t) => t.id === threadId);
+      // ── Immediate title generation ────────────────────────────────────────
+      // Fire title generation BEFORE streaming starts so the sidebar updates
+      // as soon as the user hits send, not after the AI finishes responding.
       if (chatState.messages.length === 0 && !currentThread?.title) {
         generateThreadTitleFn({ data: titleSeedText })
-          .then((title) => {
-            renameThreadFn({ data: { threadId, title } })
-              .then(() => {
-                chatState.setThreads((prev: any[]) =>
-                  prev.map((t) => (t.id === threadId ? { ...t, title } : t)),
-                );
-              })
-              .catch(console.error);
-          })
+          .then((title) =>
+            renameThreadFn({ data: { threadId, title } }).then(() => {
+              chatState.setThreads((prev: any[]) =>
+                prev.map((t) => (t.id === threadId ? { ...t, title } : t)),
+              );
+            }),
+          )
           .catch(console.error);
       }
+      // Start streaming immediately (title generation runs in parallel above)
       chatState.sendMessage({ text: finalMessage }, attachmentMeta).catch((error: unknown) => {
         console.error("[TutorThread] sendMessage background error:", error);
         toast.error("Failed to send message. Please try again.");
