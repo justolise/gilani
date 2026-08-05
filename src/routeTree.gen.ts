@@ -9,80 +9,49 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as CookiesRouteImport } from './routes/cookies'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CallbackRouteImport } from './routes/callback'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiStreamTestRouteImport } from './routes/api/stream-test'
-import { Route as ApiHealthRouteImport } from './routes/api/health'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AuthenticatedTutorRouteImport } from './routes/_authenticated/tutor'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CallbackRouteImport } from './routes/callback'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as ApiTutorThreadsRouteImport } from './routes/api/tutor/threads'
-import { Route as ApiSettingsEventsRouteImport } from './routes/api/settings/events'
-import { Route as ApiNotificationsPushSubscribeRouteImport } from './routes/api/notifications/push-subscribe'
-import { Route as ApiNotificationsPushSendRouteImport } from './routes/api/notifications/push-send'
-import { Route as ApiNotificationsEmailRouteImport } from './routes/api/notifications/email'
-import { Route as ApiNotificationsDigestRouteImport } from './routes/api/notifications/digest'
-import { Route as ApiNewsletterSubscribeRouteImport } from './routes/api/newsletter/subscribe'
-import { Route as ApiNewsletterSendRouteImport } from './routes/api/newsletter/send'
-import { Route as ApiMpesaInitiateRouteImport } from './routes/api/mpesa/initiate'
-import { Route as ApiMpesaCallbackRouteImport } from './routes/api/mpesa/callback'
-import { Route as AuthenticatedTutorSavedRouteImport } from './routes/_authenticated/tutor.saved'
-import { Route as AuthenticatedTutorQuizzesRouteImport } from './routes/_authenticated/tutor.quizzes'
-import { Route as AuthenticatedTutorPlannerRouteImport } from './routes/_authenticated/tutor.planner'
-import { Route as AuthenticatedTutorDocumentsRouteImport } from './routes/_authenticated/tutor.documents'
-import { Route as AuthenticatedTutorChatsRouteImport } from './routes/_authenticated/tutor.chats'
-import { Route as AuthenticatedTutorThreadIdRouteImport } from './routes/_authenticated/tutor.$threadId'
-import { Route as AuthenticatedTeacherEscalationsRouteImport } from './routes/_authenticated/teacher.escalations'
+import { Route as AuthenticatedTutorRouteImport } from './routes/_authenticated/tutor'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as ApiStreamTestRouteImport } from './routes/api/stream-test'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedTeacherEscalationsRouteImport } from './routes/_authenticated/teacher.escalations'
+import { Route as AuthenticatedTutorThreadIdRouteImport } from './routes/_authenticated/tutor.$threadId'
+import { Route as AuthenticatedTutorChatsRouteImport } from './routes/_authenticated/tutor.chats'
+import { Route as AuthenticatedTutorDocumentsRouteImport } from './routes/_authenticated/tutor.documents'
+import { Route as AuthenticatedTutorPlannerRouteImport } from './routes/_authenticated/tutor.planner'
+import { Route as AuthenticatedTutorQuizzesRouteImport } from './routes/_authenticated/tutor.quizzes'
+import { Route as AuthenticatedTutorSavedRouteImport } from './routes/_authenticated/tutor.saved'
+import { Route as ApiMpesaCallbackRouteImport } from './routes/api/mpesa/callback'
+import { Route as ApiMpesaInitiateRouteImport } from './routes/api/mpesa/initiate'
+import { Route as ApiNewsletterSendRouteImport } from './routes/api/newsletter/send'
+import { Route as ApiNewsletterSubscribeRouteImport } from './routes/api/newsletter/subscribe'
+import { Route as ApiNotificationsDigestRouteImport } from './routes/api/notifications/digest'
+import { Route as ApiNotificationsEmailRouteImport } from './routes/api/notifications/email'
+import { Route as ApiNotificationsPushSendRouteImport } from './routes/api/notifications/push-send'
+import { Route as ApiNotificationsPushSubscribeRouteImport } from './routes/api/notifications/push-subscribe'
+import { Route as ApiSettingsEventsRouteImport } from './routes/api/settings/events'
+import { Route as ApiTutorThreadsRouteImport } from './routes/api/tutor/threads'
 import { Route as AuthenticatedTutorQuizzesQuizIdRouteImport } from './routes/_authenticated/tutor.quizzes_.$quizId'
 
-const VerifyEmailRoute = VerifyEmailRouteImport.update({
-  id: '/verify-email',
-  path: '/verify-email',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CookiesRoute = CookiesRouteImport.update({
-  id: '/cookies',
-  path: '/cookies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CallbackRoute = CallbackRouteImport.update({
-  id: '/callback',
-  path: '/callback',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -90,18 +59,59 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const CallbackRoute = CallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiStreamTestRoute = ApiStreamTestRouteImport.update({
-  id: '/api/stream-test',
-  path: '/api/stream-test',
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTutorRoute = AuthenticatedTutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -109,82 +119,37 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
+const ApiStreamTestRoute = ApiStreamTestRouteImport.update({
+  id: '/api/stream-test',
+  path: '/api/stream-test',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedTutorRoute = AuthenticatedTutorRouteImport.update({
-  id: '/tutor',
-  path: '/tutor',
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const ApiTutorThreadsRoute = ApiTutorThreadsRouteImport.update({
-  id: '/api/tutor/threads',
-  path: '/api/tutor/threads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSettingsEventsRoute = ApiSettingsEventsRouteImport.update({
-  id: '/api/settings/events',
-  path: '/api/settings/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNotificationsPushSubscribeRoute =
-  ApiNotificationsPushSubscribeRouteImport.update({
-    id: '/api/notifications/push-subscribe',
-    path: '/api/notifications/push-subscribe',
-    getParentRoute: () => rootRouteImport,
+const AuthenticatedTeacherEscalationsRoute =
+  AuthenticatedTeacherEscalationsRouteImport.update({
+    id: '/teacher/escalations',
+    path: '/teacher/escalations',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ApiNotificationsPushSendRoute =
-  ApiNotificationsPushSendRouteImport.update({
-    id: '/api/notifications/push-send',
-    path: '/api/notifications/push-send',
-    getParentRoute: () => rootRouteImport,
+const AuthenticatedTutorThreadIdRoute =
+  AuthenticatedTutorThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
-const ApiNotificationsEmailRoute = ApiNotificationsEmailRouteImport.update({
-  id: '/api/notifications/email',
-  path: '/api/notifications/email',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNotificationsDigestRoute = ApiNotificationsDigestRouteImport.update({
-  id: '/api/notifications/digest',
-  path: '/api/notifications/digest',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNewsletterSubscribeRoute = ApiNewsletterSubscribeRouteImport.update({
-  id: '/api/newsletter/subscribe',
-  path: '/api/newsletter/subscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNewsletterSendRoute = ApiNewsletterSendRouteImport.update({
-  id: '/api/newsletter/send',
-  path: '/api/newsletter/send',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMpesaInitiateRoute = ApiMpesaInitiateRouteImport.update({
-  id: '/api/mpesa/initiate',
-  path: '/api/mpesa/initiate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
-  id: '/api/mpesa/callback',
-  path: '/api/mpesa/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedTutorSavedRoute = AuthenticatedTutorSavedRouteImport.update({
-  id: '/saved',
-  path: '/saved',
+const AuthenticatedTutorChatsRoute = AuthenticatedTutorChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => AuthenticatedTutorRoute,
 } as any)
-const AuthenticatedTutorQuizzesRoute =
-  AuthenticatedTutorQuizzesRouteImport.update({
-    id: '/quizzes',
-    path: '/quizzes',
+const AuthenticatedTutorDocumentsRoute =
+  AuthenticatedTutorDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
     getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
 const AuthenticatedTutorPlannerRoute =
@@ -193,33 +158,68 @@ const AuthenticatedTutorPlannerRoute =
     path: '/planner',
     getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
-const AuthenticatedTutorDocumentsRoute =
-  AuthenticatedTutorDocumentsRouteImport.update({
-    id: '/documents',
-    path: '/documents',
+const AuthenticatedTutorQuizzesRoute =
+  AuthenticatedTutorQuizzesRouteImport.update({
+    id: '/quizzes',
+    path: '/quizzes',
     getParentRoute: () => AuthenticatedTutorRoute,
   } as any)
-const AuthenticatedTutorChatsRoute = AuthenticatedTutorChatsRouteImport.update({
-  id: '/chats',
-  path: '/chats',
+const AuthenticatedTutorSavedRoute = AuthenticatedTutorSavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
   getParentRoute: () => AuthenticatedTutorRoute,
 } as any)
-const AuthenticatedTutorThreadIdRoute =
-  AuthenticatedTutorThreadIdRouteImport.update({
-    id: '/$threadId',
-    path: '/$threadId',
-    getParentRoute: () => AuthenticatedTutorRoute,
+const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
+  id: '/api/mpesa/callback',
+  path: '/api/mpesa/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMpesaInitiateRoute = ApiMpesaInitiateRouteImport.update({
+  id: '/api/mpesa/initiate',
+  path: '/api/mpesa/initiate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNewsletterSendRoute = ApiNewsletterSendRouteImport.update({
+  id: '/api/newsletter/send',
+  path: '/api/newsletter/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNewsletterSubscribeRoute = ApiNewsletterSubscribeRouteImport.update({
+  id: '/api/newsletter/subscribe',
+  path: '/api/newsletter/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsDigestRoute = ApiNotificationsDigestRouteImport.update({
+  id: '/api/notifications/digest',
+  path: '/api/notifications/digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsEmailRoute = ApiNotificationsEmailRouteImport.update({
+  id: '/api/notifications/email',
+  path: '/api/notifications/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotificationsPushSendRoute =
+  ApiNotificationsPushSendRouteImport.update({
+    id: '/api/notifications/push-send',
+    path: '/api/notifications/push-send',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedTeacherEscalationsRoute =
-  AuthenticatedTeacherEscalationsRouteImport.update({
-    id: '/teacher/escalations',
-    path: '/teacher/escalations',
-    getParentRoute: () => AuthenticatedRoute,
+const ApiNotificationsPushSubscribeRoute =
+  ApiNotificationsPushSubscribeRouteImport.update({
+    id: '/api/notifications/push-subscribe',
+    path: '/api/notifications/push-subscribe',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => AuthenticatedRoute,
+const ApiSettingsEventsRoute = ApiSettingsEventsRouteImport.update({
+  id: '/api/settings/events',
+  path: '/api/settings/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTutorThreadsRoute = ApiTutorThreadsRouteImport.update({
+  id: '/api/tutor/threads',
+  path: '/api/tutor/threads',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTutorQuizzesQuizIdRoute =
   AuthenticatedTutorQuizzesQuizIdRouteImport.update({
@@ -479,67 +479,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/verify-email': {
-      id: '/verify-email'
-      path: '/verify-email'
-      fullPath: '/verify-email'
-      preLoaderRoute: typeof VerifyEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cookies': {
-      id: '/cookies'
-      path: '/cookies'
-      fullPath: '/cookies'
-      preLoaderRoute: typeof CookiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/callback': {
-      id: '/callback'
-      path: '/callback'
-      fullPath: '/callback'
-      preLoaderRoute: typeof CallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -549,18 +493,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/stream-test': {
-      id: '/api/stream-test'
-      path: '/api/stream-test'
-      fullPath: '/api/stream-test'
-      preLoaderRoute: typeof ApiStreamTestRouteImport
+    '/callback': {
+      id: '/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof CallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tutor': {
+      id: '/_authenticated/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof AuthenticatedTutorRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -570,123 +584,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
+    '/api/stream-test': {
+      id: '/api/stream-test'
+      path: '/api/stream-test'
+      fullPath: '/api/stream-test'
+      preLoaderRoute: typeof ApiStreamTestRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/tutor': {
-      id: '/_authenticated/tutor'
-      path: '/tutor'
-      fullPath: '/tutor'
-      preLoaderRoute: typeof AuthenticatedTutorRouteImport
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+    '/_authenticated/teacher/escalations': {
+      id: '/_authenticated/teacher/escalations'
+      path: '/teacher/escalations'
+      fullPath: '/teacher/escalations'
+      preLoaderRoute: typeof AuthenticatedTeacherEscalationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/api/tutor/threads': {
-      id: '/api/tutor/threads'
-      path: '/api/tutor/threads'
-      fullPath: '/api/tutor/threads'
-      preLoaderRoute: typeof ApiTutorThreadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/settings/events': {
-      id: '/api/settings/events'
-      path: '/api/settings/events'
-      fullPath: '/api/settings/events'
-      preLoaderRoute: typeof ApiSettingsEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/notifications/push-subscribe': {
-      id: '/api/notifications/push-subscribe'
-      path: '/api/notifications/push-subscribe'
-      fullPath: '/api/notifications/push-subscribe'
-      preLoaderRoute: typeof ApiNotificationsPushSubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/notifications/push-send': {
-      id: '/api/notifications/push-send'
-      path: '/api/notifications/push-send'
-      fullPath: '/api/notifications/push-send'
-      preLoaderRoute: typeof ApiNotificationsPushSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/notifications/email': {
-      id: '/api/notifications/email'
-      path: '/api/notifications/email'
-      fullPath: '/api/notifications/email'
-      preLoaderRoute: typeof ApiNotificationsEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/notifications/digest': {
-      id: '/api/notifications/digest'
-      path: '/api/notifications/digest'
-      fullPath: '/api/notifications/digest'
-      preLoaderRoute: typeof ApiNotificationsDigestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/newsletter/subscribe': {
-      id: '/api/newsletter/subscribe'
-      path: '/api/newsletter/subscribe'
-      fullPath: '/api/newsletter/subscribe'
-      preLoaderRoute: typeof ApiNewsletterSubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/newsletter/send': {
-      id: '/api/newsletter/send'
-      path: '/api/newsletter/send'
-      fullPath: '/api/newsletter/send'
-      preLoaderRoute: typeof ApiNewsletterSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/mpesa/initiate': {
-      id: '/api/mpesa/initiate'
-      path: '/api/mpesa/initiate'
-      fullPath: '/api/mpesa/initiate'
-      preLoaderRoute: typeof ApiMpesaInitiateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/mpesa/callback': {
-      id: '/api/mpesa/callback'
-      path: '/api/mpesa/callback'
-      fullPath: '/api/mpesa/callback'
-      preLoaderRoute: typeof ApiMpesaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/tutor/saved': {
-      id: '/_authenticated/tutor/saved'
-      path: '/saved'
-      fullPath: '/tutor/saved'
-      preLoaderRoute: typeof AuthenticatedTutorSavedRouteImport
-      parentRoute: typeof AuthenticatedTutorRoute
-    }
-    '/_authenticated/tutor/quizzes': {
-      id: '/_authenticated/tutor/quizzes'
-      path: '/quizzes'
-      fullPath: '/tutor/quizzes'
-      preLoaderRoute: typeof AuthenticatedTutorQuizzesRouteImport
-      parentRoute: typeof AuthenticatedTutorRoute
-    }
-    '/_authenticated/tutor/planner': {
-      id: '/_authenticated/tutor/planner'
-      path: '/planner'
-      fullPath: '/tutor/planner'
-      preLoaderRoute: typeof AuthenticatedTutorPlannerRouteImport
-      parentRoute: typeof AuthenticatedTutorRoute
-    }
-    '/_authenticated/tutor/documents': {
-      id: '/_authenticated/tutor/documents'
-      path: '/documents'
-      fullPath: '/tutor/documents'
-      preLoaderRoute: typeof AuthenticatedTutorDocumentsRouteImport
+    '/_authenticated/tutor/$threadId': {
+      id: '/_authenticated/tutor/$threadId'
+      path: '/$threadId'
+      fullPath: '/tutor/$threadId'
+      preLoaderRoute: typeof AuthenticatedTutorThreadIdRouteImport
       parentRoute: typeof AuthenticatedTutorRoute
     }
     '/_authenticated/tutor/chats': {
@@ -696,26 +619,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTutorChatsRouteImport
       parentRoute: typeof AuthenticatedTutorRoute
     }
-    '/_authenticated/tutor/$threadId': {
-      id: '/_authenticated/tutor/$threadId'
-      path: '/$threadId'
-      fullPath: '/tutor/$threadId'
-      preLoaderRoute: typeof AuthenticatedTutorThreadIdRouteImport
+    '/_authenticated/tutor/documents': {
+      id: '/_authenticated/tutor/documents'
+      path: '/documents'
+      fullPath: '/tutor/documents'
+      preLoaderRoute: typeof AuthenticatedTutorDocumentsRouteImport
       parentRoute: typeof AuthenticatedTutorRoute
     }
-    '/_authenticated/teacher/escalations': {
-      id: '/_authenticated/teacher/escalations'
-      path: '/teacher/escalations'
-      fullPath: '/teacher/escalations'
-      preLoaderRoute: typeof AuthenticatedTeacherEscalationsRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/tutor/planner': {
+      id: '/_authenticated/tutor/planner'
+      path: '/planner'
+      fullPath: '/tutor/planner'
+      preLoaderRoute: typeof AuthenticatedTutorPlannerRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
     }
-    '/_authenticated/admin/users': {
-      id: '/_authenticated/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/_authenticated/tutor/quizzes': {
+      id: '/_authenticated/tutor/quizzes'
+      path: '/quizzes'
+      fullPath: '/tutor/quizzes'
+      preLoaderRoute: typeof AuthenticatedTutorQuizzesRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/_authenticated/tutor/saved': {
+      id: '/_authenticated/tutor/saved'
+      path: '/saved'
+      fullPath: '/tutor/saved'
+      preLoaderRoute: typeof AuthenticatedTutorSavedRouteImport
+      parentRoute: typeof AuthenticatedTutorRoute
+    }
+    '/api/mpesa/callback': {
+      id: '/api/mpesa/callback'
+      path: '/api/mpesa/callback'
+      fullPath: '/api/mpesa/callback'
+      preLoaderRoute: typeof ApiMpesaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mpesa/initiate': {
+      id: '/api/mpesa/initiate'
+      path: '/api/mpesa/initiate'
+      fullPath: '/api/mpesa/initiate'
+      preLoaderRoute: typeof ApiMpesaInitiateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/newsletter/send': {
+      id: '/api/newsletter/send'
+      path: '/api/newsletter/send'
+      fullPath: '/api/newsletter/send'
+      preLoaderRoute: typeof ApiNewsletterSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/newsletter/subscribe': {
+      id: '/api/newsletter/subscribe'
+      path: '/api/newsletter/subscribe'
+      fullPath: '/api/newsletter/subscribe'
+      preLoaderRoute: typeof ApiNewsletterSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/digest': {
+      id: '/api/notifications/digest'
+      path: '/api/notifications/digest'
+      fullPath: '/api/notifications/digest'
+      preLoaderRoute: typeof ApiNotificationsDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/email': {
+      id: '/api/notifications/email'
+      path: '/api/notifications/email'
+      fullPath: '/api/notifications/email'
+      preLoaderRoute: typeof ApiNotificationsEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/push-send': {
+      id: '/api/notifications/push-send'
+      path: '/api/notifications/push-send'
+      fullPath: '/api/notifications/push-send'
+      preLoaderRoute: typeof ApiNotificationsPushSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notifications/push-subscribe': {
+      id: '/api/notifications/push-subscribe'
+      path: '/api/notifications/push-subscribe'
+      fullPath: '/api/notifications/push-subscribe'
+      preLoaderRoute: typeof ApiNotificationsPushSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/settings/events': {
+      id: '/api/settings/events'
+      path: '/api/settings/events'
+      fullPath: '/api/settings/events'
+      preLoaderRoute: typeof ApiSettingsEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tutor/threads': {
+      id: '/api/tutor/threads'
+      path: '/api/tutor/threads'
+      fullPath: '/api/tutor/threads'
+      preLoaderRoute: typeof ApiTutorThreadsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/tutor/quizzes_/$quizId': {
       id: '/_authenticated/tutor/quizzes_/$quizId'
