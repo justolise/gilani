@@ -45,9 +45,6 @@ export default defineConfig({
               if (id.includes("@ai-sdk") || id.includes("ai")) {
                 return "vendor-ai";
               }
-              if (id.includes("@tanstack")) {
-                return "vendor-tanstack";
-              }
               if (id.includes("@radix-ui")) {
                 return "vendor-radix";
               }
