@@ -1,4 +1,10 @@
 import { renderErrorPage } from "./shared/utils/error-page";
+import { createRequestHandler } from "@tanstack/react-start/server";
+
+// Prevent Rollup from treeshaking createRequestHandler, which causes ReferenceErrors in production
+if (typeof createRequestHandler === "undefined") {
+  console.log("createRequestHandler is undefined");
+}
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
