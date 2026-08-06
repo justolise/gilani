@@ -232,7 +232,14 @@ export function Sidebar({ shell }: Props) {
         <div className="flex flex-col w-full lg:w-14 flex-shrink-0 lg:border-r border-b lg:border-b-0 border-border/30 pt-4 pb-2 lg:py-3">
           {/* Logo & Mobile Close */}
           <div className="mb-4 flex items-center justify-between lg:justify-center px-4 lg:px-0">
-            <Logo to="/tutor" onClick={() => setSidebarOpen(false)} size="sm" />
+            {/* Mobile: full text logo */}
+            <span className="lg:hidden">
+              <Logo to="/tutor" onClick={() => setSidebarOpen(false)} size="sm" />
+            </span>
+            {/* Desktop: icon-only "G" that fits w-14 rail */}
+            <span className="hidden lg:flex">
+              <Logo to="/tutor" size="sm" iconOnly />
+            </span>
             {/* Mobile close button */}
             <button
               onClick={() => setSidebarOpen(false)}

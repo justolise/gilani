@@ -36,8 +36,10 @@ export function Logo({
   const innerClass = className.replace("mx-auto", "").trim();
 
   const logoContent = (
-    <div className={`flex items-center ${currentSize.container} ${innerClass}`}>
-      <span className={`font-bold italic text-[#E2725B] ${currentSize.text}`}>GilaniAI</span>
+    <div className={`flex items-center justify-center ${currentSize.container} ${innerClass}`}>
+      <span className={`font-bold italic text-[#E2725B] ${currentSize.text}`}>
+        {iconOnly ? "G" : "GilaniAI"}
+      </span>
     </div>
   );
 
