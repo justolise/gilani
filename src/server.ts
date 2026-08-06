@@ -1,19 +1,4 @@
 import { renderErrorPage } from "./shared/utils/error-page";
-import {
-  createRequestHandler,
-  attachRouterServerSsrUtils,
-  defineHandlerCallback,
-  transformPipeableStreamWithRouter,
-  transformReadableStreamWithRouter,
-} from "@tanstack/react-start/server";
-
-// Prevent Rollup from treeshaking unused exports from @tanstack/react-start/server,
-// which causes ReferenceErrors in Vercel production builds
-(globalThis as any).__prevent_treeshake_1 = createRequestHandler;
-(globalThis as any).__prevent_treeshake_2 = attachRouterServerSsrUtils;
-(globalThis as any).__prevent_treeshake_3 = defineHandlerCallback;
-(globalThis as any).__prevent_treeshake_4 = transformPipeableStreamWithRouter;
-(globalThis as any).__prevent_treeshake_5 = transformReadableStreamWithRouter;
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
