@@ -228,8 +228,8 @@ export function extractText(node: any): string {
 }
 
 /**
- * Split React children at the first element that contains an "Answer:" / "A:" heading.
- * Returns { questionNodes, answerNodes }.
+ * Split React children into question vs answer nodes.
+ * Splits at the first node whose text contains "Answer:" anywhere.
  */
 function splitPracticeChildren(children: React.ReactNode): {
   questionNodes: React.ReactNode[];
@@ -239,15 +239,19 @@ function splitPracticeChildren(children: React.ReactNode): {
   let splitIdx = -1;
   for (let i = 0; i < arr.length; i++) {
     const text = extractText(arr[i]);
-    console.log(`[splitPracticeChildren] Node ${i} text:`, text);
-    if (/^\s*(Answer|A)\s*:/i.test(text)) {
-      console.log(`[splitPracticeChildren] Found answer at node ${i}`);
+    // Match "Answer:" or "**Answer:**" anywhere in the node text
+    if (/answer\s*:/i.test(text)) {
       splitIdx = i;
       break;
     }
   }
   if (splitIdx === -1) {
+    // No answer marker found — all content is the question
     return { questionNodes: arr, answerNodes: [] };
+  }
+  if (splitIdx === 0) {
+    // Answer is in the very first node — everything is the answer
+    return { questionNodes: [], answerNodes: arr };
   }
   return {
     questionNodes: arr.slice(0, splitIdx),
@@ -278,14 +282,19 @@ function CustomCallout({ type, children }: { type: string; children: React.React
       break;
     case "PRACTICE": {
       const { questionNodes, answerNodes } = splitPracticeChildren(children);
-      if (answerNodes.length === 0) {
-        // No answer section yet — fall back to StudyTipCard so it still looks good
-        content = <StudyTipCard>{children}</StudyTipCard>;
-      } else {
-        content = (
-          <PracticeQuestionCard question={<>{questionNodes}</>} answer={<>{answerNodes}</>} />
-        );
-      }
+      // Always render a PracticeQuestionCard — if no answer found, pass all content as question
+      const questionContent =
+        questionNodes.length > 0 ? questionNodes : React.Children.toArray(children);
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const bqCounter = React.useContext(BlockquotePracticeCounterCtx);
+      const bqNum = bqCounter ? ++bqCounter.current : undefined;
+      content = (
+        <PracticeQuestionCard
+          number={bqNum}
+          question={<>{questionContent}</>}
+          answer={answerNodes.length > 0 ? <>{answerNodes}</> : undefined}
+        />
+      );
       break;
     }
     default:
@@ -781,6 +790,12 @@ const PracticeCounterCtx = React.createContext<Map<number, number> | null>(null)
 export const InsidePracticeCardCtx = React.createContext<
   { isQuestion: boolean; isMultipleChoice?: boolean } | false
 >(false);
+
+// BlockquotePracticeCounterCtx: mutable ref so [!PRACTICE] blockquotes
+// can be numbered sequentially without state re-renders
+const BlockquotePracticeCounterCtx = React.createContext<React.MutableRefObject<number> | null>(
+  null,
+);
 
 // Extract plain text from a HAST node (depth-first, ignores element boundaries)
 function hastText(node: any): string {
@@ -1292,16 +1307,23 @@ export const MarkdownRenderer = React.memo(function MarkdownRenderer({
   // Components are stable — rebuild only when needed
   const components = useMemo(() => buildComponents(isStreaming), [isStreaming]);
 
+  // Per-render mutable counter for blockquote [!PRACTICE] numbering
+  const bqPracticeCounter = React.useRef(0);
+  // Reset on each new content render so numbers start from 1
+  bqPracticeCounter.current = 0;
+
   return (
-    <div className={`markdown-content text-foreground ${className}`}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath, remarkDisableIndentedCode]}
-        rehypePlugins={[]}
-        components={components}
-      >
-        {processed}
-      </ReactMarkdown>
-    </div>
+    <BlockquotePracticeCounterCtx.Provider value={bqPracticeCounter}>
+      <div className={`markdown-content text-foreground ${className}`}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath, remarkDisableIndentedCode]}
+          rehypePlugins={[]}
+          components={components}
+        >
+          {processed}
+        </ReactMarkdown>
+      </div>
+    </BlockquotePracticeCounterCtx.Provider>
   );
 });
 
