@@ -40,13 +40,7 @@ export function Logo({
 
   const logoContent = (
     <div className={`flex items-center ${currentSize.container} ${innerClass}`}>
-      {/* GilaniAI Logo — neural-network book icon from Canva */}
-      <img
-        src="/gilanilogo.png"
-        alt="GilaniAI logo"
-        className={`${currentSize.img} flex-shrink-0 object-contain`}
-        aria-hidden="true"
-      />
+      <span className={`font-bold italic text-[#E2725B] ${currentSize.text}`}>GilaniAI</span>
     </div>
   );
 

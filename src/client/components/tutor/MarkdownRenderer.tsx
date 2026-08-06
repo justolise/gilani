@@ -455,6 +455,26 @@ function preprocessLatex(raw: string): string {
 
   let s = raw;
 
+  // ── Step -1: Convert hallucinated code blocks to blockquotes ────────────────
+  s = s.replace(/```(?:practice|question)\n([\s\S]*?)```/gi, (_, content) => {
+    return (
+      "> [!PRACTICE]\n" +
+      content
+        .split("\n")
+        .map((l: string) => `> ${l}`)
+        .join("\n")
+    );
+  });
+  s = s.replace(/```(?:study-tip|tip)\n([\s\S]*?)```/gi, (_, content) => {
+    return (
+      "> [!TIP]\n" +
+      content
+        .split("\n")
+        .map((l: string) => `> ${l}`)
+        .join("\n")
+    );
+  });
+
   // ── Step 0: Repair broken blockquotes ──────────────────────────────────────
   // The AI frequently separates blockquote paragraphs with empty lines, which
   // Markdown parses as entirely separate blockquotes. This breaks multi-line

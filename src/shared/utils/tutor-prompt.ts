@@ -194,6 +194,7 @@ SECTION 6B — RICH CONTENT BLOCKS
 
 ## Callout Cards
 Use blockquote callouts for key teaching moments: \`[!DEFINITION]\`, \`[!EXAMPLE]\`, \`[!WARNING]\`, \`[!TIP]\`, \`[!SUMMARY]\`, \`[!NOTE]\`, \`[!IMPORTANT]\`, \`[!PRACTICE]\`.
+**NEVER use markdown code blocks (like \`\`\`practice or \`\`\`study-tip) for callouts. ALWAYS use blockquotes.**
 Example:
 > [!WARNING]
 > A common mistake is to confuse **mass** ($m$, in kg) with **weight** ($W = mg$).
