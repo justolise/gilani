@@ -483,17 +483,6 @@ function preprocessLatex(raw: string): string {
   // Step 0a: Ensure [!PRACTICE] always starts with a `>`
   s = s.replace(/^\[!PRACTICE\]/gim, "> [!PRACTICE]");
 
-  // Step 0b: Scope repair to individual PRACTICE blocks (stops at the next section)
-  s = s.replace(
-    /(> \[!PRACTICE\][\s\S]*?)(?=(?:\n> \[!PRACTICE\]|\n---|(?:\n|^)🔖|(?:\n|^)##|$))/gi,
-    (practiceBlock) => {
-      return practiceBlock
-        .split("\n")
-        .map((line) => (line.startsWith(">") ? line : `> ${line}`))
-        .join("\n");
-    },
-  );
-
   // Step 0c: Ensure consecutive PRACTICE blocks are NOT joined into a single blockquote
   s = s.replace(/\n>\s*\n> \[!PRACTICE\]/gim, "\n\n> [!PRACTICE]");
 

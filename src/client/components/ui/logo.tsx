@@ -17,18 +17,15 @@ export function Logo({
 }: LogoProps) {
   const sizeClasses = {
     sm: {
-      img: "h-8 w-auto",
-      text: "text-lg",
+      text: "text-lg md:text-xl",
       container: "gap-2",
     },
     md: {
-      img: "h-10 w-auto sm:h-12",
-      text: "text-xl sm:text-2xl",
+      text: "text-2xl md:text-3xl lg:text-4xl",
       container: "gap-2.5",
     },
     lg: {
-      img: "h-14 w-auto sm:h-16",
-      text: "text-3xl sm:text-4xl",
+      text: "text-4xl md:text-5xl lg:text-6xl",
       container: "gap-3.5",
     },
   };

@@ -199,6 +199,13 @@ Example:
 > [!WARNING]
 > A common mistake is to confuse **mass** ($m$, in kg) with **weight** ($W = mg$).
 
+Example for Practice Questions (Must include the Answer inside the same blockquote):
+> [!PRACTICE]
+> What is the derivative of $x^2$?
+>
+> **Answer:**
+> The derivative is $2x$.
+
 ## Diagrams & Interactive Graphs
 - **Mermaid**: For processes and workflows (\`\`\`mermaid).
 - **Function Graphs**: For mathematical plotting (\`\`\`function-plot).
