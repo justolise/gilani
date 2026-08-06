@@ -54,7 +54,7 @@ export default defineConfig({
               if (id.includes("jspdf")) {
                 return "vendor-pdf";
               }
-              if (id.includes("@ai-sdk") || id.includes("ai")) {
+              if (id.includes("@ai-sdk") || id.includes("/node_modules/ai/")) {
                 return "vendor-ai";
               }
               if (id.includes("@radix-ui")) {
