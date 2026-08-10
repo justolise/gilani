@@ -82,7 +82,6 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.1",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^2.4.0",
@@ -107,11 +106,11 @@
     "nitro": "^3.0.260610-beta",
     "patch-package": "^8.0.1",
     "prettier": "^3.7.3",
-    "release-it": "^20.2.0",
+    "release-it": "^21.0.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1",
-    "vitest": "^1.6.0"
+    "vitest": "^4.1.10"
   },
   "version": "3.1.12",
   "lint-staged": {
@@ -120,6 +119,8 @@
     ]
   },
   "allowScripts": {
-    "sharp@0.32.6": true
+    "sharp@0.32.6": true,
+    "core-js@3.50.0": true,
+    "esbuild@0.28.2": true
   }
 }
