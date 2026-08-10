@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
-import { streamText, embed, smoothStream, tool, stepCountIs } from "ai";
+import { streamText, embed, smoothStream, tool, isStepCount } from "ai";
 import { z } from "zod";
 import { supabaseAdmin } from "@/server/supabase";
 import { authenticateRequest } from "@/server/api-auth.server";
@@ -442,7 +442,7 @@ ${finalContent}`;
 
           const result = streamText({
             model: chatModel,
-            system: systemPrompt,
+            instructions: systemPrompt,
             messages: finalMessages,
             maxRetries: 2,
             temperature: 0.2,
@@ -644,7 +644,7 @@ ${finalContent}`;
                 }) as any,
               }) as any,
             } as any,
-            stopWhen: stepCountIs(5),
+            stopWhen: isStepCount(5),
             // SSE backpressure / multi-second stall reported previously (~10s
             // dump delay observed). Keeping line-chunking until the stall's
             // actual cause (likely unrelated per-commit cost, not chunking
@@ -659,7 +659,7 @@ ${finalContent}`;
                 typeof error === "object" ? JSON.stringify(error).slice(0, 300) : String(error),
               );
             },
-            onFinish: async ({ text: assistantText, providerMetadata, finishReason, steps }) => {
+            onEnd: async ({ text: assistantText, providerMetadata, finishReason, steps }) => {
               clearTimeout(streamTimeoutId);
               const usage = (providerMetadata as any)?.google?.usageMetadata;
               const cachedTokens = usage?.cachedContentTokenCount ?? 0;

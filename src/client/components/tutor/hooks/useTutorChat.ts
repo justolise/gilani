@@ -209,7 +209,7 @@ export function useTutorChat({
       setChatError(msg);
       toast.error(friendly, { duration: 4000 });
     },
-    onFinish: (message: any) => {
+    onEnd: (message: any) => {
       setChatError(null);
       let dbMessageId: string | null = null;
       if (Array.isArray(message.annotations)) {

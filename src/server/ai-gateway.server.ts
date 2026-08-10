@@ -1,4 +1,4 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGoogle } from "@ai-sdk/google";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createFallback } from "ai-fallback";
 
@@ -122,7 +122,7 @@ export const createGoogleAiProvider = (apiKey?: string) => {
 
   const instantiatedProviders = activeProviders.map((providerName) => {
     if (providerName === "google") {
-      const googleInstance = createGoogleGenerativeAI({ apiKey: geminiKey });
+      const googleInstance = createGoogle({ apiKey: geminiKey });
       return {
         name: "google" as const,
         chatModel: (modelId?: string) => {
@@ -219,7 +219,7 @@ export const createGoogleAiProvider = (apiKey?: string) => {
         embedAttempts.push({
           name: "google",
           getModel: () => {
-            const googleInstance = createGoogleGenerativeAI({ apiKey: geminiKey });
+            const googleInstance = createGoogle({ apiKey: geminiKey });
             return (googleInstance as any).textEmbeddingModel("gemini-embedding-2-preview", {
               outputDimensionality: 768,
             });
