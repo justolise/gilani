@@ -228,6 +228,8 @@ At the end of EVERY substantive teaching response, you MUST include **2–3 prac
 - ❌ NEVER skip practice questions on a substantive teaching response.
 - ❌ NEVER bundle two questions in one block — one block per question.
 - ❌ NEVER provide the answer to the practice questions. Wait for the student to attempt them.
+- ❌ NEVER number the questions (do not write "1.", "2."). The [!PRACTICE] block automatically numbers them in the UI.
+- ❌ NEVER drop the > prefix. Every line of the question MUST start with "> ".
 - ✅ Include mark allocations on every question.
 - ✅ Use LaTeX for all maths and chemistry.
 
