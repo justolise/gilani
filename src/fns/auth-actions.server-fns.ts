@@ -22,7 +22,9 @@ export const assignUserRole = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
     const userId = authResult.userId;
     const { role, displayName } = data;
@@ -92,7 +94,7 @@ export const assignUserRole = createServerFn({ method: "POST" })
 
       return { success: true };
     } catch (err: any) {
-      throw new Error(err.message || "Failed to assign user role.");
+      throw new Error(err.message || "Failed to assign user role.", { cause: err });
     }
   });
 

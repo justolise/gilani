@@ -63,7 +63,7 @@ export function NoteUploadModal({ onClose, onUploaded }: NoteUploadModalProps) {
     }
 
     setError(null);
-    let noteId: string | null = null;
+    let noteId: string | null;
 
     try {
       const created = await createNote({

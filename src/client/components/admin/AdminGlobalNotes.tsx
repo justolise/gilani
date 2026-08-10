@@ -40,7 +40,9 @@ export const ingestGlobalNote = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
 
     const isAdmin = await requireRole(authResult.userId, "admin");
@@ -125,7 +127,7 @@ export const listGlobalNotes = createServerFn({ method: "GET" }).handler(async (
   try {
     authResult = await authenticateRequest(request);
   } catch (err) {
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized", { cause: err });
   }
 
   const isAdmin = await requireRole(authResult.userId, "admin");
@@ -148,7 +150,7 @@ export const deleteGlobalNote = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error("Unauthorized");
+      throw new Error("Unauthorized", { cause: err });
     }
 
     const isAdmin = await requireRole(authResult.userId, "admin");

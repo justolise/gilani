@@ -252,6 +252,6 @@ export async function parseDocument(file: File): Promise<ExtractedDocument> {
     }
   } catch (err: any) {
     console.error(`[DocumentParser] Failed to extract text from ${name}:`, err);
-    throw new Error(err.message || `An error occurred while parsing ${name}.`);
+    throw new Error(err.message || `An error occurred while parsing ${name}.`, { cause: err });
   }
 }

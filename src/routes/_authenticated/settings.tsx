@@ -44,7 +44,9 @@ const deleteAccount = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
     const { userId, user } = authResult;
     const { data: roleRow } = await supabaseAdmin

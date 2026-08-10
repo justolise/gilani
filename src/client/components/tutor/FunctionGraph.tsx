@@ -316,7 +316,7 @@ export function FunctionGraph({ spec }: { spec: GraphSpec }) {
 }
 
 export function FunctionGraphBlock({ spec }: { spec: string }) {
-  let parsed: GraphSpec | null = null;
+  let parsed: GraphSpec | null;
   try {
     parsed = JSON.parse(spec);
   } catch {

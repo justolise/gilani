@@ -16,7 +16,9 @@ async function getAuthedUserId(request: Request): Promise<string> {
     const authResult = await authenticateRequest(request);
     return authResult.userId;
   } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+      cause: err,
+    });
   }
 }
 
@@ -185,7 +187,7 @@ export const finalizeNote = createServerFn({ method: "POST" })
         .from("notes")
         .update({ status: "failed", error_message: message })
         .eq("id", data.noteId);
-      throw new Error(message);
+      throw new Error(message, { cause: err });
     }
   });
 

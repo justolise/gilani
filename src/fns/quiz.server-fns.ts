@@ -210,7 +210,7 @@ export const generateQuizFn = createServerFn({ method: "POST" })
       );
     } catch (err) {
       console.error("[Quiz Gen] Failed:", err instanceof Error ? err.message : String(err));
-      throw new Error("Failed to generate quiz. Please try again in a moment.");
+      throw new Error("Failed to generate quiz. Please try again in a moment.", { cause: err });
     }
 
     const questionsWithIds: QuizQuestion[] = (result as any).object.questions.map((q: any) => ({

@@ -174,7 +174,7 @@ export function useTutorChat({
           }
           const res = await fetch(input, init);
           if (!res.ok) {
-            let errText = "";
+            let errText: string;
             try {
               errText = await res.text();
             } catch {

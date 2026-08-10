@@ -124,7 +124,6 @@ export const generateStudyPlanFn = createServerFn({ method: "POST" })
       spanDays = Math.min(rawSpan, 60);
       dateInstruction = `The plan must run from ${start} up to and including ${examDate} (${spanDays} day span). Build intensity so coverage is roughly complete a day or two before the exam, leaving the final day or two for light review only.`;
     } else {
-      spanDays = 14;
       dateInstruction = `No fixed exam date was given — build a general 14-day plan starting ${start}.`;
     }
 
@@ -185,7 +184,9 @@ export const generateStudyPlanFn = createServerFn({ method: "POST" })
       );
     } catch (err) {
       console.error("[Planner Gen] Failed:", err instanceof Error ? err.message : String(err));
-      throw new Error("Failed to generate study plan. Please try again in a moment.");
+      throw new Error("Failed to generate study plan. Please try again in a moment.", {
+        cause: err,
+      });
     }
 
     const itemsWithIds: StudyPlanItem[] = (result as any).object.items

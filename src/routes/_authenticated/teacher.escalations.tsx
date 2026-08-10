@@ -32,7 +32,9 @@ const listEscalations = createServerFn({ method: "POST" }).handler(async () => {
   try {
     authResult = await authenticateRequest(request);
   } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+      cause: err,
+    });
   }
   const userId = authResult.userId;
 
@@ -82,7 +84,9 @@ const resolveEscalation = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
     const userId = authResult.userId;
     const { id, expertAnswer } = data;
@@ -165,7 +169,9 @@ const saveEscalationDraft = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
     const userId = authResult.userId;
     const { id, draftAnswer } = data;
@@ -204,7 +210,9 @@ const getConversationMessages = createServerFn({ method: "POST" })
     try {
       authResult = await authenticateRequest(request);
     } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized");
+      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+        cause: err,
+      });
     }
     const userId = authResult.userId;
     const { conversationId } = data;
