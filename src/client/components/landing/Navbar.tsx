@@ -40,16 +40,9 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            search={{ redirect: undefined, signout: undefined }}
-            className="hidden sm:inline-flex text-sm font-medium text-[rgba(255,255,255,0.75)] hover:text-white transition-colors px-3 py-2"
-          >
-            Sign In
-          </Link>
           <Button
             asChild
-            className="hidden sm:inline-flex rounded-full bg-[#C96A3D] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#E28743]"
+            className="inline-flex rounded-full bg-[#C96A3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(201,106,61,0.2)]"
           >
             <Link to="/login" search={{ redirect: undefined, signout: undefined }}>
               Get Started
@@ -80,14 +73,6 @@ export default function Navbar() {
                   </a>
                 ))}
                 <div className="mt-1 flex flex-col gap-1 border-t border-white/10 pt-2">
-                  <Link
-                    to="/login"
-                    search={{ redirect: undefined, signout: undefined }}
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-lg bg-white/5 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-colors text-left"
-                  >
-                    Sign In
-                  </Link>
                   <Link
                     to="/login"
                     search={{ redirect: undefined, signout: undefined }}

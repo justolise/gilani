@@ -60,22 +60,22 @@ export default function Features() {
           {FEATURES.map((feat, idx) => (
             <div
               key={idx}
-              className={`group relative flex flex-col items-center text-center md:items-start md:text-left gap-5 rounded-[24px] border border-white/5 bg-[#121212] p-6 md:p-8 transition-all duration-500 hover:-translate-y-2 hover:border-white/10 overflow-hidden ${feat.glow}`}
+              className={`group relative flex flex-col items-center text-center md:items-start md:text-left gap-5 rounded-[28px] border border-white/[0.06] bg-white/[0.02] backdrop-blur-md p-6 md:p-8 transition-all duration-500 hover:-translate-y-2 hover:border-[#C96A3D]/40 hover:bg-white/[0.04] overflow-hidden ${feat.glow}`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#C96A3D]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-              <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#1f1f1f] border border-white/5 text-2xl shadow-inner group-hover:scale-110 transition-transform duration-500">
+              <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.05] border border-white/[0.08] text-2xl shadow-inner group-hover:scale-110 group-hover:bg-[#C96A3D]/10 group-hover:border-[#C96A3D]/30 transition-all duration-500">
                 {feat.icon}
               </div>
 
               <div className="relative z-10 space-y-2">
                 <h3 className="text-xl font-bold text-white tracking-tight">{feat.title}</h3>
-                <p className="text-[#a1a1aa] leading-relaxed font-light max-w-[280px] md:max-w-none mx-auto md:mx-0">
+                <p className="text-[#a1a1aa] leading-relaxed font-light text-sm max-w-[280px] md:max-w-none mx-auto md:mx-0">
                   {feat.desc}
                 </p>
               </div>
 
-              <div className="absolute top-8 right-8 w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-[#d9531e] transition-colors duration-500"></div>
+              <div className="absolute top-8 right-8 w-2 h-2 rounded-full bg-white/10 group-hover:bg-[#C96A3D] group-hover:scale-125 transition-all duration-500"></div>
             </div>
           ))}
         </div>

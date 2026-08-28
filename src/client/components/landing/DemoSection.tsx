@@ -4,25 +4,37 @@ export default function DemoSection() {
   const [activeChat, setActiveChat] = useState<"math" | "essay">("math");
 
   return (
-    <section id="demo" className="w-full bg-[#050505] py-20 relative overflow-hidden">
+    <section id="demo" className="w-full bg-[#050505] py-24 relative overflow-hidden">
       {/* Background glowing orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#d9531e]/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#C96A3D]/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="mx-auto max-w-6xl px-6 relative z-10">
-        <div className="mb-20 text-center max-w-3xl mx-auto space-y-4">
+        <div className="mb-16 text-center max-w-3xl mx-auto space-y-4">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#a1a1aa] backdrop-blur-md">
             Interactive Demo
           </span>
           <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
             See GilaniAI in{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d9531e] to-[#f59e0b]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] to-[#E28743]">
               Action
             </span>
           </h2>
         </div>
 
-        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a0a0a] shadow-[0_30px_100px_-20px_rgba(217,83,30,0.25)] relative">
+        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a0a0a] shadow-[0_30px_100px_-20px_rgba(201,106,61,0.25)] relative">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+
+          {/* Browser window top bar */}
+          <div className="flex items-center h-12 px-6 border-b border-white/5 bg-[#121212]/90 gap-2 relative z-20">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-[#ff5f56] opacity-80"></div>
+              <div className="w-3 h-3 rounded-full bg-[#ffbd2e] opacity-80"></div>
+              <div className="w-3 h-3 rounded-full bg-[#27c93f] opacity-80"></div>
+            </div>
+            <div className="absolute left-1/2 -translate-x-1/2 text-xs text-white/30 font-mono tracking-wide select-none">
+              gilaniai.site/tutor
+            </div>
+          </div>
 
           <div className="flex flex-col md:flex-row h-auto md:h-[600px] w-full relative z-10">
             {/* Sidebar Mockup */}
@@ -55,7 +67,7 @@ export default function DemoSection() {
                 }`}
               >
                 <svg
-                  className={`w-4 h-4 ${activeChat === "math" ? "text-[#d9531e]" : "text-current"}`}
+                  className={`w-4 h-4 ${activeChat === "math" ? "text-[#C96A3D]" : "text-current"}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -78,7 +90,7 @@ export default function DemoSection() {
                 }`}
               >
                 <svg
-                  className={`w-4 h-4 ${activeChat === "essay" ? "text-[#d9531e]" : "text-current"}`}
+                  className={`w-4 h-4 ${activeChat === "essay" ? "text-[#C96A3D]" : "text-current"}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -100,71 +112,140 @@ export default function DemoSection() {
                 <span className="font-semibold text-white">
                   {activeChat === "math" ? "Balancing Equations" : "History Essay Help"}
                 </span>
-                <span className="ml-3 px-2 py-0.5 rounded-md bg-[#d9531e]/10 text-[#d9531e] text-[10px] font-bold uppercase tracking-wider border border-[#d9531e]/20">
+                <span className="ml-3 px-2 py-0.5 rounded-md bg-[#C96A3D]/10 text-[#E28743] text-[10px] font-bold uppercase tracking-wider border border-[#C96A3D]/20">
                   {activeChat === "math" ? "Chemistry" : "History"}
                 </span>
               </div>
 
-              <div className="flex-1 overflow-hidden md:overflow-y-auto p-4 md:p-8 flex flex-col gap-6 md:gap-8 scrollbar-hide">
-                {/* Student Message */}
-                <div className="flex w-full justify-end">
-                  <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#d9531e] px-4 md:px-6 py-3 md:py-4 text-[14px] md:text-[15px] text-white rounded-tr-sm shadow-md">
-                    {activeChat === "math"
-                      ? "How do I balance the combustion of methane?"
-                      : "Can you help me structure my essay on the causes of World War I?"}
-                  </div>
-                </div>
-                {/* AI Message */}
-                <div className="flex w-full justify-start gap-3 md:gap-5">
-                  <div className="flex h-8 w-8 md:h-10 md:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f1f1f] to-[#121212] border border-white/10 text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d9531e] to-[#f59e0b] shadow-lg">
-                    AI
-                  </div>
-                  <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-6 py-4 md:py-5 text-[14px] md:text-[15px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed">
-                    {activeChat === "math" ? (
-                      <>
-                        <p className="mb-3 md:mb-4">
-                          Here is the balanced equation for the combustion of methane:
+              <div className="flex-1 overflow-hidden md:overflow-y-auto p-4 md:p-6 flex flex-col gap-5 scrollbar-hide">
+                {activeChat === "math" ? (
+                  <>
+                    {/* Turn 1 */}
+                    <div className="flex w-full justify-end">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#C96A3D] px-4 md:px-5 py-3 text-[14px] text-white rounded-tr-sm shadow-md">
+                        How do I balance the combustion of methane?
+                      </div>
+                    </div>
+                    <div className="flex w-full justify-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
+                        AI
+                      </div>
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                        <p>
+                          Let's work through this step-by-step! Methane (CH₄) reacts with oxygen
+                          (O₂) to produce carbon dioxide (CO₂) and water (H₂O).
                         </p>
-                        <div className="font-mono text-[12px] md:text-[13px] bg-[#050505] p-3 md:p-4 rounded-xl mb-3 border border-emerald-500/30 text-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                          CH₄ + 2O₂ → CO₂ + 2H₂O
+                        <p>
+                          First, Carbon: we have 1 carbon on the left (CH₄) and 1 on the right
+                          (CO₂). Carbon is already balanced!
+                        </p>
+                        <p>
+                          Next, let's look at Hydrogen: we have 4 hydrogens on the left (CH₄), but
+                          only 2 on the right (H₂O).
+                        </p>
+                        <p className="text-[#E28743] font-semibold">
+                          What coefficient should we put in front of H₂O on the right side to get 4
+                          hydrogens?
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Turn 2 */}
+                    <div className="flex w-full justify-end">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#C96A3D] px-4 md:px-5 py-3 text-[14px] text-white rounded-tr-sm shadow-md">
+                        Multiply by 2?
+                      </div>
+                    </div>
+                    <div className="flex w-full justify-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
+                        AI
+                      </div>
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                        <p>
+                          Spot on! That gives us 4 hydrogens on the right side, matching the left:
+                        </p>
+                        <div className="font-mono text-xs bg-[#050505] p-3 rounded-xl border border-white/5 text-[#E28743] font-bold">
+                          CH₄ + O₂ → CO₂ + 2H₂O
                         </div>
-                        <p>Notice how we now have equal atoms on both sides!</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="mb-3 md:mb-4">
-                          Sure! A great way to structure it is using the MAIN acronym for the body
-                          paragraphs:
+                        <p>
+                          Now, let's count the oxygen atoms on the right: we have 2 from CO₂ and 2
+                          from 2H₂O, making 4 in total.
                         </p>
-                        <ul className="list-disc pl-5 space-y-2 mb-3 md:mb-4 text-[#a1a1aa]">
+                        <p className="text-[#E28743] font-semibold">
+                          How can we balance the oxygen atoms on the left side?
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Turn 1 */}
+                    <div className="flex w-full justify-end">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#C96A3D] px-4 md:px-5 py-3 text-[14px] text-white rounded-tr-sm shadow-md">
+                        Can you help me structure my essay on the causes of World War I?
+                      </div>
+                    </div>
+                    <div className="flex w-full justify-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
+                        AI
+                      </div>
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                        <p>
+                          Of course! Let's build an outline. A strong structure is essential for
+                          high-scoring essays.
+                        </p>
+                        <p>
+                          Have you heard of the <strong>M.A.I.N.</strong> acronym? It stands for the
+                          four long-term causes of the war.
+                        </p>
+                        <p className="text-[#E28743] font-semibold">
+                          Before we list them, do you know what the 'A' stands for in this context?
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Turn 2 */}
+                    <div className="flex w-full justify-end">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#C96A3D] px-4 md:px-5 py-3 text-[14px] text-white rounded-tr-sm shadow-md">
+                        Is it Alliances?
+                      </div>
+                    </div>
+                    <div className="flex w-full justify-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
+                        AI
+                      </div>
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                        <p>
+                          Exactly! The web of mutual defense treaties (like the Triple Entente and
+                          Triple Alliance) that dragged multiple nations into conflict.
+                        </p>
+                        <p>The full acronym is:</p>
+                        <ul className="list-disc pl-5 space-y-1 text-[#a1a1aa] text-sm">
                           <li>
-                            <strong className="text-[#e4e4e7]">Militarism:</strong> The arms race.
+                            <strong>Militarism:</strong> The arms race.
                           </li>
                           <li>
-                            <strong className="text-[#e4e4e7]">Alliances:</strong> Secret treaties
-                            pulling nations in.
+                            <strong>Alliances:</strong> Defense treaties.
                           </li>
                           <li>
-                            <strong className="text-[#e4e4e7]">Imperialism:</strong> Competition for
-                            colonies.
+                            <strong>Imperialism:</strong> Contest for colonies.
                           </li>
                           <li>
-                            <strong className="text-[#e4e4e7]">Nationalism:</strong> Extreme pride
-                            and tension.
+                            <strong>Nationalism:</strong> Extreme national pride.
                           </li>
                         </ul>
-                        <p>
-                          Start with a strong thesis in your intro, and conclude by showing how they
-                          all led to the spark in Sarajevo!
+                        <p className="text-[#E28743] font-semibold">
+                          How do you want to formulate your central thesis statement in the
+                          introduction?
                         </p>
-                      </>
-                    )}
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="p-6 bg-gradient-to-t from-[#0a0a0a] to-transparent">
-                <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#121212]/80 backdrop-blur-xl px-5 py-3.5 shadow-lg focus-within:border-[#d9531e]/50 focus-within:shadow-[0_0_20px_rgba(217,83,30,0.15)] transition-all">
+                <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#121212]/80 backdrop-blur-xl px-5 py-3.5 shadow-lg focus-within:border-[#C96A3D]/50 focus-within:shadow-[0_0_20px_rgba(201,106,61,0.15)] transition-all">
                   <svg
                     className="w-5 h-5 text-[#a1a1aa]"
                     fill="none"
@@ -178,8 +259,10 @@ export default function DemoSection() {
                       d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                     />
                   </svg>
-                  <div className="flex-1 text-[15px] text-[#71717a]">Message GilaniAI...</div>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#d9531e] cursor-pointer hover:bg-[#e85b24] transition-colors shadow-lg shadow-[#d9531e]/30">
+                  <div className="flex-1 text-[15px] text-[#71717a] select-none">
+                    Message GilaniAI...
+                  </div>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C96A3D] cursor-pointer hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#C96A3D]/30">
                     <svg
                       className="w-4 h-4 text-white"
                       fill="none"

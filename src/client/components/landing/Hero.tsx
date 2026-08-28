@@ -7,7 +7,82 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#C96A3D]/20 blur-[120px] rounded-full mix-blend-screen opacity-60 motion-safe:animate-pulse [animation-duration:8s]"></div>
         <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-[#C96A3D]/10 blur-[150px] rounded-full mix-blend-screen opacity-50"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50"></div>
+        {/* Graph Paper Grid overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] opacity-50"></div>
+      </div>
+
+      {/* Floating Academic Badges */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+        {/* Math Badge */}
+        <div className="absolute top-28 left-6 md:left-16 lg:left-24 animate-float hidden lg:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
+            <span className="font-serif text-lg font-bold">∑</span>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
+              Mathematics
+            </span>
+            <span className="text-xs font-mono font-bold text-white">f(x) = dx/dy</span>
+          </div>
+        </div>
+
+        {/* Chemistry Badge */}
+        <div
+          className="absolute bottom-28 left-[8%] animate-float hidden xl:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]"
+          style={{ animationDelay: "2s" }}
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 3h15M6 3v16a2 2 0 002 2h8a2 2 0 002-2V3M6 14h12"
+              />
+            </svg>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
+              Chemistry
+            </span>
+            <span className="text-xs font-mono font-bold text-white">H₂O + CO₂</span>
+          </div>
+        </div>
+
+        {/* Physics/Orbit Badge */}
+        <div
+          className="absolute top-44 right-[44%] animate-float hidden xl:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]"
+          style={{ animationDelay: "4s" }}
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="w-4 h-4 animate-spin [animation-duration:15s]"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path
+                strokeLinecap="round"
+                d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10zM2 12h20"
+              />
+            </svg>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
+              Physics
+            </span>
+            <span className="text-xs font-mono font-bold text-white">E = mc²</span>
+          </div>
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row lg:items-center">
@@ -89,8 +164,8 @@ export default function Hero() {
 
             {/* Subtle floating overlay tags */}
             <div className="absolute bottom-6 left-6 z-20 backdrop-blur-md bg-black/40 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#C96A3D] animate-pulse"></div>
-              <span className="text-sm text-white font-medium">Smart AI Tutor</span>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#C96A3D] animate-pulse"></div>
+              <span className="text-sm text-white font-semibold">Socratic AI Tutor</span>
             </div>
           </div>
         </div>
