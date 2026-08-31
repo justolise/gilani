@@ -8,18 +8,12 @@ import {
   Pencil,
   FileText,
   Trash2,
-  Download,
-  ShieldAlert,
-  Timer,
-  CheckCircle2,
-  Clock,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/client/supabase";
 import { SmoothMarkdownRenderer } from "@/client/components/tutor/SmoothMarkdownRenderer";
-import { PomodoroTimer } from "@/client/components/tutor/PomodoroTimer";
 import { ThinkingSweep } from "@/client/components/tutor/ThinkingSweep";
+import { ToolStepPill } from "@/client/components/tutor/ToolStepPill";
 
 type Props = {
   message: any;
@@ -35,7 +29,6 @@ type Props = {
   onDelete?: (messageId: string) => void;
   // Session action props (only shown on last assistant bubble)
   onExportPDF?: () => void;
-
   onEscalate?: () => void;
   escalationStatus?: "open" | "in_review" | "resolved" | null;
   escalating?: boolean;
@@ -46,7 +39,6 @@ type Props = {
 // Memoize the entire component to prevent unnecessary re-renders
 export const MessageBubble = memo(function MessageBubble({
   message: m,
-  idx,
   isLast,
   isPending,
   isRateLimited,
@@ -57,17 +49,12 @@ export const MessageBubble = memo(function MessageBubble({
   onVote,
   pauseLabel,
   onDelete,
-  onExportPDF,
-  onEscalate,
-  escalationStatus,
-  escalating,
-  messagesLoading,
 }: Props) {
   const [copied, setCopied] = useState(false);
-  const [timerOpen, setTimerOpen] = useState(false);
   const [vote, setVote] = useState<1 | -1 | null>(initialVote ?? null);
   const [voting, setVoting] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
+  const [showThinkingPanel, setShowThinkingPanel] = useState(false);
 
   const prevInitialVoteRef = useRef(initialVote);
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -89,7 +76,7 @@ export const MessageBubble = memo(function MessageBubble({
 
   const COLLAPSE_THRESHOLD = 300;
 
-  // Memoize expensive computations
+  // Memoize attachment parsing for user messages
   const attachmentName = useMemo(() => {
     if (m.role !== "user") return null;
     const partsText =
@@ -100,7 +87,7 @@ export const MessageBubble = memo(function MessageBubble({
     const rawText = partsText || m.content || "";
     const match = rawText.match(/\[Document Attached:\s*([^\]\n]+)\]/);
     return match ? match[1].trim() : null;
-  }, [m.id, m.role, m.parts, m.content]);
+  }, [m.parts, m.content, m.role]);
 
   const displayText = useMemo(() => {
     const partsText =
@@ -116,7 +103,7 @@ export const MessageBubble = memo(function MessageBubble({
           .replace(/^Student Query:\s*(\(See attached document\))?\s*/m, "")
           .trim()
       : rawText;
-  }, [m.id, m.role, m.parts, m.content]);
+  }, [m.parts, m.content, m.role]);
 
   const { reasoningSteps, toolSteps } = useMemo(() => {
     const part = m.parts?.find((p: any) => p.type === "thinking-steps");
@@ -157,16 +144,15 @@ export const MessageBubble = memo(function MessageBubble({
       reasoningSteps: steps.filter((s: any) => s.type === "reasoning"),
       toolSteps: finalToolSteps,
     };
-  }, [m.id, m.parts, m.toolInvocations]);
-
-  const [showThinkingPanel, setShowThinkingPanel] = useState(false);
+  }, [m.parts, m.toolInvocations]);
 
   const isStreamActive = isPending && isLast;
-  // Detect a silent mid-stream pause (no tool, no new text for a beat) so we
-  // can still show a "Thinking..." indicator instead of a stuck blinking cursor.
+
+  // Detect a silent mid-stream pause so we can still show a "Thinking..." indicator
   const [isStalled, setIsStalled] = useState(false);
   const lastTextRef = useRef<string>("");
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
   useEffect(() => {
     if (!isStreamActive) {
       setIsStalled(false);
@@ -182,6 +168,7 @@ export const MessageBubble = memo(function MessageBubble({
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
     };
   }, [displayText, isStreamActive]);
+
   useEffect(() => {
     if (!isStreamActive) return;
     stallTimerRef.current = setTimeout(() => setIsStalled(true), 1500);
@@ -189,6 +176,7 @@ export const MessageBubble = memo(function MessageBubble({
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
     };
   }, [isStreamActive]);
+
   const showBubbleCard = displayText.length > 0;
   const isUser = m.role === "user";
 
@@ -251,7 +239,7 @@ export const MessageBubble = memo(function MessageBubble({
           isUser ? "max-w-[85%] sm:max-w-[75%]" : "w-full px-3 sm:px-8"
         }`}
       >
-        {/* Live tool call indicator — rendered OUTSIDE the bubble so it's visible even before text appears */}
+        {/* Live tool call indicator — rendered OUTSIDE the bubble before text appears */}
         {!isUser && isStreamActive && toolSteps.length > 0 && !showBubbleCard && (
           <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-300 w-full max-w-[96%]">
             {toolSteps.map((step: any, i: number) => {
@@ -260,50 +248,16 @@ export const MessageBubble = memo(function MessageBubble({
                 (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
               );
               return (
-                <div
+                <ToolStepPill
                   key={`${step.toolName}-${i}`}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-mono border transition-all duration-300 ${
-                    isDone
-                      ? "bg-emerald-950/40 text-emerald-400 border-emerald-800/50"
-                      : "bg-amber-950/40 text-amber-400 border-amber-800/50"
-                  }`}
-                >
-                  {isDone ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="animate-spin"
-                    >
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                  )}
-                  <span className="font-semibold">{step.toolName}</span>
-                </div>
+                  toolName={step.toolName}
+                  isDone={isDone}
+                />
               );
             })}
           </div>
         )}
+
         <div
           className={`${
             isUser
@@ -311,7 +265,7 @@ export const MessageBubble = memo(function MessageBubble({
               : isStreamActive && !showBubbleCard
                 ? "opacity-0 pointer-events-none"
                 : "px-0 py-1 bg-transparent text-foreground"
-          } text-[15px] leading-relaxed relative transition-all duration-200`}
+          } text-[15px] sm:text-base leading-relaxed relative transition-all duration-200`}
         >
           {!isUser ? (
             <>
@@ -323,12 +277,12 @@ export const MessageBubble = memo(function MessageBubble({
                         <button
                           type="button"
                           onClick={() => setShowThinkingPanel((v) => !v)}
-                          className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-muted-foreground/70 hover:text-foreground transition-colors"
+                          className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-muted-foreground/70 hover:text-foreground transition-colors"
                         >
                           Thinking{showThinkingPanel ? " ▲" : " ..."}
                         </button>
                         {showThinkingPanel && (
-                          <div className="mt-1.5 space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-2.5 text-[11px] leading-relaxed text-muted-foreground">
+                          <div className="mt-1.5 space-y-1.5 rounded-xl border border-border/50 bg-muted/20 p-2.5 text-xs leading-relaxed text-muted-foreground">
                             {reasoningSteps.map((step: any, i: number) => (
                               <p
                                 key={`reasoning-${i}-${(step.text || "").slice(0, 20)}`}
@@ -341,6 +295,7 @@ export const MessageBubble = memo(function MessageBubble({
                         )}
                       </div>
                     )}
+
                     {/* Use SmoothMarkdownRenderer for word-by-word streaming */}
                     <SmoothMarkdownRenderer
                       content={displayText}
@@ -365,46 +320,11 @@ export const MessageBubble = memo(function MessageBubble({
                             (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
                           );
                           return (
-                            <div
+                            <ToolStepPill
                               key={`${step.toolName}-${i}`}
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono border transition-all duration-300 ${
-                                isDone
-                                  ? "bg-emerald-950/40 text-emerald-400 border-emerald-800/50"
-                                  : "bg-amber-950/40 text-amber-400 border-amber-800/50"
-                              }`}
-                            >
-                              {isDone ? (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="11"
-                                  height="11"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                              ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="11"
-                                  height="11"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  className="animate-spin"
-                                >
-                                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                                </svg>
-                              )}
-                              <span className="font-semibold">{step.toolName}</span>
-                            </div>
+                              toolName={step.toolName}
+                              isDone={isDone}
+                            />
                           );
                         })}
                       </div>
@@ -418,17 +338,15 @@ export const MessageBubble = memo(function MessageBubble({
                   )
                 )}
 
-                {/* Footer: action buttons (only once a final response exists) + persistent G avatar
-                    The avatar renders in all three states — before, during, and after streaming —
-                    since it lives outside the showBubbleCard/isStreamActive gates below. */}
+                {/* Footer: action buttons + persistent G badge */}
                 <div className="flex flex-col gap-1.5 mt-2">
                   {showBubbleCard && !isStreamActive && (
                     <div className="flex items-center gap-1 transition-opacity duration-200">
                       {/* Copy */}
                       <button
                         onClick={handleCopy}
-                        className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded hover:bg-muted"
-                        title="Copy"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
+                        title="Copy message"
                         aria-label="Copy message"
                       >
                         {copied ? (
@@ -443,13 +361,13 @@ export const MessageBubble = memo(function MessageBubble({
                         <button
                           onClick={isRateLimited ? undefined : onReload}
                           disabled={isRateLimited}
-                          className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider transition-colors px-2.5 py-1.5 rounded ${
+                          className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md ${
                             isRateLimited
                               ? "opacity-40 cursor-not-allowed text-muted-foreground"
                               : "text-muted-foreground hover:text-foreground hover:bg-muted"
                           }`}
-                          title={isRateLimited ? "Rate limit reached" : "Retry"}
-                          aria-label="Retry message"
+                          title={isRateLimited ? "Rate limit reached" : "Retry response"}
+                          aria-label="Retry response"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
                         </button>
@@ -462,7 +380,7 @@ export const MessageBubble = memo(function MessageBubble({
                       <button
                         onClick={() => handleVote(1)}
                         disabled={voting}
-                        className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider transition-colors px-2 py-1 rounded hover:bg-muted ${
+                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted ${
                           vote === 1
                             ? "text-green-500"
                             : "text-muted-foreground hover:text-green-500"
@@ -477,7 +395,7 @@ export const MessageBubble = memo(function MessageBubble({
                       <button
                         onClick={() => handleVote(-1)}
                         disabled={voting}
-                        className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider transition-colors px-2 py-1 rounded hover:bg-muted ${
+                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted ${
                           vote === -1
                             ? "text-destructive"
                             : "text-muted-foreground hover:text-destructive"
@@ -490,12 +408,11 @@ export const MessageBubble = memo(function MessageBubble({
                     </div>
                   )}
 
-                  {/* Persistent G avatar — only on the last assistant message,
-                      visible before, during, and after streaming */}
+                  {/* Persistent Gilani badge on last assistant bubble */}
                   {isLast && (
-                    <div className="flex items-center">
+                    <div className="flex items-center pt-1">
                       <div
-                        className="flex items-center justify-center text-2xl font-bold text-primary select-none leading-none"
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
                         aria-hidden="true"
                         title="GilaniAI"
                       >
@@ -510,8 +427,8 @@ export const MessageBubble = memo(function MessageBubble({
             /* User message */
             <div className="flex flex-col gap-1.5">
               {attachmentName && (
-                <div className="flex items-center gap-1.5 rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs font-semibold text-foreground w-fit max-w-full select-none">
-                  <FileText className="h-3.5 w-3.5 flex-shrink-0" />
+                <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/80 px-2.5 py-1.5 text-xs font-semibold text-foreground w-fit max-w-full select-none">
+                  <FileText className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
                   <span className="truncate max-w-[200px]">{attachmentName}</span>
                 </div>
               )}
@@ -524,7 +441,7 @@ export const MessageBubble = memo(function MessageBubble({
                 {displayText.length > COLLAPSE_THRESHOLD && (
                   <button
                     onClick={() => setCollapsed((p) => !p)}
-                    className="self-start text-[10px] font-bold text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                    className="self-start text-xs font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
                     aria-expanded={!collapsed}
                   >
                     {collapsed ? "Show more" : "Show less"}
@@ -536,8 +453,8 @@ export const MessageBubble = memo(function MessageBubble({
                 <div className="flex items-center gap-1 mt-1.5 transition-opacity duration-200 justify-end">
                   <button
                     onClick={handleCopy}
-                    className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-muted"
-                    title="Copy"
+                    className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
+                    title="Copy message"
                     aria-label="Copy message"
                   >
                     {copied ? (
@@ -550,7 +467,7 @@ export const MessageBubble = memo(function MessageBubble({
                     <button
                       onClick={isRateLimited ? undefined : () => onEditRequest(displayText)}
                       disabled={isRateLimited}
-                      className={`inline-flex items-center text-[9px] font-bold uppercase tracking-wider transition-colors px-2 py-1 rounded ${
+                      className={`inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md ${
                         isRateLimited
                           ? "opacity-40 cursor-not-allowed text-muted-foreground/50"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -564,7 +481,7 @@ export const MessageBubble = memo(function MessageBubble({
                   {onDelete && (
                     <button
                       onClick={() => onDelete(m.id)}
-                      className="inline-flex items-center text-[9px] font-bold uppercase tracking-wider transition-colors px-2 py-1 rounded text-muted-foreground hover:text-destructive hover:bg-muted"
+                      className="inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted"
                       title="Delete message"
                       aria-label="Delete message"
                     >
@@ -577,11 +494,11 @@ export const MessageBubble = memo(function MessageBubble({
           )}
         </div>
 
-        {/* Timestamp */}
+        {/* Hover timestamp aligned to message boundaries */}
         <div
           className={`absolute -bottom-2 ${
-            isUser ? "right-2" : "left-12"
-          } opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[9px] text-muted-foreground font-mono bg-background border border-border/60 px-1.5 py-0.5 rounded shadow-sm pointer-events-none z-10`}
+            isUser ? "right-2" : "left-3 sm:left-8"
+          } opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-mono text-xs text-muted-foreground bg-background/90 backdrop-blur-xs border border-border/60 px-1.5 py-0.5 rounded shadow-xs pointer-events-none z-10`}
         >
           {m.createdAt
             ? new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
