@@ -102,7 +102,13 @@ export const MessageBubble = memo(function MessageBubble({
           .replace(/\[Document Attached:[^\]]+\]\n*/g, "")
           .replace(/^Student Query:\s*(\(See attached document\))?\s*/m, "")
           .trim()
-      : rawText;
+      : rawText
+          .replace(
+            /^(?:tool_code\s+[\s\S]*?(?=\n\n|\n[A-Z0-9#*-])|thought\s+[\s\S]*?(?=\n\n|\n[A-Z0-9#*-]))+/g,
+            "",
+          )
+          .replace(/<thought>[\s\S]*?<\/thought>/gi, "")
+          .trim();
   }, [m.parts, m.content, m.role]);
 
   const { reasoningSteps, toolSteps } = useMemo(() => {

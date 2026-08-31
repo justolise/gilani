@@ -16,12 +16,21 @@ export function extractText(node: any): string {
   if (typeof node === "string" || typeof node === "number") {
     return String(node);
   }
-  if (!node || !node.props) return "";
-  if (node.props.children) {
-    if (Array.isArray(node.props.children)) {
-      return node.props.children.map(extractText).join("");
+  if (!node) return "";
+  if (node.value) return String(node.value);
+  if (Array.isArray(node)) {
+    return node.map(extractText).filter(Boolean).join("\n");
+  }
+  if (node.props) {
+    if (node.props.children) {
+      if (Array.isArray(node.props.children)) {
+        return node.props.children.map(extractText).filter(Boolean).join("\n");
+      }
+      return extractText(node.props.children);
     }
-    return extractText(node.props.children);
+  }
+  if (node.children && Array.isArray(node.children)) {
+    return node.children.map(extractText).filter(Boolean).join("\n");
   }
   return "";
 }
