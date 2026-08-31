@@ -6,13 +6,18 @@ export function useProfile(userId: string | null | undefined) {
   const [profileName, setProfileName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [curriculum, setCurriculum] = useState<string | null>("KCSE");
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   const fetchProfile = async () => {
-    if (!userId) return;
+    if (!userId) {
+      setProfileLoading(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("plan, display_name, avatar_url, curriculum")
+        .select("plan, display_name, avatar_url, curriculum, onboarding_completed")
         .eq("id", userId)
         .maybeSingle();
       if (!error && data) {
@@ -20,9 +25,15 @@ export function useProfile(userId: string | null | undefined) {
         setProfileName(data.display_name || "");
         setAvatarUrl(data.avatar_url || null);
         if (data.curriculum) setCurriculum(data.curriculum);
+        setOnboardingCompleted(Boolean(data.onboarding_completed));
+      } else {
+        setOnboardingCompleted(false);
       }
     } catch (err) {
       console.error("Failed to load profile for sidebar:", err);
+      setOnboardingCompleted(false);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -39,5 +50,5 @@ export function useProfile(userId: string | null | undefined) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  return { profileName, avatarUrl, currentPlan, curriculum };
+  return { profileName, avatarUrl, currentPlan, curriculum, onboardingCompleted, profileLoading };
 }

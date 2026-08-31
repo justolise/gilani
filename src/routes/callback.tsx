@@ -149,22 +149,6 @@ function AuthCallback() {
         }
         return;
       }
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, s) => {
-        if (event === "PASSWORD_RECOVERY") {
-          navigate({ to: "/" });
-        } else if (event === "SIGNED_IN" && s) {
-          const urlParams = new URLSearchParams(window.location.search);
-          const type = urlParams.get("type");
-          if (type !== "recovery") {
-            navigateToDestination(safePath);
-          }
-        }
-      });
-
-      return () => subscription.unsubscribe();
     };
 
     handleCallback();

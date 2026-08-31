@@ -139,6 +139,8 @@ export function useAuthedShell() {
     avatarUrl: profile.avatarUrl,
     currentPlan: profile.currentPlan,
     curriculum: profile.curriculum,
+    onboardingCompleted: profile.onboardingCompleted,
+    profileLoading: profile.profileLoading,
 
     isDark: appChrome.isDark,
     pwaInstallable: appChrome.pwaInstallable,

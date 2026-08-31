@@ -93,11 +93,15 @@ function AuthedShell() {
     return <GilaniLoader />;
   }
 
+  const isProfileLoaded = !shell.loading && !shell.profileLoading;
+  const needsProfileSetup =
+    isProfileLoaded && (!shell.onboardingCompleted || !shell.profileName?.trim());
+
   return (
     <I18nProvider>
       <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground">
         <DisclaimerModal />
-        {!shell.profileName?.trim() && (
+        {needsProfileSetup && (
           <CompleteProfileForm
             initialName={shell.user?.user_metadata?.full_name || ""}
             onSave={async (displayName, role, curriculum) => {
