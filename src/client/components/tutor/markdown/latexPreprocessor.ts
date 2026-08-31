@@ -377,9 +377,14 @@ export function preprocessLatex(raw: string): string {
     },
   );
 
-  // ── Step 11: Ensure numbered/lettered items start on new lines ────────────
-  s = s.replace(/([^\n(])\s+([a-z]\))\s+(?=[A-Z])/g, (_, pre, letter) => `${pre}\n\n   ${letter} `);
-  s = s.replace(/([^\n:])[ \t]+(\d+\.\s+)(?=[A-Z])/g, (_, pre, num) => `${pre}\n${num}`);
+  // ── Step 11: Ensure numbered/lettered items & MCQ choices start on new lines ────
+  s = s.replace(/([^\n])\n([A-D][\)\.\:]|\([A-D]\))\s+/g, "$1\n\n$2 ");
+  s = s.replace(/([^\n])\s+([A-D][\)\.\:]|\([A-D]\))\s+/g, "$1\n\n$2 ");
+  s = s.replace(
+    /([^\n(])\s+([a-z]\))\s+(?=[A-Za-z0-9$])/g,
+    (_, pre, letter) => `${pre}\n\n   ${letter} `,
+  );
+  s = s.replace(/([^\n:])[ \t]+(\d+\.\s+)(?=[A-Za-z0-9$])/g, (_, pre, num) => `${pre}\n${num}`);
 
   // Restore protected blocks
   s = s.replace(new RegExp(MATH_TOKEN, "g"), () => repairMatrix(mathBlocks.shift()!));

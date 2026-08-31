@@ -5,13 +5,12 @@ import {
   CheckCircle2,
   XCircle,
   Pencil,
-  ChevronDown,
-  ChevronUp,
   Award,
   Sparkles,
   Check,
   RotateCcw,
 } from "lucide-react";
+import katex from "katex";
 import { toast } from "sonner";
 import { InsidePracticeCardCtx, extractText } from "../tutor/MarkdownRenderer";
 
@@ -20,6 +19,17 @@ interface Props {
   answer?: React.ReactNode;
   number?: number;
   isMultipleChoice?: boolean;
+}
+
+export interface McqOption {
+  letter: string;
+  text: string;
+}
+
+export interface ParsedMcq {
+  isMcq: boolean;
+  prompt: string;
+  options: McqOption[];
 }
 
 const COMMAND_VERBS = [
@@ -41,6 +51,64 @@ const COMMAND_VERBS = [
   "List",
   "Define",
 ];
+
+export function extractMcq(text: string): ParsedMcq {
+  if (!text) return { isMcq: false, prompt: "", options: [] };
+
+  // Match choices like:
+  // A) Text  or  A. Text  or  (A) Text  or  [A] Text  or  Option A: Text  or  - A) Text
+  const optionRegex =
+    /(?:^|\s+|\n)(?:[\-\*]\s+)?(?:\(?([A-D])\)|\b([A-D])[\.\:\)]|\[([A-D])\]|Option\s+([A-D])[\:\.\)]?)\s+([^\n]+?)(?=(?:\s+(?:[\-\*]\s+)?(?:\(?[A-D]\)|\b[A-D][\.\:\)]|\[[A-D]\]|Option\s+[A-D])\s+)|$)/gi;
+
+  const matches = [...text.matchAll(optionRegex)];
+  const letters = matches.map((m) => (m[1] || m[2] || m[3] || m[4]).toUpperCase());
+  const isSequential = letters.includes("A") && letters.includes("B");
+
+  if (!isSequential || matches.length < 2) {
+    return { isMcq: false, prompt: text, options: [] };
+  }
+
+  const firstIdx = matches[0].index ?? 0;
+  const prompt = text.substring(0, firstIdx).trim();
+  const options = matches.map((m) => ({
+    letter: (m[1] || m[2] || m[3] || m[4]).toUpperCase(),
+    text: m[5].trim(),
+  }));
+
+  return { isMcq: true, prompt, options };
+}
+
+function RenderFormattedText({ text }: { text: string }) {
+  if (!text) return null;
+  const parts = text.split(/(\$[^$]+\$)/g);
+
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith("$") && part.endsWith("$") && part.length > 2) {
+          const math = part.slice(1, -1);
+          try {
+            const html = katex.renderToString(math, {
+              throwOnError: false,
+              displayMode: false,
+              strict: "ignore",
+            });
+            return (
+              <span
+                key={i}
+                className="inline-block align-middle mx-0.5"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            );
+          } catch {
+            return <span key={i}>{part}</span>;
+          }
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </span>
+  );
+}
 
 export default function PracticeQuestionCard({
   question,
@@ -76,11 +144,9 @@ export default function PracticeQuestionCard({
     return null;
   }, [questionText]);
 
-  // Detect MCQ options (A, B, C, D)
-  const isMCQ = useMemo(() => {
-    if (isMultipleChoice) return true;
-    return /\b[A-D]\)\s+[^\n]+/i.test(questionText) || /\bOption\s+[A-D]\b/i.test(questionText);
-  }, [isMultipleChoice, questionText]);
+  // Extract structured MCQ choices and prompt
+  const parsedMcq = useMemo(() => extractMcq(questionText), [questionText]);
+  const isMCQ = isMultipleChoice || parsedMcq.isMcq;
 
   // Detect correct option letter in answer text (e.g. "Answer: B" or "**(B)**" or "Option C")
   const correctOption = useMemo(() => {
@@ -92,6 +158,22 @@ export default function PracticeQuestionCard({
     const bareMatch = answerText.match(/\b([A-D])\b/);
     return bareMatch ? bareMatch[1].toUpperCase() : null;
   }, [isMCQ, answerText]);
+
+  const handleSelectOption = (opt: string) => {
+    setSelectedOption(opt);
+    if (answer) {
+      setShowAnswer(true);
+      if (correctOption) {
+        if (opt === correctOption) {
+          toast.success(`Correct! (${opt}) is the right answer.`, { duration: 3500 });
+        } else {
+          toast.error(`Not quite! (${opt}) is incorrect. Correct answer is (${correctOption}).`, {
+            duration: 4000,
+          });
+        }
+      }
+    }
+  };
 
   const handleSelfAssessment = (type: "correct" | "partial" | "review") => {
     setSelfAssessment(type);
@@ -126,7 +208,7 @@ export default function PracticeQuestionCard({
             </span>
             {isMCQ && (
               <span className="rounded-md bg-secondary/80 px-2 py-0.5 font-mono text-[11px] font-medium text-secondary-foreground">
-                MCQ
+                Multiple Choice
               </span>
             )}
           </div>
@@ -148,20 +230,102 @@ export default function PracticeQuestionCard({
 
         {/* Question Body */}
         <div className="p-4 sm:p-5 text-[15px] sm:text-base text-foreground leading-relaxed">
-          {question}
+          {parsedMcq.isMcq && parsedMcq.prompt ? (
+            <div className="font-medium text-foreground mb-3">
+              <RenderFormattedText text={parsedMcq.prompt} />
+            </div>
+          ) : (
+            <div className="mb-3">{question}</div>
+          )}
 
-          {/* Interactive MCQ Choice Pills (if detected) */}
-          {isMCQ && (
+          {/* Interactive MCQ Choice Cards */}
+          {parsedMcq.isMcq && parsedMcq.options.length > 0 ? (
+            <div className="mt-3 space-y-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Select an option:
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {parsedMcq.options.map((opt) => {
+                  const isSelected = selectedOption === opt.letter;
+                  const isCorrect = correctOption === opt.letter;
+                  let cardStyle =
+                    "border-border/70 bg-card hover:bg-muted/40 hover:border-primary/40 text-foreground cursor-pointer shadow-2xs";
+                  let badgeStyle = "bg-muted text-muted-foreground border-border/80";
+
+                  if (showAnswer && correctOption) {
+                    if (isCorrect) {
+                      cardStyle =
+                        "border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold ring-2 ring-emerald-500/20";
+                      badgeStyle = "bg-emerald-500 text-white border-emerald-600";
+                    } else if (isSelected && !isCorrect) {
+                      cardStyle =
+                        "border-rose-500 bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20 opacity-90";
+                      badgeStyle = "bg-rose-500 text-white border-rose-600";
+                    } else {
+                      cardStyle =
+                        "border-border/40 bg-muted/10 text-muted-foreground opacity-60 cursor-default";
+                      badgeStyle = "bg-muted/50 text-muted-foreground border-border/40";
+                    }
+                  } else if (isSelected) {
+                    cardStyle =
+                      "border-primary bg-primary/10 text-primary font-medium ring-2 ring-primary/20";
+                    badgeStyle = "bg-primary text-primary-foreground border-primary";
+                  }
+
+                  return (
+                    <button
+                      key={opt.letter}
+                      type="button"
+                      onClick={() => handleSelectOption(opt.letter)}
+                      className={`w-full flex items-center justify-between text-left p-3 sm:p-3.5 rounded-xl border text-sm transition-all active:scale-[0.99] group ${cardStyle}`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 pr-2">
+                        <span
+                          className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border font-mono font-bold text-xs transition-colors ${badgeStyle}`}
+                        >
+                          {opt.letter}
+                        </span>
+                        <span className="leading-snug break-words">
+                          <RenderFormattedText text={opt.text} />
+                        </span>
+                      </div>
+
+                      <div className="flex-shrink-0 ml-2">
+                        {showAnswer && isCorrect && (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                        )}
+                        {showAnswer && isSelected && !isCorrect && (
+                          <XCircle className="h-4 w-4 text-rose-500 flex-shrink-0" />
+                        )}
+                        {!showAnswer && (
+                          <div
+                            className={`h-4 w-4 rounded-full border flex items-center justify-center transition-colors ${
+                              isSelected
+                                ? "border-primary bg-primary"
+                                : "border-border/80 group-hover:border-primary/50"
+                            }`}
+                          >
+                            {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : isMCQ ? (
+            /* Fallback generic pills if choices could not be fully parsed into discrete texts */
             <div className="mt-4 pt-3 border-t border-border/40">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Select Your Answer:
+                Select Your Choice:
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["A", "B", "C", "D"].map((opt) => {
                   const isSelected = selectedOption === opt;
                   const isCorrect = correctOption === opt;
                   let btnStyle =
-                    "border-border/80 bg-muted/20 text-foreground hover:bg-muted/50 hover:border-border";
+                    "border-border/80 bg-muted/20 text-foreground hover:bg-muted/50 hover:border-border cursor-pointer";
 
                   if (showAnswer && correctOption) {
                     if (isCorrect) {
@@ -171,7 +335,8 @@ export default function PracticeQuestionCard({
                       btnStyle =
                         "border-rose-500 bg-rose-500/15 text-rose-600 dark:text-rose-400 line-through opacity-80";
                     } else {
-                      btnStyle = "border-border/40 bg-muted/10 text-muted-foreground opacity-60";
+                      btnStyle =
+                        "border-border/40 bg-muted/10 text-muted-foreground opacity-60 cursor-default";
                     }
                   } else if (isSelected) {
                     btnStyle =
@@ -182,15 +347,7 @@ export default function PracticeQuestionCard({
                     <button
                       key={opt}
                       type="button"
-                      onClick={() => {
-                        setSelectedOption(opt);
-                        if (!showAnswer) {
-                          // Allow quick answer checking on selection if answer exists
-                          if (answer) {
-                            setShowAnswer(true);
-                          }
-                        }
-                      }}
+                      onClick={() => handleSelectOption(opt)}
                       className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-medium transition-all active:scale-98 ${btnStyle}`}
                     >
                       <span className="font-mono font-bold">({opt})</span>
@@ -205,7 +362,7 @@ export default function PracticeQuestionCard({
                 })}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Scratchpad (Open-Ended / Normal Questions) */}

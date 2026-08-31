@@ -6,7 +6,7 @@ import katex from "katex";
 
 import { RenderErrorBoundary } from "@/client/components/shared/RenderErrorBoundary";
 import { FlashCard } from "@/client/components/cards/FlashCard";
-import PracticeQuestionCard from "@/client/components/cards/PracticeQuestionCard";
+import PracticeQuestionCard, { extractMcq } from "@/client/components/cards/PracticeQuestionCard";
 import DefinitionCard from "@/client/components/cards/DefinitionCard";
 import ExampleCard from "@/client/components/cards/ExampleCard";
 import WarningCard from "@/client/components/cards/WarningCard";
@@ -35,7 +35,7 @@ const MERMAID_PATTERN =
 
 const PRACTICE_MARKS_RE = /\(\d+\s+marks?\)/i;
 const PRACTICE_VERBS_RE =
-  /^(state|find|calculate|identify|given|show|prove|determine|explain|describe|evaluate|solve|simplify|compute|derive|sketch|draw|write|list|define|compare|differentiate|hence)/i;
+  /^(state|find|calculate|identify|given|show|prove|determine|explain|describe|evaluate|solve|simplify|compute|derive|sketch|draw|write|list|define|compare|differentiate|hence|which|what|how|where|when|why|choose|select)/i;
 
 function hastText(node: any): string {
   if (!node) return "";
@@ -44,7 +44,9 @@ function hastText(node: any): string {
 }
 
 function looksLikePractice(text: string) {
-  return PRACTICE_MARKS_RE.test(text) || PRACTICE_VERBS_RE.test(text.trim());
+  return (
+    PRACTICE_MARKS_RE.test(text) || PRACTICE_VERBS_RE.test(text.trim()) || extractMcq(text).isMcq
+  );
 }
 
 // ── Top-Level Markdown Subcomponents ──────────────────────────────────────────
