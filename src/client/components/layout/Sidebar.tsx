@@ -84,6 +84,7 @@ export function Sidebar({ shell }: Props) {
     profileName,
     avatarUrl,
     currentPlan,
+    curriculum,
     user,
     signOut,
     escalationStatuses,
@@ -155,9 +156,19 @@ export function Sidebar({ shell }: Props) {
               <p className="text-sm font-semibold truncate text-foreground leading-tight">
                 {profileName || user?.email?.split("@")[0]}
               </p>
-              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary mt-0.5">
-                {currentPlan} PLAN
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-primary">
+                  {currentPlan} PLAN
+                </span>
+                {curriculum && (
+                  <>
+                    <span className="text-[10px] text-muted-foreground/40">•</span>
+                    <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                      {curriculum}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </button>
@@ -172,9 +183,16 @@ export function Sidebar({ shell }: Props) {
             {profileName || user?.email?.split("@")[0]}
           </p>
           <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          <span className="inline-flex mt-1 items-center rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-primary">
-            {currentPlan}
-          </span>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-primary">
+              {currentPlan}
+            </span>
+            {curriculum && (
+              <span className="inline-flex items-center rounded-full bg-secondary/80 px-2 py-0.5 font-mono text-[9px] font-semibold text-secondary-foreground">
+                {curriculum}
+              </span>
+            )}
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem asChild>

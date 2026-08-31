@@ -9,7 +9,8 @@ export const assignUserRole = createServerFn({ method: "POST" })
   .validator(
     z.object({
       role: z.enum(["student", "teacher", "admin"]),
-      displayName: z.string().optional(),
+      displayName: z.string().min(2, "Name must be at least 2 characters").max(100).optional(),
+      curriculum: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -27,7 +28,7 @@ export const assignUserRole = createServerFn({ method: "POST" })
       });
     }
     const userId = authResult.userId;
-    const { role, displayName } = data;
+    const { role, displayName, curriculum } = data;
 
     // SECURITY: Prevent privilege escalation -- only existing admins may
     // (re)assign themselves the "admin" role via this self-service endpoint.
@@ -50,27 +51,30 @@ export const assignUserRole = createServerFn({ method: "POST" })
         .insert({ user_id: userId, role });
       if (insertError) throw insertError;
 
-      // Also ensure profile exists for OAuth users
-      const resolvedDisplayName = displayName || authResult.user.user_metadata?.full_name || null;
+      const cleanDisplayName =
+        displayName?.trim() || authResult.user.user_metadata?.full_name?.trim() || "";
 
-      await supabaseAdmin.from("profiles").upsert(
-        {
-          id: userId,
-          display_name: resolvedDisplayName,
-          email: authResult.user.email ?? null,
-          onboarding_completed: true,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" },
-      );
+      const profilePayload: Record<string, any> = {
+        id: userId,
+        display_name: cleanDisplayName,
+        email: authResult.user.email ?? null,
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (curriculum) {
+        profilePayload.curriculum = curriculum;
+      }
+
+      await supabaseAdmin.from("profiles").upsert(profilePayload, { onConflict: "id" });
 
       // Cosmetic only: syncs the name into auth.users' metadata so it shows
       // up in the Supabase Auth dashboard's user list. The app itself always
       // reads display_name from the profiles table above, never from here.
-      if (resolvedDisplayName) {
+      if (cleanDisplayName) {
         await supabaseAdmin.auth.admin
           .updateUserById(userId, {
-            user_metadata: { display_name: resolvedDisplayName },
+            user_metadata: { display_name: cleanDisplayName },
           })
           .catch((err) => console.error("[assignUserRole] Failed to sync auth metadata:", err));
       }

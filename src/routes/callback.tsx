@@ -124,15 +124,16 @@ function AuthCallback() {
         // by assignUserRole once the user actually submits their display name.
         const { data: profileRow } = await supabase
           .from("profiles")
-          .select("onboarding_completed")
+          .select("display_name, onboarding_completed")
           .eq("id", session.user.id)
           .maybeSingle();
 
-        const isNewUser = !profileRow?.onboarding_completed;
+        const needsProfile = !profileRow?.display_name?.trim() || !profileRow?.onboarding_completed;
 
-        if (isNewUser) {
-          // New user — show complete profile form before proceeding
-          const googleName = session.user.user_metadata?.full_name || "";
+        if (needsProfile) {
+          // New or incomplete user — show complete profile form before proceeding
+          const googleName =
+            profileRow?.display_name || session.user.user_metadata?.full_name || "";
           setProfileName(googleName);
           setShowProfileForm(true);
           return;
@@ -169,13 +170,18 @@ function AuthCallback() {
     handleCallback();
   }, []);
 
-  const onSaveProfile = async (displayName: string, role: "student" | "teacher") => {
+  const onSaveProfile = async (
+    displayName: string,
+    role: "student" | "teacher",
+    curriculum?: string,
+  ) => {
     try {
       const { assignUserRole } = await import("@/fns/auth-actions.server-fns");
       await assignUserRole({
         data: {
           role,
           displayName: displayName.trim(),
+          curriculum,
         },
       });
       setShowProfileForm(false);

@@ -11,6 +11,8 @@ import { DeleteModal } from "@/client/components/tutor/DeleteModal";
 import { useAuthedShell } from "@/client/components/layout/hooks/useAuthedShell";
 import { Sidebar } from "@/client/components/layout/Sidebar";
 import { I18nProvider } from "@/client/i18n/I18nContext";
+import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileForm";
+import { assignUserRole } from "@/fns/auth-actions.server-fns";
 import * as Sentry from "@sentry/react";
 
 const requireAuth = createServerFn({ method: "GET" }).handler(async () => {
@@ -95,6 +97,15 @@ function AuthedShell() {
     <I18nProvider>
       <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground">
         <DisclaimerModal />
+        {!shell.profileName?.trim() && (
+          <CompleteProfileForm
+            initialName={shell.user?.user_metadata?.full_name || ""}
+            onSave={async (displayName, role, curriculum) => {
+              await assignUserRole({ data: { role, displayName, curriculum } });
+              window.dispatchEvent(new CustomEvent("custom:profile-updated"));
+            }}
+          />
+        )}
         {shell.showPlans && (
           <PlansModal onClose={() => shell.setShowPlans(false)} currentPlan={shell.currentPlan} />
         )}

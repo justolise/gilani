@@ -87,6 +87,23 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
         });
         if (error) throw error;
 
+        // Check if existing user is missing username / display_name
+        const { data: sessionData } = await supabase.auth.getSession();
+        const userId = sessionData.session?.user?.id;
+        if (userId) {
+          const { data: profileRow } = await supabase
+            .from("profiles")
+            .select("display_name, onboarding_completed")
+            .eq("id", userId)
+            .maybeSingle();
+
+          if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
+            setLoadingProvider(null);
+            setShowProfileForm(true);
+            return;
+          }
+        }
+
         setShowLoader(true);
         await routeToDestination();
         onAuthComplete?.();
@@ -124,11 +141,11 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     const userId = data.session.user.id;
     const { data: profileRow } = await supabase
       .from("profiles")
-      .select("onboarding_completed")
+      .select("display_name, onboarding_completed")
       .eq("id", userId)
       .maybeSingle();
 
-    if (!profileRow?.onboarding_completed) {
+    if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
       setLoadingProvider(null);
       setShowProfileForm(true);
     } else {
@@ -139,9 +156,13 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     }
   };
 
-  const onSaveProfile = async (displayName: string, role: "student" | "teacher") => {
+  const onSaveProfile = async (
+    displayName: string,
+    role: "student" | "teacher",
+    curriculum?: string,
+  ) => {
     try {
-      await assignUserRole({ data: { role, displayName: displayName.trim() } });
+      await assignUserRole({ data: { role, displayName: displayName.trim(), curriculum } });
       setShowProfileForm(false);
       setShowLoader(true);
       onAuthComplete?.();
