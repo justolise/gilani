@@ -55,10 +55,10 @@ const COMMAND_VERBS = [
 export function extractMcq(text: string): ParsedMcq {
   if (!text) return { isMcq: false, prompt: "", options: [] };
 
-  // Match choices like:
-  // A) Text  or  A. Text  or  (A) Text  or  [A] Text  or  Option A: Text  or  - A) Text
+  // Match choices in all markdown variations:
+  // A) Text | A. Text | (A) Text | - **A)** Text | Option A: Text | [A] Text
   const optionRegex =
-    /(?:^|\s+|\n)(?:[\-\*]\s+)?(?:\(?([A-D])\)|\b([A-D])[\.\:\)]|\[([A-D])\]|Option\s+([A-D])[\:\.\)]?)\s+([^\n]+?)(?=(?:\s+(?:[\-\*]\s+)?(?:\(?[A-D]\)|\b[A-D][\.\:\)]|\[[A-D]\]|Option\s+[A-D])\s+)|$)/gi;
+    /(?:^|\s+|\n)(?:[\-\*]\s+)?(?:\(?\*?\*?([A-D])\*?\*?\)|\b\*?\*?([A-D])\*?\*?[\.\:\)]|\[\*?\*?([A-D])\*?\*?\]|Option\s+([A-D])[\:\.\)]?)\s*[\)\.\:]?\s*([^\n]+?)(?=(?:\s+(?:[\-\*]\s+)?(?:\(?\*?\*?[A-D]\*?\*?\)|\b\*?\*?[A-D]\*?\*?[\.\:\)]|\[\*?\*?[A-D]\*?\*?\]|Option\s+[A-D])[\)\.\:]?\s*)|$)/gi;
 
   const matches = [...text.matchAll(optionRegex)];
   const letters = matches.map((m) => (m[1] || m[2] || m[3] || m[4]).toUpperCase());
@@ -72,7 +72,10 @@ export function extractMcq(text: string): ParsedMcq {
   const prompt = text.substring(0, firstIdx).trim();
   const options = matches.map((m) => ({
     letter: (m[1] || m[2] || m[3] || m[4]).toUpperCase(),
-    text: m[5].trim(),
+    text: m[5]
+      .replace(/^\*\*\s*/, "")
+      .replace(/\s*\*\*$/, "")
+      .trim(),
   }));
 
   return { isMcq: true, prompt, options };

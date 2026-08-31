@@ -377,9 +377,51 @@ export function preprocessLatex(raw: string): string {
     },
   );
 
-  // ── Step 11: Ensure numbered/lettered items & MCQ choices start on new lines ────
-  s = s.replace(/([^\n])\n([A-D][\)\.\:]|\([A-D]\))\s+/g, "$1\n\n$2 ");
-  s = s.replace(/([^\n])\s+([A-D][\)\.\:]|\([A-D]\))\s+/g, "$1\n\n$2 ");
+  // ── Step 11: Format MCQ choices and list items ───────────────────────────
+  // Split inline choices on same line (e.g. A. Opt1 B. Opt2) into newlines
+  s = s.replace(/([^\n])\s+(?:\b|\()([A-D])(?:\)|\.|\:)\s+/g, "$1\n$2. ");
+
+  // Ensure choices under numbered question list items stay indented inside the <li>
+  const lines = s.split("\n");
+  const outLines: string[] = [];
+  let inNumberedItem = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (/^\s*\d+\.\s+/.test(line)) {
+      inNumberedItem = true;
+      outLines.push(line);
+      continue;
+    }
+
+    const choiceMatch = line.match(
+      /^\s*(?:[\-\*]\s+)?(?:\(?([A-D])\)|\b([A-D])[\.\:\)]|\[([A-D])\])\s+(.*)$/,
+    );
+    if (choiceMatch) {
+      const letter = (choiceMatch[1] || choiceMatch[2] || choiceMatch[3]).toUpperCase();
+      const rest = choiceMatch[4];
+      if (inNumberedItem) {
+        // Indent 3 spaces so CommonMark keeps it inside the parent <li>
+        outLines.push(`   - **${letter})** ${rest}`);
+      } else {
+        outLines.push(`- **${letter})** ${rest}`);
+      }
+      continue;
+    }
+
+    if (line.trim() === "") {
+      if (i + 1 < lines.length && /^\s*\d+\.\s+/.test(lines[i + 1])) {
+        inNumberedItem = false;
+      }
+    } else if (!/^\s{2,}/.test(line)) {
+      inNumberedItem = false;
+    }
+
+    outLines.push(line);
+  }
+  s = outLines.join("\n");
+
   s = s.replace(
     /([^\n(])\s+([a-z]\))\s+(?=[A-Za-z0-9$])/g,
     (_, pre, letter) => `${pre}\n\n   ${letter} `,
