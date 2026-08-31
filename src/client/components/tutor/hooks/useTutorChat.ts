@@ -192,7 +192,7 @@ export function useTutorChat({
     id: threadId,
     transport,
     experimental_throttle: 50,
-    onError: async (err) => {
+    onError: async (err: any) => {
       const msg = err instanceof Error ? err.message : String(err);
       const isAuthError =
         msg.includes("401") ||
@@ -231,7 +231,7 @@ export function useTutorChat({
       }
       refreshRateLimitStatus();
     },
-  });
+  } as any);
 
   const { messages: messagesRaw, setMessages, sendMessage, stop, status, regenerate } = chatHelpers;
   const isPending = status === "submitted" || status === "streaming";

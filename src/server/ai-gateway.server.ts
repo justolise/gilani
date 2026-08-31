@@ -197,7 +197,7 @@ export const createGoogleAiProvider = (apiKey?: string) => {
       // a malformed request) throw immediately instead of burning through
       // every provider.
       return createFallback({
-        models,
+        models: models as any,
         onError: (error: any, failedModelId: string) => {
           console.warn(
             `[AI Gateway] Chat Model ${failedModelId} failed. Falling back... Reason:`,
