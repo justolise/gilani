@@ -35,29 +35,46 @@ export function extractText(node: any): string {
   return "";
 }
 
-/**
- * Split React children into question vs answer nodes.
- * Splits at the first node whose text contains "Answer:" anywhere.
- */
 export function splitPracticeChildren(children: React.ReactNode): {
   questionNodes: React.ReactNode[];
   answerNodes: React.ReactNode[];
 } {
   const arr = React.Children.toArray(children);
+  if (arr.length === 0) {
+    return { questionNodes: [], answerNodes: [] };
+  }
+
   let splitIdx = -1;
   for (let i = 0; i < arr.length; i++) {
     const text = extractText(arr[i]);
-    if (/answer\s*:/i.test(text)) {
+    if (/(?:^|\n|\s+)(?:answer|solution|worked solution|explanation)\s*:/i.test(text)) {
       splitIdx = i;
       break;
     }
   }
+
   if (splitIdx === -1) {
     return { questionNodes: arr, answerNodes: [] };
   }
+
   if (splitIdx === 0) {
-    return { questionNodes: [], answerNodes: arr };
+    const fullText = extractText(arr[0]);
+    const match = fullText.match(
+      /(?:^|\n|\s+)(?:answer|solution|worked solution|explanation)\s*:/i,
+    );
+    if (match && match.index !== undefined && match.index > 0) {
+      const qText = fullText.slice(0, match.index).trim();
+      const aText = fullText.slice(match.index).trim();
+      if (qText) {
+        return {
+          questionNodes: [<span key="q-split">{qText}</span>],
+          answerNodes: [<span key="a-split">{aText}</span>, ...arr.slice(1)],
+        };
+      }
+    }
+    return { questionNodes: arr, answerNodes: [] };
   }
+
   return {
     questionNodes: arr.slice(0, splitIdx),
     answerNodes: arr.slice(splitIdx),

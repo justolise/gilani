@@ -4,10 +4,6 @@ import PracticeQuestionCard, { extractMcq } from "@/client/components/cards/Prac
 import { splitPracticeChildren } from "./CalloutCards";
 import { PracticeCounterCtx, InsidePracticeCardCtx } from "./MarkdownContexts";
 
-export const PRACTICE_MARKS_RE = /\(\d+\s+marks?\)/i;
-export const PRACTICE_VERBS_RE =
-  /^(state|find|calculate|identify|given|show|prove|determine|explain|describe|evaluate|solve|simplify|compute|derive|sketch|draw|write|list|define|compare|differentiate|hence|which|what|how|where|when|why|choose|select)/i;
-
 export function hastText(node: any): string {
   if (!node) return "";
   if (node.type === "text") return node.value ?? "";
@@ -15,9 +11,15 @@ export function hastText(node: any): string {
 }
 
 export function looksLikePractice(text: string) {
-  return (
-    PRACTICE_MARKS_RE.test(text) || PRACTICE_VERBS_RE.test(text.trim()) || extractMcq(text).isMcq
-  );
+  const trimmed = text.trim();
+  if (/^(?:practice\s+question|question\s+\d+|[Qq]\d+[\.\:\)])/i.test(trimmed)) {
+    return true;
+  }
+  const mcq = extractMcq(trimmed);
+  if (mcq.isMcq && mcq.options.length >= 2) {
+    return true;
+  }
+  return false;
 }
 
 export function MarkdownOl({ children, node }: any) {
