@@ -1,19 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo, memo } from "react";
-import {
-  Copy,
-  RefreshCw,
-  Check,
-  ThumbsUp,
-  ThumbsDown,
-  Pencil,
-  FileText,
-  Trash2,
-} from "lucide-react";
+import { Copy, RefreshCw, Check, ThumbsUp, ThumbsDown, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/client/supabase";
 import { SmoothMarkdownRenderer } from "@/client/components/tutor/SmoothMarkdownRenderer";
 import { ThinkingSweep } from "@/client/components/tutor/ThinkingSweep";
 import { ToolStepPill } from "@/client/components/tutor/ToolStepPill";
+import { BubbleThinkingPanel } from "./bubble/BubbleThinkingPanel";
+import { BubbleAttachment } from "./bubble/BubbleAttachment";
 
 type Props = {
   message: any;
@@ -27,7 +20,6 @@ type Props = {
   initialVote?: 1 | -1 | null;
   onVote?: (messageId: string, vote: 1 | -1 | null) => void;
   onDelete?: (messageId: string) => void;
-  // Session action props (only shown on last assistant bubble)
   onExportPDF?: () => void;
   onEscalate?: () => void;
   escalationStatus?: "open" | "in_review" | "resolved" | null;
@@ -36,7 +28,6 @@ type Props = {
   pauseLabel?: string | null;
 };
 
-// Memoize the entire component to prevent unnecessary re-renders
 export const MessageBubble = memo(function MessageBubble({
   message: m,
   isLast,
@@ -54,12 +45,10 @@ export const MessageBubble = memo(function MessageBubble({
   const [vote, setVote] = useState<1 | -1 | null>(initialVote ?? null);
   const [voting, setVoting] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
-  const [showThinkingPanel, setShowThinkingPanel] = useState(false);
 
   const prevInitialVoteRef = useRef(initialVote);
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync vote state when parent updates
   useEffect(() => {
     if (prevInitialVoteRef.current !== initialVote) {
       prevInitialVoteRef.current = initialVote;
@@ -67,7 +56,6 @@ export const MessageBubble = memo(function MessageBubble({
     }
   }, [initialVote]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
@@ -76,7 +64,6 @@ export const MessageBubble = memo(function MessageBubble({
 
   const COLLAPSE_THRESHOLD = 300;
 
-  // Memoize attachment parsing for user messages
   const attachmentName = useMemo(() => {
     if (m.role !== "user") return null;
     const partsText =
@@ -154,7 +141,6 @@ export const MessageBubble = memo(function MessageBubble({
 
   const isStreamActive = isPending && isLast;
 
-  // Detect a silent mid-stream pause so we can still show a "Thinking..." indicator
   const [isStalled, setIsStalled] = useState(false);
   const lastTextRef = useRef<string>("");
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -204,7 +190,6 @@ export const MessageBubble = memo(function MessageBubble({
     const newVote = vote === v ? null : v;
     const previousVote = vote;
 
-    // Optimistic update
     setVote(newVote);
     onVote?.(m.id, newVote);
 
@@ -229,7 +214,6 @@ export const MessageBubble = memo(function MessageBubble({
           );
       }
     } catch {
-      // Revert on failure
       setVote(previousVote);
       onVote?.(m.id, previousVote);
       toast.error("Failed to save feedback");
@@ -245,7 +229,7 @@ export const MessageBubble = memo(function MessageBubble({
           isUser ? "max-w-[85%] sm:max-w-[75%]" : "w-full px-3 sm:px-8"
         }`}
       >
-        {/* Live tool call indicator — rendered OUTSIDE the bubble before text appears */}
+        {/* Live tool call indicator */}
         {!isUser && isStreamActive && toolSteps.length > 0 && !showBubbleCard && (
           <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-300 w-full max-w-[96%]">
             {toolSteps.map((step: any, i: number) => {
@@ -274,170 +258,132 @@ export const MessageBubble = memo(function MessageBubble({
           } text-[15px] sm:text-base leading-relaxed relative transition-all duration-200`}
         >
           {!isUser ? (
-            <>
-              <div className="flex flex-col w-full">
-                {showBubbleCard ? (
-                  <div className="prose-ai relative">
-                    {reasoningSteps.length > 0 && (
-                      <div className="mb-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowThinkingPanel((v) => !v)}
-                          className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-muted-foreground/70 hover:text-foreground transition-colors"
-                        >
-                          Thinking{showThinkingPanel ? " ▲" : " ..."}
-                        </button>
-                        {showThinkingPanel && (
-                          <div className="mt-1.5 space-y-1.5 rounded-xl border border-border/50 bg-muted/20 p-2.5 text-xs leading-relaxed text-muted-foreground">
-                            {reasoningSteps.map((step: any, i: number) => (
-                              <p
-                                key={`reasoning-${i}-${(step.text || "").slice(0, 20)}`}
-                                className="italic"
-                              >
-                                {step.text}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
+            <div className="flex flex-col w-full">
+              {showBubbleCard ? (
+                <div className="prose-ai relative">
+                  <BubbleThinkingPanel reasoningSteps={reasoningSteps} />
 
-                    {/* Use SmoothMarkdownRenderer for word-by-word streaming */}
-                    <SmoothMarkdownRenderer
-                      content={displayText}
-                      isStreaming={isStreamActive}
-                      className={
-                        isStreamActive && !pauseLabel && !isStalled
-                          ? "transition-opacity duration-200 streaming-cursor"
-                          : "transition-opacity duration-200"
-                      }
-                    />
-                    {isStreamActive && (pauseLabel || isStalled) && (
-                      <div className="mt-1 animate-in fade-in duration-300">
-                        <ThinkingSweep label={pauseLabel || "Thinking..."} />
-                      </div>
-                    )}
-
-                    {toolSteps.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {toolSteps.map((step: any, i: number) => {
-                          if (step.type !== "tool-call") return null;
-                          const isDone = toolSteps.some(
-                            (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
-                          );
-                          return (
-                            <ToolStepPill
-                              key={`${step.toolName}-${i}`}
-                              toolName={step.toolName}
-                              isDone={isDone}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  !isStreamActive && (
-                    <span className="text-xs text-muted-foreground italic mt-1">
-                      No response generated. Please resend your question.
-                    </span>
-                  )
-                )}
-
-                {/* Footer: action buttons + persistent G badge */}
-                <div className="flex flex-col gap-1.5 mt-2">
-                  {showBubbleCard && !isStreamActive && (
-                    <div className="flex items-center gap-1 transition-opacity duration-200">
-                      {/* Copy */}
-                      <button
-                        onClick={handleCopy}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
-                        title="Copy message"
-                        aria-label="Copy message"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5 text-green-500" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-
-                      {/* Retry */}
-                      {isLast && (
-                        <button
-                          onClick={isRateLimited ? undefined : onReload}
-                          disabled={isRateLimited}
-                          className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md ${
-                            isRateLimited
-                              ? "opacity-40 cursor-not-allowed text-muted-foreground"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          }`}
-                          title={isRateLimited ? "Rate limit reached" : "Retry response"}
-                          aria-label="Retry response"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-
-                      {/* Divider */}
-                      <span className="w-px h-3 bg-border/60 mx-0.5" />
-
-                      {/* Thumbs up */}
-                      <button
-                        onClick={() => handleVote(1)}
-                        disabled={voting}
-                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted ${
-                          vote === 1
-                            ? "text-green-500"
-                            : "text-muted-foreground hover:text-green-500"
-                        }`}
-                        title="Good response"
-                        aria-label="Vote up"
-                      >
-                        <ThumbsUp className="h-3.5 w-3.5" />
-                      </button>
-
-                      {/* Thumbs down */}
-                      <button
-                        onClick={() => handleVote(-1)}
-                        disabled={voting}
-                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted ${
-                          vote === -1
-                            ? "text-destructive"
-                            : "text-muted-foreground hover:text-destructive"
-                        }`}
-                        title="Bad response"
-                        aria-label="Vote down"
-                      >
-                        <ThumbsDown className="h-3.5 w-3.5" />
-                      </button>
+                  <SmoothMarkdownRenderer
+                    content={displayText}
+                    isStreaming={isStreamActive}
+                    className={
+                      isStreamActive && !pauseLabel && !isStalled
+                        ? "transition-opacity duration-200 streaming-cursor"
+                        : "transition-opacity duration-200"
+                    }
+                  />
+                  {isStreamActive && (pauseLabel || isStalled) && (
+                    <div className="mt-1 animate-in fade-in duration-300">
+                      <ThinkingSweep label={pauseLabel || "Thinking..."} />
                     </div>
                   )}
 
-                  {/* Persistent Gilani badge on last assistant bubble */}
-                  {isLast && (
-                    <div className="flex items-center pt-1">
-                      <div
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
-                        aria-hidden="true"
-                        title="GilaniAI"
-                      >
-                        G
-                      </div>
+                  {toolSteps.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {toolSteps.map((step: any, i: number) => {
+                        if (step.type !== "tool-call") return null;
+                        const isDone = toolSteps.some(
+                          (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
+                        );
+                        return (
+                          <ToolStepPill
+                            key={`${step.toolName}-${i}`}
+                            toolName={step.toolName}
+                            isDone={isDone}
+                          />
+                        );
+                      })}
                     </div>
                   )}
                 </div>
+              ) : (
+                !isStreamActive && (
+                  <span className="text-xs text-muted-foreground italic mt-1">
+                    No response generated. Please resend your question.
+                  </span>
+                )
+              )}
+
+              {/* Footer: action buttons + persistent G badge */}
+              <div className="flex flex-col gap-1.5 mt-2">
+                {showBubbleCard && !isStreamActive && (
+                  <div className="flex items-center gap-1 transition-opacity duration-200">
+                    <button
+                      onClick={handleCopy}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
+                      title="Copy message"
+                      aria-label="Copy message"
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5 text-green-500" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+
+                    {isLast && (
+                      <button
+                        onClick={isRateLimited ? undefined : onReload}
+                        disabled={isRateLimited}
+                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md ${
+                          isRateLimited
+                            ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                        }`}
+                        title={isRateLimited ? "Rate limit reached" : "Retry response"}
+                        aria-label="Retry response"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+
+                    <span className="w-px h-3 bg-border/60 mx-0.5" />
+
+                    <button
+                      onClick={() => handleVote(1)}
+                      disabled={voting}
+                      className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer ${
+                        vote === 1 ? "text-green-500" : "text-muted-foreground hover:text-green-500"
+                      }`}
+                      title="Good response"
+                      aria-label="Vote up"
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    </button>
+
+                    <button
+                      onClick={() => handleVote(-1)}
+                      disabled={voting}
+                      className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer ${
+                        vote === -1
+                          ? "text-destructive"
+                          : "text-muted-foreground hover:text-destructive"
+                      }`}
+                      title="Bad response"
+                      aria-label="Vote down"
+                    >
+                      <ThumbsDown className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {isLast && (
+                  <div className="flex items-center pt-1">
+                    <div
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
+                      aria-hidden="true"
+                      title="GilaniAI"
+                    >
+                      G
+                    </div>
+                  </div>
+                )}
               </div>
-            </>
+            </div>
           ) : (
             /* User message */
             <div className="flex flex-col gap-1.5">
-              {attachmentName && (
-                <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/80 px-2.5 py-1.5 text-xs font-semibold text-foreground w-fit max-w-full select-none">
-                  <FileText className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
-                  <span className="truncate max-w-[200px]">{attachmentName}</span>
-                </div>
-              )}
+              <BubbleAttachment attachmentName={attachmentName} />
               <div className="flex flex-col gap-1">
                 <span className="whitespace-pre-wrap text-foreground font-medium">
                   {collapsed && displayText.length > COLLAPSE_THRESHOLD
@@ -447,7 +393,7 @@ export const MessageBubble = memo(function MessageBubble({
                 {displayText.length > COLLAPSE_THRESHOLD && (
                   <button
                     onClick={() => setCollapsed((p) => !p)}
-                    className="self-start text-xs font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+                    className="self-start text-xs font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors cursor-pointer"
                     aria-expanded={!collapsed}
                   >
                     {collapsed ? "Show more" : "Show less"}
@@ -459,7 +405,7 @@ export const MessageBubble = memo(function MessageBubble({
                 <div className="flex items-center gap-1 mt-1.5 transition-opacity duration-200 justify-end">
                   <button
                     onClick={handleCopy}
-                    className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
+                    className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
                     title="Copy message"
                     aria-label="Copy message"
                   >
@@ -476,7 +422,7 @@ export const MessageBubble = memo(function MessageBubble({
                       className={`inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md ${
                         isRateLimited
                           ? "opacity-40 cursor-not-allowed text-muted-foreground/50"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
                       }`}
                       title={isRateLimited ? "Rate limit reached" : "Edit message"}
                       aria-label="Edit message"
@@ -487,7 +433,7 @@ export const MessageBubble = memo(function MessageBubble({
                   {onDelete && (
                     <button
                       onClick={() => onDelete(m.id)}
-                      className="inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted"
+                      className="inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted cursor-pointer"
                       title="Delete message"
                       aria-label="Delete message"
                     >
@@ -500,7 +446,7 @@ export const MessageBubble = memo(function MessageBubble({
           )}
         </div>
 
-        {/* Hover timestamp aligned to message boundaries */}
+        {/* Hover timestamp */}
         <div
           className={`absolute -bottom-2 ${
             isUser ? "right-2" : "left-3 sm:left-8"
