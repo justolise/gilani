@@ -119,12 +119,22 @@ function TutorThreadInner({
       // Fire title generation BEFORE streaming starts so the sidebar updates
       // as soon as the user hits send, not after the AI finishes responding.
       if (chatState.messages.length === 0 && !currentThread?.title) {
-        generateThreadTitleFn({ data: titleSeedText })
+        // Truncate to 499 chars — generateThreadTitleFn validates max(500);
+        // silently fails with a Zod error for longer messages without truncation.
+        generateThreadTitleFn({ data: titleSeedText.slice(0, 499) })
           .then((title) =>
             renameThreadFn({ data: { threadId, title } }).then(() => {
-              chatState.setThreads((prev: any[]) =>
-                prev.map((t) => (t.id === threadId ? { ...t, title } : t)),
-              );
+              // Update existing thread OR prepend brand-new thread to the list.
+              // A brand-new thread won't be in the cache yet, so a plain .map()
+              // is a no-op — we need to also handle the insert case.
+              chatState.setThreads((prev: any[]) => {
+                const exists = prev.some((t) => t.id === threadId);
+                if (exists) {
+                  return prev.map((t) => (t.id === threadId ? { ...t, title } : t));
+                }
+                // Prepend new thread so it appears at the top of the sidebar
+                return [{ id: threadId, title, updated_at: new Date().toISOString() }, ...prev];
+              });
               // Bust the shared query cache so the sidebar refreshes with the new title
               chatState.invalidateThreads();
             }),

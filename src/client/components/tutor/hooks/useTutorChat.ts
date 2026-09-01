@@ -376,11 +376,14 @@ export function useTutorChat({
       }
       const timer = setTimeout(() => {
         loadMessages();
+        // Sync the sidebar thread list so title + ordering stay up to date
+        // after the AI finishes responding.
+        invalidateThreads();
       }, 500);
       return () => clearTimeout(timer);
     }
     prevPendingRef.current = isPending;
-  }, [isPending, loadMessages, isBrandNewThread]);
+  }, [isPending, loadMessages, isBrandNewThread, invalidateThreads]);
 
   useEffect(() => {
     if (!threadId) return;
