@@ -65,6 +65,16 @@ function TutorIndex() {
     return () => window.removeEventListener("pomodoro:tick", handler);
   }, []);
 
+  // Strip the ?new=1 param once the empty-state mounts so back
+  // navigation doesn't replay it and cause a stale-param flicker.
+  // Must be declared before any conditional return (rules of hooks).
+  useEffect(() => {
+    if (isExactTutor) {
+      navigate({ to: "/tutor", replace: true } as any);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Render Outlet for child routes now that all hooks above have been
   // called unconditionally on every render.
   if (!isExactTutor) {
@@ -98,18 +108,6 @@ function TutorIndex() {
     setPendingMessage(id, { finalMessage, titleSeedText });
     await navigate({ to: "/tutor/$threadId", params: { threadId: id } } as any);
   };
-
-  // If not exact tutor route, we don't render the empty state composer.
-  // The child route handles rendering its own messages.
-  if (!isExactTutor) {
-    return (
-      <div className="flex flex-col h-screen">
-        <div className="flex-1 overflow-hidden">
-          <Outlet />
-        </div>
-      </div>
-    );
-  }
 
   // Exact /tutor route layout (empty state)
   if (authLoading) {

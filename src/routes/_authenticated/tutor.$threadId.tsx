@@ -125,6 +125,8 @@ function TutorThreadInner({
               chatState.setThreads((prev: any[]) =>
                 prev.map((t) => (t.id === threadId ? { ...t, title } : t)),
               );
+              // Bust the shared query cache so the sidebar refreshes with the new title
+              chatState.invalidateThreads();
             }),
           )
           .catch(console.error);

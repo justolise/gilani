@@ -503,6 +503,7 @@ export function useTutorChat({
     threadsLoading,
     threadsLoadError,
     setThreads,
+    invalidateThreads,
     chatError,
     setChatError,
     messagesUsed,

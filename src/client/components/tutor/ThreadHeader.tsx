@@ -137,7 +137,5 @@ export function ThreadHeader({
     </>
   );
 
-  return (
-    <AppHeader title={currentTitle} leftContent={combinedLeftContent} actions={actionsContent} />
-  );
+  return <AppHeader leftContent={combinedLeftContent} actions={actionsContent} />;
 }

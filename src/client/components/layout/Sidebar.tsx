@@ -559,7 +559,7 @@ export function Sidebar({ shell }: Props) {
                                     }}
                                     className="truncate flex-1 py-0.5 text-left outline-hidden"
                                   >
-                                    {t.title || ""}
+                                    {t.title || "New Chat"}
                                   </Link>
                                 )}
 
