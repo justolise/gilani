@@ -67,65 +67,102 @@ export const deleteThreadFn = createServerFn({ method: "POST" })
   });
 
 export const generateThreadTitleFn = createServerFn({ method: "POST" })
-  .validator(z.string().max(500))
-  .handler(async ({ data: firstMessage }) => {
+  .validator(
+    z.union([
+      z.object({
+        threadId: z.string().uuid().optional(),
+        text: z.string().max(1000),
+      }),
+      z.string().max(1000),
+    ]),
+  )
+  .handler(async ({ data }) => {
+    const threadId = typeof data === "object" ? data.threadId : undefined;
+    const firstMessage = typeof data === "object" ? data.text : data;
+
     const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
     const request = (await import("@tanstack/react-start/server")).getRequest();
     const { authenticateRequest } = await import("@/server/api-auth.server");
+    let authUserId: string | null = null;
     try {
-      await authenticateRequest(request);
+      const authResult = await authenticateRequest(request);
+      authUserId = authResult.userId;
     } catch {
-      throw new Error("Unauthorized");
+      /* allow title generation without failing, but user_id needed for saving */
     }
-
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const { generateText } = await import("ai");
-
-    const gateway = createGoogleAiProvider();
-
-    // Use the fastest/lightest model for title generation — we only need ~20 tokens
-    // so there's no reason to use a heavy model here. This minimises latency so
-    // the title appears in the sidebar before the AI finishes streaming.
-    const TITLE_MODEL_ID = "gemini-2.0-flash-lite";
-    const models = gateway.getAllChatModels(TITLE_MODEL_ID);
 
     let title = "";
-    let lastError: unknown;
 
-    for (let i = 0; i < models.length; i++) {
-      const { model, name } = models[i];
-      try {
-        if (i > 0) {
-          const { backoffDelay } = await import("@/shared/utils/provider-backoff");
-          await backoffDelay(i);
-        }
-        console.log(`[Title Gen] Attempting with provider: ${name}`);
-        const result = await generateText({
-          model: model as any, // from gateway
-          maxTokens: 20,
-          prompt: `Generate a short 3-5 word title for a study session that starts with this question: "${firstMessage.slice(0, 200)}". Reply with only the title itself. Do not wrap in quotes. Do not include prefixes like "Title:". No punctuation.`,
-        } as any);
+    try {
+      const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
+      const { generateText } = await import("ai");
+      const gateway = createGoogleAiProvider();
+      const models = gateway.getAllChatModels("gemini-2.5-flash");
 
-        if (result.text) {
-          title = result.text.trim();
-          console.log(`[Title Gen] Successfully generated title.`);
-          break;
+      for (let i = 0; i < models.length; i++) {
+        const { model, name } = models[i];
+        try {
+          if (i > 0) {
+            const { backoffDelay } = await import("@/shared/utils/provider-backoff");
+            await backoffDelay(i);
+          }
+          const cleanPrompt = firstMessage.slice(0, 300).trim();
+          const result = await generateText({
+            model: model as any,
+            maxTokens: 25,
+            prompt: `Generate a short 3 to 5 word topic title for a student study session that begins with this question: "${cleanPrompt}". Return ONLY the title words. No quotes, no prefix like "Title:", no ending punctuation.`,
+          } as any);
+
+          if (result.text && result.text.trim()) {
+            title = result.text.trim();
+            break;
+          }
+        } catch (err) {
+          console.warn(`[Title Gen] Attempt with ${name} failed:`, err);
         }
-      } catch (err) {
-        console.warn(`[Title Gen] Attempt failed:`, err);
-        lastError = err;
       }
-    }
-
-    if (!title && lastError) {
-      throw lastError;
+    } catch (gatewayErr) {
+      console.warn("[Title Gen] Gateway initialization failed:", gatewayErr);
     }
 
     // Clean quotes or conversational prefix/suffix
-    title = title.replace(/^["'“”‘“]|["'“”’]$/g, "").trim();
-    title = title.replace(/^(title|session|study session):\s*/i, "").trim();
-    return title || firstMessage.slice(0, 29);
+    if (title) {
+      title = title.replace(/^["'“”‘“#*\s]+|["'“”’*\s]+$/g, "").trim();
+      title = title.replace(/^(title|session|study session|topic):\s*/i, "").trim();
+    }
+
+    // Fallback if AI generation failed or returned empty
+    if (!title || title.length < 2) {
+      const words = firstMessage
+        .replace(/<[^>]+>/g, "")
+        .replace(/\[[^\]]+\]/g, "")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 5)
+        .join(" ");
+      title = words.length > 50 ? words.slice(0, 47) + "…" : words || "Study Session";
+    }
+
+    // Cap title length to 80 chars max
+    title = title.slice(0, 80).trim();
+
+    // Persist directly to DB if threadId and userId are available
+    if (threadId && authUserId) {
+      try {
+        await supabaseAdmin.from("conversations").upsert(
+          {
+            id: threadId,
+            user_id: authUserId,
+            title,
+          },
+          { onConflict: "id" },
+        );
+      } catch (dbErr) {
+        console.error("[Title Gen] Failed to persist title to database:", dbErr);
+      }
+    }
+
+    return title;
   });
 
 export const lookupTeacherByEmail = createServerFn({ method: "POST" })

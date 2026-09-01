@@ -115,31 +115,53 @@ function TutorThreadInner({
   ) => {
     try {
       const currentThread = chatState.threads.find((t) => t.id === threadId);
-      // ── Immediate title generation ────────────────────────────────────────
-      // Fire title generation BEFORE streaming starts so the sidebar updates
-      // as soon as the user hits send, not after the AI finishes responding.
-      if (chatState.messages.length === 0 && !currentThread?.title) {
-        // Truncate to 499 chars — generateThreadTitleFn validates max(500);
-        // silently fails with a Zod error for longer messages without truncation.
-        generateThreadTitleFn({ data: titleSeedText.slice(0, 499) })
-          .then((title) =>
-            renameThreadFn({ data: { threadId, title } }).then(() => {
-              // Update existing thread OR prepend brand-new thread to the list.
-              // A brand-new thread won't be in the cache yet, so a plain .map()
-              // is a no-op — we need to also handle the insert case.
-              chatState.setThreads((prev: any[]) => {
-                const exists = prev.some((t) => t.id === threadId);
-                if (exists) {
-                  return prev.map((t) => (t.id === threadId ? { ...t, title } : t));
-                }
-                // Prepend new thread so it appears at the top of the sidebar
-                return [{ id: threadId, title, updated_at: new Date().toISOString() }, ...prev];
-              });
-              // Bust the shared query cache so the sidebar refreshes with the new title
+      // ── Immediate optimistic sidebar update & title generation ───────────
+      if (chatState.messages.length === 0 && (!currentThread || !currentThread.title)) {
+        const initialTitle =
+          titleSeedText
+            .replace(/<[^>]+>/g, "")
+            .replace(/\[[^\]]+\]/g, "")
+            .trim()
+            .split(/\s+/)
+            .slice(0, 5)
+            .join(" ")
+            .slice(0, 45) || "Study Session";
+
+        // Optimistically insert/update the thread in sidebar right away
+        chatState.setThreads((prev: any[]) => {
+          const exists = prev.some((t) => t.id === threadId);
+          if (exists) {
+            return prev.map((t) =>
+              t.id === threadId ? { ...t, title: t.title || initialTitle } : t,
+            );
+          }
+          return [
+            { id: threadId, title: initialTitle, updated_at: new Date().toISOString() },
+            ...prev,
+          ];
+        });
+
+        // Trigger asynchronous title generation + DB update
+        generateThreadTitleFn({
+          data: {
+            threadId,
+            text: titleSeedText.slice(0, 499),
+          },
+        })
+          .then((finalTitle) => {
+            if (finalTitle) {
+              chatState.setThreads((prev: any[]) =>
+                prev.map((t) => (t.id === threadId ? { ...t, title: finalTitle } : t)),
+              );
               chatState.invalidateThreads();
-            }),
-          )
-          .catch(console.error);
+              import("@/client/db/local").then(({ localDb }) => {
+                localDb.threads
+                  .put({ id: threadId, title: finalTitle, updated_at: new Date().toISOString() })
+                  .catch(() => {});
+              });
+            }
+          })
+          .catch((err) => console.warn("[Title Gen] Client handler non-fatal:", err));
       }
       // Start streaming immediately (title generation runs in parallel above)
       chatState.sendMessage({ text: finalMessage }, attachmentMeta).catch((error: unknown) => {

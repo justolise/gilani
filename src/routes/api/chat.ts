@@ -109,6 +109,15 @@ export const Route = createFileRoute("/api/chat")({
           console.log(`[API Chat] Using provider: google (gemini), with fallback`);
 
           // ─── Database Checks ─────────────────────────────────────────────
+          const lastMessage = messages?.[messages.length - 1];
+          const latestMessageContent = extractText(lastMessage);
+          const initialTitle =
+            latestMessageContent
+              .replace(/<[^>]+>/g, "")
+              .replace(/\[[^\]]+\]/g, "")
+              .trim()
+              .slice(0, 50) || "Study Session";
+
           let { data: thread } = await supabaseAdmin
             .from("conversations")
             .select("*")
@@ -117,12 +126,13 @@ export const Route = createFileRoute("/api/chat")({
             .maybeSingle();
 
           if (!thread) {
-            // Auto-create thread for instant client-side transitions
+            // Auto-create thread with initial title
             const { data: newThread, error: createError } = await supabaseAdmin
               .from("conversations")
               .insert({
                 id: threadId,
                 user_id: userId,
+                title: initialTitle,
                 updated_at: new Date().toISOString(),
               })
               .select("*")
@@ -135,10 +145,13 @@ export const Route = createFileRoute("/api/chat")({
               });
             }
             thread = newThread;
+          } else if (!thread.title || thread.title === "New Chat" || thread.title === "Untitled") {
+            // If thread existed without a title, backfill it
+            await supabaseAdmin
+              .from("conversations")
+              .update({ title: initialTitle, updated_at: new Date().toISOString() })
+              .eq("id", threadId);
           }
-
-          const lastMessage = messages?.[messages.length - 1];
-          const latestMessageContent = extractText(lastMessage);
 
           // ─── Parallelize independent pre-stream work ────────────────────
           const messageTask = persistUserMessage({
