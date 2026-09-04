@@ -333,9 +333,10 @@ function RootComponent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let listener: any = null;
+    let backListener: any = null;
+    let urlListener: any = null;
 
-    // Only register the hardware back button listener inside a native Capacitor app
+    // Only register listeners inside a native Capacitor app
     import("@capacitor/core").then(({ Capacitor }) => {
       if (!Capacitor.isNativePlatform()) return;
 
@@ -347,15 +348,42 @@ function RootComponent() {
             } else {
               App.exitApp();
             }
-          }).then((l) => (listener = l));
+          }).then((l) => (backListener = l));
+
+          App.addListener("appUrlOpen", async ({ url }) => {
+            try {
+              // Deep link scheme: com.gilaniai.app://callback?access_token=...&refresh_token=...&next=/tutor
+              const normalized = url.replace(
+                /^(?:com\.gilaniai\.app|gilaniai):\/\//i,
+                "https://app/",
+              );
+              const parsed = new URL(normalized);
+              const accessToken = parsed.searchParams.get("access_token");
+              const refreshToken = parsed.searchParams.get("refresh_token");
+              const nextPath = parsed.searchParams.get("next") || "/tutor";
+
+              if (accessToken && refreshToken) {
+                await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                });
+                queryClient.invalidateQueries();
+                router.invalidate();
+                router.navigate({ to: nextPath as any, search: { new: "1" } as any });
+              }
+            } catch (err) {
+              console.error("[Capacitor] Failed to handle appUrlOpen:", err);
+            }
+          }).then((l) => (urlListener = l));
         })
         .catch((err) => console.log("Capacitor App plugin not available", err));
     });
 
     return () => {
-      if (listener) listener.remove();
+      if (backListener) backListener.remove();
+      if (urlListener) urlListener.remove();
     };
-  }, [router.history]);
+  }, [router, queryClient]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;

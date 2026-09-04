@@ -1,8 +1,10 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo, useContext, createContext } from "react";
 import { FlashCard } from "@/client/components/cards/FlashCard";
 import PracticeQuestionCard, { extractMcq } from "@/client/components/cards/PracticeQuestionCard";
-import { splitPracticeChildren } from "./CalloutCards";
+import { splitPracticeChildren, extractText } from "./CalloutCards";
 import { PracticeCounterCtx, InsidePracticeCardCtx } from "./MarkdownContexts";
+
+export const ListDepthContext = createContext<number>(0);
 
 export function hastText(node: any): string {
   if (!node) return "";
@@ -22,7 +24,8 @@ export function looksLikePractice(text: string) {
   return false;
 }
 
-export function MarkdownOl({ children, node }: any) {
+export function MarkdownOl({ children, node, start, className, ...props }: any) {
+  const depth = useContext(ListDepthContext);
   const practiceNumbers = useMemo(() => {
     const map = new Map<number, number>();
     let q = 0;
@@ -36,43 +39,86 @@ export function MarkdownOl({ children, node }: any) {
     return map;
   }, [node]);
 
+  const resolvedStart = start ?? node?.properties?.start ?? undefined;
+
+  // Hierarchical list styles:
+  // depth 0: decimal (1, 2, 3...)
+  // depth 1: lower-alpha (a, b, c...)
+  // depth >= 2: lower-roman (i, ii, iii...)
+  const depthClass =
+    depth === 0
+      ? "list-decimal my-3 pl-6 space-y-1.5"
+      : depth === 1
+        ? "list-[lower-alpha] mt-1.5 mb-1 pl-5 space-y-1"
+        : "list-[lower-roman] mt-1 mb-1 pl-5 space-y-1";
+
   return (
     <PracticeCounterCtx.Provider value={practiceNumbers}>
-      <ol className="list-decimal pl-6 my-4 space-y-1.5 block w-full marker:text-muted-foreground marker:font-medium [&_ol]:list-[lower-alpha] [&_ol_ol]:list-[lower-roman]">
-        {children}
-      </ol>
+      <ListDepthContext.Provider value={depth + 1}>
+        <ol
+          start={resolvedStart}
+          className={`${depthClass} block w-full marker:text-muted-foreground marker:font-medium ${className || ""}`}
+          {...props}
+        >
+          {children}
+        </ol>
+      </ListDepthContext.Provider>
     </PracticeCounterCtx.Provider>
   );
 }
 
-export function MarkdownLi({ children, checked, node }: any) {
+export function MarkdownUl({ children, className, ...props }: any) {
+  const depth = useContext(ListDepthContext);
+
+  // Hierarchical list styles:
+  // depth 0: disc (•)
+  // depth 1: circle (○)
+  // depth >= 2: square (■)
+  const depthClass =
+    depth === 0
+      ? "list-disc my-3 pl-6 space-y-1.5"
+      : depth === 1
+        ? "list-[circle] mt-1.5 mb-1 pl-5 space-y-1"
+        : "list-[square] mt-1 mb-1 pl-5 space-y-1";
+
+  return (
+    <ListDepthContext.Provider value={depth + 1}>
+      <ul
+        className={`${depthClass} block w-full marker:text-muted-foreground/70 ${className || ""}`}
+        {...props}
+      >
+        {children}
+      </ul>
+    </ListDepthContext.Provider>
+  );
+}
+
+export function MarkdownLi({ children, checked, node, ...props }: any) {
   const practiceNumbers = useContext(PracticeCounterCtx);
   const insidePractice = useContext(InsidePracticeCardCtx);
 
   // Task-list checkbox support
   if (checked !== null && checked !== undefined) {
     return (
-      <li className="flex items-start gap-3 text-[15px] sm:text-base leading-relaxed sm:leading-7 list-none -ml-2">
+      <li className="flex items-start gap-3 text-[15px] sm:text-base leading-relaxed sm:leading-7 list-none -ml-2 my-1">
         <input
           type="checkbox"
           checked={checked}
           readOnly
           className="mt-1.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0 cursor-default"
         />
-        <span>{children}</span>
+        <span className="flex-1">{children}</span>
       </li>
     );
   }
 
-  const text = React.Children.toArray(children)
-    .map((c) => (typeof c === "string" ? c : ((c as any)?.props?.children ?? "")))
-    .join("");
+  const text = extractText(children);
 
   // Quick Review Card detection
   const flashMatch = text.match(/^Front:\s*(.+?)\s+Back:\s*(.+)$/s);
   if (flashMatch) {
     return (
-      <li className="list-none -mx-1">
+      <li className="list-none -mx-1 my-2">
         <FlashCard front={flashMatch[1].trim()} back={flashMatch[2].trim()} />
       </li>
     );
@@ -104,8 +150,9 @@ export function MarkdownLi({ children, checked, node }: any) {
 
   return (
     <li
-      className="text-[15px] sm:text-base leading-relaxed sm:leading-7"
+      className="text-[15px] sm:text-base leading-relaxed sm:leading-7 my-0.5 [&>p]:mb-1 [&>p:last-child]:mb-0"
       style={{ display: "list-item" }}
+      {...props}
     >
       {children}
     </li>

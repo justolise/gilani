@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { Mail, X, Loader2, ArrowRight } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
+import { Capacitor } from "@capacitor/core";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -28,10 +29,12 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
   const onGoogle = async () => {
     setLoadingProvider("google");
     try {
+      const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
+      const nativeParam = isNative ? "&app=1" : "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/callback?next=/tutor`,
+          redirectTo: `${window.location.origin}/callback?next=/tutor${nativeParam}`,
           queryParams: {
             access_type: "offline",
             prompt: "select_account",

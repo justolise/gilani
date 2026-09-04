@@ -9,6 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { Mail, Loader2, ArrowRight } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
+import { Capacitor } from "@capacitor/core";
 
 export function AuthForm() {
   const navigate = useNavigate();
@@ -22,10 +23,12 @@ export function AuthForm() {
   const onGoogle = async () => {
     setLoadingProvider("google");
     try {
+      const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
+      const nativeParam = isNative ? "&app=1" : "";
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/callback?next=/tutor`,
+          redirectTo: `${window.location.origin}/callback?next=/tutor${nativeParam}`,
           queryParams: {
             access_type: "offline",
             prompt: "select_account",

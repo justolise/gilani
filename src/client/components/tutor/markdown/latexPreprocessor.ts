@@ -378,8 +378,23 @@ export function preprocessLatex(raw: string): string {
   );
 
   // ── Step 11: Format MCQ choices and list items ───────────────────────────
-  // Split inline choices on same line (e.g. A. Opt1 B. Opt2) into newlines
-  s = s.replace(/([^\n])\s+(?:\b|\()([A-D])(?:\)|\.|\:)\s+/g, "$1\n$2. ");
+  // Split inline choices only when a line contains multiple sequential choices (e.g. A) ... B) ...)
+  const rawLines = s.split("\n");
+  const processedLines: string[] = [];
+
+  for (let line of rawLines) {
+    const hasSequentialChoices =
+      /(?:\(?A\)|\bA[\.\:\)]|\[A\])\s+.*?(?:\(?B\)|\bB[\.\:\)]|\[B\])/i.test(line);
+
+    if (hasSequentialChoices) {
+      line = line.replace(
+        /(\s+)(?=(?:[\-\*]\s+)?(?:\(?[A-D]\)|\b[A-D][\.\:\)]|\[[A-D]\])\s+)/gi,
+        "\n",
+      );
+    }
+    processedLines.push(line);
+  }
+  s = processedLines.join("\n");
 
   // Ensure choices under numbered question list items stay indented inside the <li>
   const lines = s.split("\n");
@@ -396,7 +411,7 @@ export function preprocessLatex(raw: string): string {
     }
 
     const choiceMatch = line.match(
-      /^\s*(?:[\-\*]\s+)?(?:\(?([A-D])\)|\b([A-D])[\.\:\)]|\[([A-D])\])\s+(.*)$/,
+      /^\s*(?:[\-\*]\s+)?(?:\(([A-D])\)|([A-D])[\.\:\)]|\[([A-D])\])\s+(.*)$/i,
     );
     if (choiceMatch) {
       const letter = (choiceMatch[1] || choiceMatch[2] || choiceMatch[3]).toUpperCase();
@@ -422,11 +437,11 @@ export function preprocessLatex(raw: string): string {
   }
   s = outLines.join("\n");
 
+  // Split inline sub-questions only when a line has sequential subparts (e.g. a) ... b) ...)
   s = s.replace(
-    /([^\n(])\s+([a-z]\))\s+(?=[A-Za-z0-9$])/g,
-    (_, pre, letter) => `${pre}\n\n   ${letter} `,
+    /^([^\n]*?(?:\(a\)|(?:\s|^)a\))\s+[^\n]*?)\s+(?=(?:\([b-d]\)|[b-d]\))\s+)/gim,
+    "$1\n   ",
   );
-  s = s.replace(/([^\n:])[ \t]+(\d+\.\s+)(?=[A-Za-z0-9$])/g, (_, pre, num) => `${pre}\n${num}`);
 
   // Restore protected blocks
   s = s.replace(new RegExp(MATH_TOKEN, "g"), () => repairMatrix(mathBlocks.shift()!));

@@ -11,6 +11,7 @@ export const Route = createFileRoute("/callback")({
   component: AuthCallback,
   validateSearch: (search: Record<string, unknown>) => ({
     next: (search.next as string) || "/tutor",
+    app: (search.app as string) || undefined,
     error: (search.error as string) || undefined,
     error_description: (search.error_description as string) || undefined,
     code: (search.code as string) || undefined,
@@ -20,12 +21,19 @@ export const Route = createFileRoute("/callback")({
 
 function AuthCallback() {
   const navigate = useNavigate();
-  const { next, error: urlError, error_description } = useSearch({ from: "/callback" });
+  const {
+    next,
+    app: appParam,
+    error: urlError,
+    error_description,
+  } = useSearch({ from: "/callback" });
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [showLoader, setShowLoader] = useState(false);
+  const [deepLinkUrl, setDeepLinkUrl] = useState<string | null>(null);
+  const [isAppRedirect, setIsAppRedirect] = useState(false);
   const processedRef = useRef(false);
 
   // Sanitize next — prevent open redirect attacks
@@ -106,6 +114,19 @@ function AuthCallback() {
       }
 
       if (session) {
+        const isApp = appParam === "1" || urlParams.get("app") === "1";
+        if (isApp) {
+          const deepLink = `com.gilaniai.app://callback?access_token=${encodeURIComponent(session.access_token)}&refresh_token=${encodeURIComponent(session.refresh_token)}&next=${encodeURIComponent(safePath)}`;
+          setDeepLinkUrl(deepLink);
+          setIsAppRedirect(true);
+          try {
+            window.location.href = deepLink;
+          } catch (e) {
+            console.error("Auto deep link failed:", e);
+          }
+          return;
+        }
+
         if (safePath === "/reset-password" || type === "recovery") {
           navigate({ to: "/" });
           return;
@@ -265,6 +286,26 @@ function AuthCallback() {
             Back to home
           </a>
         </div>
+      </div>
+    );
+  }
+
+  if (isAppRedirect && deepLinkUrl) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-[#0a0f1e] text-white">
+        <div className="w-16 h-16 rounded-2xl bg-[#C96A3D]/20 border border-[#C96A3D]/40 flex items-center justify-center mb-4 text-3xl">
+          ✨
+        </div>
+        <h2 className="text-xl font-bold mb-2">Login Successful!</h2>
+        <p className="text-sm text-white/60 max-w-sm mb-6">
+          Redirecting you back to the GilaniAI app...
+        </p>
+        <a
+          href={deepLinkUrl}
+          className="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-[#C96A3D] text-white font-bold text-sm shadow-lg shadow-[#C96A3D]/30 hover:bg-[#D9784A] active:scale-95 transition-all"
+        >
+          Open GilaniAI App
+        </a>
       </div>
     );
   }

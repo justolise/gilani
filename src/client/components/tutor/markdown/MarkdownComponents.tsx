@@ -1,10 +1,10 @@
 import React from "react";
 import { MarkdownP, MarkdownA, MarkdownImg, MarkdownBlockquote } from "./MarkdownMedia";
-import { MarkdownOl, MarkdownLi } from "./MarkdownLists";
+import { MarkdownOl, MarkdownUl, MarkdownLi } from "./MarkdownLists";
 import { MarkdownPre, MarkdownCode } from "./MarkdownCode";
 
 export { MarkdownP, MarkdownA, MarkdownImg, MarkdownBlockquote };
-export { MarkdownOl, MarkdownLi };
+export { MarkdownOl, MarkdownUl, MarkdownLi };
 export { MarkdownPre, MarkdownCode };
 
 export function getMarkdownComponents(isStreaming: boolean) {
@@ -47,11 +47,7 @@ export function getMarkdownComponents(isStreaming: boolean) {
     em: ({ children }: any) => <em className="italic text-muted-foreground/90">{children}</em>,
     a: MarkdownA,
     img: MarkdownImg,
-    ul: ({ children }: any) => (
-      <ul className="list-disc pl-6 my-4 space-y-1.5 block w-full marker:text-muted-foreground/70">
-        {children}
-      </ul>
-    ),
+    ul: MarkdownUl,
     ol: MarkdownOl,
     li: MarkdownLi,
     blockquote: MarkdownBlockquote,

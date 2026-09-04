@@ -699,6 +699,19 @@
   word-break: break-word;
 }
 
+/* Lists — clean spacing and hierarchical markers */
+.markdown-content li > p {
+  margin-bottom: 0.25rem;
+}
+.markdown-content li > p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content li > ul,
+.markdown-content li > ol {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 /* Links — bright sky-blue, clearly clickable */
 .markdown-content a {
   color: #38bdf8;
