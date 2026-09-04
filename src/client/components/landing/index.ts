@@ -11,3 +11,7 @@ export { default as FinalCTA } from "./FinalCTA";
 export { default as Footer } from "./Footer";
 export { FeaturesModal } from "./FeaturesModal";
 export { DemoModal } from "./DemoModal";
+export { FAQModal } from "./FAQModal";
+export { AboutModal } from "./AboutModal";
+export { ContactModal } from "./ContactModal";
+export { LegalModal } from "./LegalModal";

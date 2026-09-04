@@ -3,7 +3,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/client/hooks/use-auth";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
 
-import { Navbar, Hero, Footer, FeaturesModal, DemoModal } from "@/client/components/landing";
+import {
+  Navbar,
+  Hero,
+  Footer,
+  FeaturesModal,
+  DemoModal,
+  FAQModal,
+  AboutModal,
+  ContactModal,
+  LegalModal,
+} from "@/client/components/landing";
 
 export const Route = createFileRoute("/")({
   validateSearch: () => ({}),
@@ -48,8 +58,15 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   const { user, roles, loading } = useAuth();
   const navigate = useNavigate();
+
+  // Modals state for all resources and links
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState<"privacy" | "terms">("privacy");
 
   useEffect(() => {
     if (!loading && user) {
@@ -69,12 +86,36 @@ function LandingPage() {
 
   return (
     <main className="h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-[#121212] text-white selection:bg-[#C96A3D] selection:text-white font-sans relative">
-      <Navbar onOpenFeatures={() => setFeaturesOpen(true)} onOpenDemo={() => setDemoOpen(true)} />
-      <Hero onOpenDemo={() => setDemoOpen(true)} onOpenFeatures={() => setFeaturesOpen(true)} />
-      <Footer />
+      {/* Clean Navbar without duplicate menu */}
+      <Navbar />
 
+      {/* Hero stage with expanded mobile height & large prominent buttons */}
+      <Hero onOpenDemo={() => setDemoOpen(true)} onOpenFeatures={() => setFeaturesOpen(true)} />
+
+      {/* Docked Footer with GilaniAI removed, large buttons, and menu opening all modals */}
+      <Footer
+        onOpenFeatures={() => setFeaturesOpen(true)}
+        onOpenDemo={() => setDemoOpen(true)}
+        onOpenFAQ={() => setFaqOpen(true)}
+        onOpenAbout={() => setAboutOpen(true)}
+        onOpenContact={() => setContactOpen(true)}
+        onOpenPrivacy={() => {
+          setLegalTab("privacy");
+          setLegalOpen(true);
+        }}
+        onOpenTerms={() => {
+          setLegalTab("terms");
+          setLegalOpen(true);
+        }}
+      />
+
+      {/* All Links and Resources Modal Dialogs */}
       <FeaturesModal open={featuresOpen} onOpenChange={setFeaturesOpen} />
       <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />
+      <FAQModal open={faqOpen} onOpenChange={setFaqOpen} />
+      <AboutModal open={aboutOpen} onOpenChange={setAboutOpen} />
+      <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
+      <LegalModal open={legalOpen} onOpenChange={setLegalOpen} initialTab={legalTab} />
     </main>
   );
 }
