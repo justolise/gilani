@@ -6,7 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/client/components/ui/dialog";
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, ExternalLink } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 interface FAQModalProps {
   open: boolean;
@@ -47,9 +48,19 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
         <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
-            <HelpCircle className="h-3.5 w-3.5" />
-            Knowledge Base
+          <div className="flex items-center justify-between gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
+              <HelpCircle className="h-3.5 w-3.5" />
+              Knowledge Base
+            </div>
+
+            <Link
+              to="/faq"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#E28743] hover:underline font-semibold pr-6"
+            >
+              <span>View full FAQ page</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
           </div>
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
             Frequently Asked Questions
@@ -87,6 +98,18 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
               </div>
             );
           })}
+        </div>
+
+        {/* Modal Footer Link */}
+        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+          <span>Need further help? Our team is available 24/7.</span>
+          <Link
+            to="/faq"
+            className="text-[#E28743] hover:underline font-semibold inline-flex items-center gap-1"
+          >
+            <span>Open full FAQ page</span>
+            <ExternalLink className="h-3 w-3" />
+          </Link>
         </div>
       </DialogContent>
     </Dialog>

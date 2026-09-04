@@ -6,7 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/client/components/ui/dialog";
-import { ShieldCheck, FileText } from "lucide-react";
+import { ShieldCheck, FileText, ExternalLink } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 interface LegalModalProps {
   open: boolean;
@@ -27,31 +28,42 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
         <DialogHeader className="text-left space-y-2 shrink-0 pb-3 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setTab("privacy")}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                tab === "privacy"
-                  ? "bg-[#C96A3D] text-white shadow-sm"
-                  : "bg-white/5 text-white/60 hover:text-white"
-              }`}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTab("privacy")}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  tab === "privacy"
+                    ? "bg-[#C96A3D] text-white shadow-sm"
+                    : "bg-white/5 text-white/60 hover:text-white"
+                }`}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Privacy Policy
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("terms")}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  tab === "terms"
+                    ? "bg-[#C96A3D] text-white shadow-sm"
+                    : "bg-white/5 text-white/60 hover:text-white"
+                }`}
+              >
+                <FileText className="h-4 w-4" />
+                Terms of Service
+              </button>
+            </div>
+
+            {/* Open Full Dedicated Page Link */}
+            <Link
+              to={tab === "privacy" ? "/privacy" : "/terms"}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#E28743] hover:underline font-semibold pr-6"
             >
-              <ShieldCheck className="h-4 w-4" />
-              Privacy Policy
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("terms")}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                tab === "terms"
-                  ? "bg-[#C96A3D] text-white shadow-sm"
-                  : "bg-white/5 text-white/60 hover:text-white"
-              }`}
-            >
-              <FileText className="h-4 w-4" />
-              Terms of Service
-            </button>
+              <span>View full page</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
           </div>
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
             {tab === "privacy" ? "Privacy Policy" : "Terms of Service"}
@@ -214,6 +226,18 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
               </div>
             </>
           )}
+        </div>
+
+        {/* Modal Footer with Full Page Link */}
+        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+          <span>Official legal documentation</span>
+          <Link
+            to={tab === "privacy" ? "/privacy" : "/terms"}
+            className="text-[#E28743] hover:underline font-semibold inline-flex items-center gap-1"
+          >
+            <span>Open as full standalone page</span>
+            <ExternalLink className="h-3 w-3" />
+          </Link>
         </div>
       </DialogContent>
     </Dialog>
