@@ -9,3 +9,5 @@ export { default as Pricing } from "./Pricing";
 export { default as FAQ } from "./FAQ";
 export { default as FinalCTA } from "./FinalCTA";
 export { default as Footer } from "./Footer";
+export { FeaturesModal } from "./FeaturesModal";
+export { DemoModal } from "./DemoModal";

@@ -1,171 +1,188 @@
 import { Link } from "@tanstack/react-router";
+import { Sparkles, ArrowRight, Play, CheckCircle2 } from "lucide-react";
+import { Button } from "@/client/components/ui/button";
 
-export default function Hero() {
+interface HeroProps {
+  onOpenDemo?: () => void;
+  onOpenFeatures?: () => void;
+}
+
+export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#161210] pt-[88px] pb-20">
-      {/* Rich Background Gradients */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#C96A3D]/20 blur-[120px] rounded-full mix-blend-screen opacity-60 motion-safe:animate-pulse [animation-duration:8s]"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-[#C96A3D]/10 blur-[150px] rounded-full mix-blend-screen opacity-50"></div>
-        {/* Graph Paper Grid overlay */}
+    <section className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-6 py-2 sm:py-4">
+      {/* Ambient background glow & grid */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute top-1/4 left-1/4 w-[320px] sm:w-[500px] h-[320px] sm:h-[500px] bg-[#C96A3D]/20 blur-[90px] sm:blur-[130px] rounded-full mix-blend-screen opacity-60 motion-safe:animate-pulse [animation-duration:8s]"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] sm:w-[550px] h-[300px] sm:h-[550px] bg-[#C96A3D]/10 blur-[100px] sm:blur-[150px] rounded-full mix-blend-screen opacity-50"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] opacity-50"></div>
       </div>
 
-      {/* Floating Academic Badges */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
-        {/* Math Badge */}
-        <div className="absolute top-28 left-6 md:left-16 lg:left-24 animate-float hidden lg:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
-            <span className="font-serif text-lg font-bold">∑</span>
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
-              Mathematics
-            </span>
-            <span className="text-xs font-mono font-bold text-white">f(x) = dx/dy</span>
-          </div>
-        </div>
-
-        {/* Chemistry Badge */}
-        <div
-          className="absolute bottom-28 left-[8%] animate-float hidden xl:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]"
-          style={{ animationDelay: "2s" }}
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="w-4 h-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M4.5 3h15M6 3v16a2 2 0 002 2h8a2 2 0 002-2V3M6 14h12"
-              />
-            </svg>
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
-              Chemistry
-            </span>
-            <span className="text-xs font-mono font-bold text-white">H₂O + CO₂</span>
-          </div>
-        </div>
-
-        {/* Physics/Orbit Badge */}
-        <div
-          className="absolute top-44 right-[44%] animate-float hidden xl:flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-4 py-3 shadow-[0_8px_32px_rgba(201,106,61,0.1)]"
-          style={{ animationDelay: "4s" }}
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#C96A3D]/20 text-[#E28743]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="w-4 h-4 animate-spin [animation-duration:15s]"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path
-                strokeLinecap="round"
-                d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10zM2 12h20"
-              />
-            </svg>
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-[9px] text-[#a1a1aa] uppercase font-bold tracking-wider">
-              Physics
-            </span>
-            <span className="text-xs font-mono font-bold text-white">E = mc²</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 lg:flex-row lg:items-center">
-        {/* Left Side: Copy & CTA */}
-        <div className="flex flex-1 min-w-0 flex-col items-start gap-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#E28743] backdrop-blur-sm shadow-[0_0_15px_rgba(201,106,61,0.2)]">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-8 lg:gap-12 h-full">
+        {/* Left Column: Core Value & CTAs */}
+        <div className="flex flex-1 flex-col items-center lg:items-start text-center lg:text-left justify-center gap-3 sm:gap-4 lg:gap-5 max-w-2xl mx-auto lg:mx-0">
+          {/* Live Status Pill */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 sm:px-4 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#E28743] backdrop-blur-sm shadow-[0_0_15px_rgba(201,106,61,0.2)]">
             <span className="relative flex h-2 w-2">
               <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C96A3D] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C96A3D]"></span>
             </span>
-            GilaniAI is Live
+            <span className="truncate">Live · KCSE · TVET · College · University</span>
           </div>
 
-          <h1 className="font-serif text-5xl font-bold tracking-tight text-white sm:text-6xl xl:text-7xl leading-[1.1] break-words w-full">
+          {/* Main Headline */}
+          <h1 className="font-serif text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.12]">
             Ace your{" "}
-            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] to-[#E28743]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] via-[#E28743] to-[#F59E0B]">
               Exams
             </span>
-            , <br className="hidden lg:block" />
-            one question at a time.
+            ,<br className="hidden sm:inline" /> one question at a time.
           </h1>
 
-          <p className="max-w-xl text-lg text-[#a1a1aa] sm:text-xl leading-relaxed font-light">
-            GilaniAI doesn't just hand you answers — it teaches you how to find them,{" "}
-            <span className="text-white font-semibold">the way a real tutor would.</span>
+          {/* Subheading */}
+          <p className="text-xs sm:text-base text-white/70 max-w-lg sm:max-w-xl font-light leading-relaxed">
+            GilaniAI doesn't just hand you answers — it teaches you how to solve them step-by-step,{" "}
+            <span className="text-white font-medium">
+              with zero hallucination and real teacher escalation.
+            </span>
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 mt-2">
-            <Link
-              to="/login"
-              search={{ redirect: undefined, signout: undefined }}
-              className="group relative rounded-full bg-[#C96A3D] px-8 py-4 text-base font-bold text-white transition-all hover:bg-[#E28743] hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(201,106,61,0.4)] overflow-hidden"
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-4 mt-1">
+            <Button
+              asChild
+              className="rounded-full bg-[#C96A3D] px-6 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base font-bold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_25px_rgba(201,106,61,0.4)] group"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-              <span className="relative">Start for Free</span>
-            </Link>
-            <a
-              href="#demo"
-              className="rounded-full border border-white/10 bg-white/5 px-8 py-4 text-base font-medium text-white transition-all hover:bg-white/10 hover:border-white/20 backdrop-blur-md"
+              <Link to="/login" search={{ redirect: undefined, signout: undefined }}>
+                <span>Start for Free</span>
+                <ArrowRight className="ml-1.5 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onOpenDemo}
+              className="rounded-full border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25 px-5 sm:px-6 py-2.5 sm:py-3.5 text-xs sm:text-sm font-semibold text-white backdrop-blur-md transition-all flex items-center gap-2"
             >
-              Watch Demo
-            </a>
+              <Play className="h-3.5 w-3.5 text-[#E28743] fill-[#E28743]" />
+              <span>Watch Demo</span>
+            </Button>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-white/10 pt-6 text-sm text-[#a1a1aa]">
-            <span className="inline-flex items-center gap-1.5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="w-4 h-4 text-[#E28743]"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                />
-              </svg>
-              Free to start, no credit card required
+          {/* Trust Badges */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 sm:pt-2 text-[11px] sm:text-xs text-white/50">
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[#E28743]" />
+              Free to start
             </span>
-            <span className="text-white/20">·</span>
-            <span>Real teacher escalation built in</span>
+            <span>·</span>
+            <span className="inline-flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5 text-[#E28743]" />
+              Zero hallucination
+            </span>
+            <span>·</span>
+            <span className="hidden xs:inline">Teacher escalation built-in</span>
+          </div>
+
+          {/* Mobile Curriculum Pills */}
+          <div className="flex lg:hidden flex-wrap items-center justify-center gap-1.5 pt-1 text-[10px] text-white/60">
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5">∑ Math</span>
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5">
+              🧪 Sciences
+            </span>
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5">
+              ⚡ TVET
+            </span>
+            <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5">
+              🏛️ Humanities
+            </span>
           </div>
         </div>
 
-        {/* Right Side: Hero Image */}
-        <div className="relative flex flex-1 items-center justify-center w-full max-w-lg lg:max-w-none">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 shadow-[0_20px_60px_-15px_rgba(201,106,61,0.5)] overflow-hidden">
-            {/* Image Glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#C96A3D]/20 to-transparent mix-blend-overlay z-10"></div>
+        {/* Right Column: Interactive Tutor Preview Showcase (Desktop & Large Tablet) */}
+        <div className="hidden lg:flex flex-1 items-center justify-center max-w-lg xl:max-w-xl">
+          <div className="relative w-full rounded-2xl border border-white/15 bg-[#141414]/90 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(201,106,61,0.3)] p-5 overflow-hidden group">
+            {/* Header bar */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/80"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/80"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]/80"></div>
+                </div>
+                <span className="text-[11px] font-mono text-white/40 ml-2">
+                  gilaniai.site/tutor
+                </span>
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#E28743] bg-[#C96A3D]/10 border border-[#C96A3D]/20 px-2 py-0.5 rounded-full">
+                Socratic Mode
+              </span>
+            </div>
 
-            <img
-              src="/hero-library.png"
-              alt="Student studying with GilaniAI"
-              className="w-full h-auto object-cover hover:scale-105 transition-transform duration-700 ease-out z-0 relative"
-            />
+            {/* Conversation Flow */}
+            <div className="mt-4 space-y-3 text-xs">
+              {/* Student message */}
+              <div className="flex justify-end">
+                <div className="rounded-2xl rounded-tr-sm bg-[#C96A3D] px-3.5 py-2 text-white font-medium max-w-[85%] shadow-sm">
+                  How does Ohm's law apply to TVET electrical circuits in parallel?
+                </div>
+              </div>
 
-            {/* Subtle floating overlay tags */}
-            <div className="absolute bottom-6 left-6 z-20 backdrop-blur-md bg-black/40 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#C96A3D] animate-pulse"></div>
-              <span className="text-sm text-white font-semibold">Socratic AI Tutor</span>
+              {/* Socratic AI Tutor Response */}
+              <div className="flex gap-2.5">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/30 text-[10px] font-bold text-[#E28743]">
+                  G
+                </div>
+                <div className="rounded-2xl rounded-tl-sm bg-white/5 border border-white/10 p-3 text-white/80 space-y-1.5 max-w-[90%]">
+                  <p>
+                    In a parallel circuit, remember the fundamental rule:{" "}
+                    <span className="text-white font-medium">
+                      voltage is constant across every branch
+                    </span>
+                    :
+                  </p>
+                  <div className="font-mono text-[11px] text-[#E28743] bg-black/40 p-2 rounded-lg border border-white/5">
+                    V_total = V₁ = V₂ = V_n
+                  </div>
+                  <p className="text-white font-medium">
+                    If branch 1 has resistor R₁ = 10Ω and branch 2 has R₂ = 20Ω connected to 240V
+                    mains, how much current flows through branch 1?
+                  </p>
+                </div>
+              </div>
+
+              {/* Student response */}
+              <div className="flex justify-end">
+                <div className="rounded-2xl rounded-tr-sm bg-[#C96A3D] px-3 py-1.5 text-white font-medium text-xs shadow-sm">
+                  I₁ = V / R₁ = 240 / 10 = 24 Amperes!
+                </div>
+              </div>
+
+              {/* AI validation */}
+              <div className="flex gap-2.5">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/30 text-[10px] font-bold text-[#E28743]">
+                  G
+                </div>
+                <div className="rounded-2xl rounded-tl-sm bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-emerald-200 text-xs">
+                  ✓ Exactly correct. Each parallel path draws current independently based on its
+                  branch resistance.
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom action trigger */}
+            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[11px] text-white/50">
+                Verified curriculum citations included
+              </span>
+              <button
+                type="button"
+                onClick={onOpenDemo}
+                className="text-[11px] font-semibold text-[#E28743] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Try interactive simulator</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
             </div>
           </div>
         </div>

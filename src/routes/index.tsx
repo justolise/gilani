@@ -2,20 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/client/hooks/use-auth";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
-import { AuthModal } from "@/client/components/auth/AuthModal";
 
-import {
-  Navbar,
-  Hero,
-  SocialProof,
-  Features,
-  HowItWorks,
-  DemoSection,
-  Testimonials,
-  FAQ,
-  FinalCTA,
-  Footer,
-} from "@/client/components/landing";
+import { Navbar, Hero, Footer, FeaturesModal, DemoModal } from "@/client/components/landing";
 
 export const Route = createFileRoute("/")({
   validateSearch: () => ({}),
@@ -30,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         name: "keywords",
         content:
-          "AI tutor, study assistant, global curriculum, AI education, online study, GilaniAI",
+          "AI tutor, study assistant, KCSE, TVET, University, College, CBC, AI education, online study, GilaniAI",
       },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
@@ -60,6 +48,9 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   const { user, roles, loading } = useAuth();
   const navigate = useNavigate();
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+
   useEffect(() => {
     if (!loading && user) {
       if (roles.includes("admin")) {
@@ -77,17 +68,13 @@ function LandingPage() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#121212] text-white selection:bg-[#C96A3D] selection:text-white font-sans overflow-x-hidden">
-      <Navbar />
-      <Hero />
-      <SocialProof />
-      <Features />
-      <HowItWorks />
-      <DemoSection />
-      <Testimonials />
-      <FAQ />
-      <FinalCTA />
+    <main className="h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-[#121212] text-white selection:bg-[#C96A3D] selection:text-white font-sans relative">
+      <Navbar onOpenFeatures={() => setFeaturesOpen(true)} onOpenDemo={() => setDemoOpen(true)} />
+      <Hero onOpenDemo={() => setDemoOpen(true)} onOpenFeatures={() => setFeaturesOpen(true)} />
       <Footer />
+
+      <FeaturesModal open={featuresOpen} onOpenChange={setFeaturesOpen} />
+      <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />
     </main>
   );
 }

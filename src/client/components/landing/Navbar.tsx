@@ -1,17 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { PanelRight } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Logo } from "@/client/components/ui/logo";
 import { Button } from "@/client/components/ui/button";
 
-const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it Works" },
-  { href: "#demo", label: "Demo" },
-  { href: "#faq", label: "FAQ" },
-];
+interface NavbarProps {
+  onOpenFeatures?: () => void;
+  onOpenDemo?: () => void;
+}
 
-export default function Navbar() {
+export default function Navbar({ onOpenFeatures, onOpenDemo }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -27,59 +25,118 @@ export default function Navbar() {
   }, [mobileOpen]);
 
   return (
-    <nav className="fixed top-0 left-0 z-50 h-[72px] w-full border-b border-white/5 bg-[#161210]/80 backdrop-blur-md">
-      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
+    <header className="relative z-40 h-14 sm:h-16 w-full flex-none border-b border-white/10 bg-[#121212]/90 backdrop-blur-md">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
         <Logo to="/" size="md" />
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-[rgba(255,255,255,0.75)]">
-          {NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href} className="hover:text-white transition-colors">
-              {link.label}
-            </a>
-          ))}
-        </div>
+        {/* Desktop Nav Links */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-white/70">
+          <button
+            type="button"
+            onClick={onOpenFeatures}
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Features
+          </button>
+          <button
+            type="button"
+            onClick={onOpenDemo}
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Demo
+          </button>
+          <Link to="/faq" className="hover:text-white transition-colors">
+            FAQ
+          </Link>
+          <Link to="/about" className="hover:text-white transition-colors">
+            About
+          </Link>
+          <Link to="/contact" className="hover:text-white transition-colors">
+            Contact
+          </Link>
+        </nav>
 
-        <div className="flex items-center gap-3">
+        {/* Right actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button
             asChild
-            className="inline-flex rounded-full bg-[#C96A3D] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(201,106,61,0.2)]"
+            size="sm"
+            className="rounded-full bg-[#C96A3D] px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(201,106,61,0.3)]"
           >
             <Link to="/login" search={{ redirect: undefined, signout: undefined }}>
               Get Started
             </Link>
           </Button>
 
-          {/* Mobile menu trigger + inline dropdown */}
+          {/* Mobile menu trigger */}
           <div ref={menuRef} className="relative md:hidden">
             <button
               type="button"
-              aria-label="Open menu"
+              aria-label="Toggle navigation menu"
               onClick={() => setMobileOpen((o) => !o)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white/80 hover:text-white transition-colors"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             >
-              <PanelRight className="h-5 w-5" />
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
             {mobileOpen && (
-              <div className="absolute right-0 top-full mt-3 z-50 flex flex-col min-w-[160px] bg-[#161210]/95 backdrop-blur-xl border border-white/10 rounded-xl p-2 shadow-2xl gap-1">
-                {NAV_LINKS.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="px-3 py-2.5 rounded-lg bg-white/5 text-sm font-medium text-white/85 hover:bg-white/10 hover:text-white transition-colors text-left"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-                <div className="mt-1 flex flex-col gap-1 border-t border-white/10 pt-2">
+              <div className="absolute right-0 top-full mt-2 z-50 flex flex-col min-w-[200px] bg-[#161413]/98 backdrop-blur-2xl border border-white/15 rounded-2xl p-2.5 shadow-2xl gap-1 animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenFeatures?.();
+                  }}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 text-xs font-semibold text-white hover:bg-white/10 transition-colors text-left flex items-center justify-between"
+                >
+                  <span>Features</span>
+                  <span className="text-[10px] text-[#E28743] font-mono">Overview</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onOpenDemo?.();
+                  }}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 text-xs font-semibold text-white hover:bg-white/10 transition-colors text-left flex items-center justify-between"
+                >
+                  <span>Interactive Demo</span>
+                  <span className="text-[10px] text-[#E28743] font-mono">Live</span>
+                </button>
+
+                <Link
+                  to="/faq"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-colors text-left"
+                >
+                  FAQ
+                </Link>
+
+                <Link
+                  to="/about"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-colors text-left"
+                >
+                  About Us
+                </Link>
+
+                <Link
+                  to="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-colors text-left"
+                >
+                  Contact Support
+                </Link>
+
+                <div className="mt-1 border-t border-white/10 pt-2">
                   <Link
                     to="/login"
                     search={{ redirect: undefined, signout: undefined }}
                     onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2.5 rounded-lg bg-[#C96A3D]/10 text-sm font-semibold text-[#E28743] hover:bg-[#C96A3D]/20 transition-colors text-left"
+                    className="block px-3.5 py-2.5 rounded-xl bg-[#C96A3D]/20 text-xs font-bold text-[#E28743] hover:bg-[#C96A3D]/30 transition-colors text-center"
                   >
-                    Get Started
+                    Sign In
                   </Link>
                 </div>
               </div>
@@ -87,6 +144,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
