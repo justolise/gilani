@@ -5,12 +5,57 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/client/components/ui/dialog";
-import { GraduationCap, ShieldCheck, Users, Sparkles, MapPin } from "lucide-react";
+import { GraduationCap, ShieldCheck, Users, Zap, Brain, Target, Sparkles } from "lucide-react";
 
 interface AboutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const AGENTS = [
+  {
+    name: "Guardian",
+    role: "Socratic Curriculum Engine",
+    icon: Brain,
+    description:
+      "Grounded in your syllabus and uploaded materials. Guides you through first-principles reasoning step-by-step with zero hallucination.",
+    accent: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+  },
+  {
+    name: "Scout",
+    role: "Study Momentum & Planning",
+    icon: Target,
+    description:
+      "Tracks exam countdowns, builds adaptive revision timelines, and keeps your study rhythm steady leading up to exam day.",
+    accent: "text-[#E28743] bg-[#C96A3D]/10 border-[#C96A3D]/20",
+  },
+  {
+    name: "Hunter",
+    role: "Teacher Escalation & Safety",
+    icon: ShieldCheck,
+    description:
+      "Monitors confidence levels. Whenever an answer is complex or requires human judgment, Hunter routes your thread to a vetted educator.",
+    accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  },
+];
+
+const VALUES = [
+  {
+    icon: GraduationCap,
+    title: "Curriculum-First",
+    desc: "Works natively with KCSE, CBC, TVET technical diploma, College, University degrees, and International curricula (IGCSE / IB).",
+  },
+  {
+    icon: Users,
+    title: "Human Teachers in the Loop",
+    desc: "AI is a companion, not a replacement. One tap escalates any query to human educators for verified review.",
+  },
+  {
+    icon: Zap,
+    title: "Honest, Rigorous AI",
+    desc: "Surfaces uncertainty instead of guessing. Provides verified textbook citations and step-by-step working.",
+  },
+];
 
 export function AboutModal({ open, onOpenChange }: AboutModalProps) {
   return (
@@ -18,69 +63,75 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
       <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
         <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/10">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
-            <GraduationCap className="h-3.5 w-3.5" />
-            Our Mission
+            <Sparkles className="h-3.5 w-3.5" />
+            Our Vision & Architecture
           </div>
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
-            About GilaniAI
+            A Learning Companion, <span className="text-[#E28743] italic">Not a Replacement.</span>
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm text-white/60">
-            Empowering students with genuine understanding, ethical AI, and human mentorship.
+            Founded in Nairobi, Kenya to provide research-backed, ethical AI tutoring across all
+            academic levels.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-1 text-xs sm:text-sm text-white/80 leading-relaxed">
+        <div className="flex-1 overflow-y-auto mt-4 space-y-5 pr-2 text-xs sm:text-sm text-white/80 leading-relaxed">
           <p>
-            GilaniAI was founded in Nairobi, Kenya with a clear purpose:{" "}
-            <strong className="text-white">
-              students don't need another generic chatbot that spits out answers
-            </strong>
-            . They need a patient, intelligent tutor that teaches them how to think.
+            GilaniAI combines curriculum-grounded artificial intelligence, Socratic questioning, and
+            human teacher oversight to help students across any curriculum study more effectively
+            and ethically.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Sparkles className="h-4 w-4 text-[#E28743]" />
-                Socratic First-Principles
-              </div>
-              <p className="text-xs text-white/60 leading-relaxed">
-                We break complex mathematical, scientific, and technical problems into intuitive,
-                digestible steps.
-              </p>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
+              Three-Tier Intelligent System
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {AGENTS.map((agent) => {
+                const Icon = agent.icon;
+                return (
+                  <div
+                    key={agent.name}
+                    className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-white text-sm">{agent.name}</span>
+                        <div className={`p-1.5 rounded-lg border ${agent.accent}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-semibold text-[#E28743] uppercase tracking-wider block mb-1.5">
+                        {agent.role}
+                      </span>
+                      <p className="text-xs text-white/65 leading-relaxed">{agent.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <ShieldCheck className="h-4 w-4 text-[#E28743]" />
-                Zero Hallucination
-              </div>
-              <p className="text-xs text-white/60 leading-relaxed">
-                Grounded in syllabus guidelines and your uploaded notes, backed by real-time
-                verified research.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <Users className="h-4 w-4 text-[#E28743]" />
-                Human Teacher Escalation
-              </div>
-              <p className="text-xs text-white/60 leading-relaxed">
-                When you need human intuition, real educators are available on-demand directly in
-                your study thread.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 space-y-1.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <MapPin className="h-4 w-4 text-[#E28743]" />
-                Rooted in Nairobi 🇰🇪
-              </div>
-              <p className="text-xs text-white/60 leading-relaxed">
-                Engineered to deeply understand KCSE, CBC, TVET, College, and University academic
-                environments.
-              </p>
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
+              Core Principles
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {VALUES.map((val) => {
+                const Icon = val.icon;
+                return (
+                  <div
+                    key={val.title}
+                    className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-1"
+                  >
+                    <div className="flex items-center gap-2 font-semibold text-white text-xs">
+                      <Icon className="h-3.5 w-3.5 text-[#E28743]" />
+                      <span>{val.title}</span>
+                    </div>
+                    <p className="text-[11px] text-white/60 leading-relaxed">{val.desc}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
