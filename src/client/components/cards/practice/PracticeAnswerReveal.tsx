@@ -1,5 +1,19 @@
 import React from "react";
 import { Lightbulb, RotateCcw, Sparkles, Check } from "lucide-react";
+import { toast } from "sonner";
+import { sendChatMessageToTutor } from "./PracticeScratchpad";
+
+interface PracticeAnswerRevealProps {
+  answer: React.ReactNode;
+  showAnswer: boolean;
+  userDraft?: string;
+  selfAssessment: "correct" | "partial" | "review" | null;
+  onShowAnswer: () => void;
+  onReset: () => void;
+  onSelfAssessment: (type: "correct" | "partial" | "review") => void;
+  questionNumber?: number;
+  questionText?: string;
+}
 
 export function PracticeAnswerReveal({
   answer,
@@ -9,16 +23,32 @@ export function PracticeAnswerReveal({
   onShowAnswer,
   onReset,
   onSelfAssessment,
-}: {
-  answer: React.ReactNode;
-  showAnswer: boolean;
-  userDraft?: string;
-  selfAssessment: "correct" | "partial" | "review" | null;
-  onShowAnswer: () => void;
-  onReset: () => void;
-  onSelfAssessment: (type: "correct" | "partial" | "review") => void;
-}) {
-  if (!answer) return null;
+  questionNumber,
+  questionText,
+}: PracticeAnswerRevealProps) {
+  if (!answer) {
+    return (
+      <div className="border-t border-border/40 px-4 sm:px-5 py-3 bg-muted/10">
+        <button
+          type="button"
+          onClick={() => {
+            const qNum =
+              questionNumber != null
+                ? `Practice Question ${questionNumber}`
+                : "this practice question";
+            const qSnippet = questionText ? `:\n\n"${questionText.trim()}"` : "";
+            const prompt = `Could you please provide the complete, step-by-step worked solution and explanation for ${qNum}${qSnippet}?`;
+            sendChatMessageToTutor(prompt);
+            toast.success("Solution requested from tutor!");
+          }}
+          className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/10 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-all active:scale-99 shadow-xs cursor-pointer"
+        >
+          <Lightbulb className="h-4 w-4" />
+          Ask Tutor for Worked Solution
+        </button>
+      </div>
+    );
+  }
 
   if (!showAnswer) {
     return (

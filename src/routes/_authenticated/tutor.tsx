@@ -75,6 +75,18 @@ function TutorIndex() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!isExactTutor) return;
+    const handleGlobalSendMessage = (e: Event) => {
+      const { text } = (e as CustomEvent<{ text: string }>).detail || {};
+      if (text && text.trim()) {
+        composer.handlePromptClick(text.trim());
+      }
+    };
+    window.addEventListener("custom:send-chat-message", handleGlobalSendMessage);
+    return () => window.removeEventListener("custom:send-chat-message", handleGlobalSendMessage);
+  }, [isExactTutor, composer]);
+
   // Render Outlet for child routes now that all hooks above have been
   // called unconditionally on every render.
   if (!isExactTutor) {

@@ -352,15 +352,20 @@ function RootComponent() {
 
           App.addListener("appUrlOpen", async ({ url }) => {
             try {
-              // Deep link scheme: com.gilaniai.app://callback?access_token=...&refresh_token=...&next=/tutor
-              const normalized = url.replace(
-                /^(?:com\.gilaniai\.app|gilaniai):\/\//i,
-                "https://app/",
-              );
+              // Supports com.gilaniai.app://, gilaniai://, intent://, https://gilaniai.site/callback
+              const normalized = url
+                .replace(/^(?:com\.gilaniai\.app|gilaniai|intent):\/\//i, "https://app/")
+                .replace(/#Intent;.*$/i, "");
               const parsed = new URL(normalized);
-              const accessToken = parsed.searchParams.get("access_token");
-              const refreshToken = parsed.searchParams.get("refresh_token");
+              let accessToken = parsed.searchParams.get("access_token");
+              let refreshToken = parsed.searchParams.get("refresh_token");
               const nextPath = parsed.searchParams.get("next") || "/tutor";
+
+              if (!accessToken && parsed.hash) {
+                const hashParams = new URLSearchParams(parsed.hash.replace(/^#/, ""));
+                accessToken = hashParams.get("access_token");
+                refreshToken = hashParams.get("refresh_token");
+              }
 
               if (accessToken && refreshToken) {
                 await supabase.auth.setSession({

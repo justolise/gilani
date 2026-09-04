@@ -204,6 +204,17 @@ function TutorThreadInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);
 
+  useEffect(() => {
+    const handleGlobalSendMessage = (e: Event) => {
+      const { text } = (e as CustomEvent<{ text: string }>).detail || {};
+      if (text && text.trim()) {
+        sendChatMessage(text.trim(), text.trim());
+      }
+    };
+    window.addEventListener("custom:send-chat-message", handleGlobalSendMessage);
+    return () => window.removeEventListener("custom:send-chat-message", handleGlobalSendMessage);
+  }, [threadId, chatState]);
+
   const handleEscalateConfirm = async (email?: string) => {
     const success = await chatState.handleEscalate(email);
     if (success) {

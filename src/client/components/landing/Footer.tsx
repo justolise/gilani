@@ -67,8 +67,6 @@ export default function Footer({
         {/* Left: Copyright & Nairobi attribution (GilaniAI text removed as requested) */}
         <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
           <span className="text-white/60 font-medium">&copy; {new Date().getFullYear()}</span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/75 font-medium">Made in Nairobi 🇰🇪</span>
           <span className="text-white/30 hidden md:inline">·</span>
           <span className="text-white/40 hidden md:inline font-mono text-xs">v{pkg.version}</span>
         </div>

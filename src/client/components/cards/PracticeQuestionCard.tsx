@@ -208,6 +208,10 @@ export default function PracticeQuestionCard({
             onOpenChange={setScratchpadOpen}
             draft={userDraft}
             onDraftChange={setUserDraft}
+            hasAnswer={Boolean(answer)}
+            onShowAnswer={() => setShowAnswer(true)}
+            questionNumber={number}
+            questionText={questionText}
           />
         )}
 
@@ -220,6 +224,8 @@ export default function PracticeQuestionCard({
           onShowAnswer={() => setShowAnswer(true)}
           onReset={handleReset}
           onSelfAssessment={handleSelfAssessment}
+          questionNumber={number}
+          questionText={questionText}
         />
       </section>
     </InsidePracticeCardCtx.Provider>
