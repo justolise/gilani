@@ -163,10 +163,23 @@ export function CompleteProfileForm({
                     {...register("curriculum")}
                     className="w-full appearance-none rounded-xl border border-white/[0.12] bg-[#1a1c29] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer"
                   >
-                    <option value="KCSE">KCSE (Kenya Secondary)</option>
-                    <option value="CBC">CBC (Competency Based Curriculum)</option>
-                    <option value="IGCSE">IGCSE / British National</option>
-                    <option value="General">General / International</option>
+                    <optgroup label="Secondary School (Kenya)">
+                      <option value="KCSE">8-4-4 / KCSE (Kenya)</option>
+                      <option value="CBC">CBC (Kenya)</option>
+                    </optgroup>
+                    <optgroup label="International Secondary">
+                      <option value="IGCSE">Cambridge IGCSE</option>
+                      <option value="A-Level">A-Level</option>
+                      <option value="IB">International Baccalaureate (IB)</option>
+                    </optgroup>
+                    <optgroup label="Higher Education">
+                      <option value="University">University (Degree / Postgraduate)</option>
+                      <option value="College">College (Diploma / Certificate)</option>
+                      <option value="TVET">TVET (Technical &amp; Vocational)</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                      <option value="General">General / International</option>
+                    </optgroup>
                   </select>
                 </div>
               )}

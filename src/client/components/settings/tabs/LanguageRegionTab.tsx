@@ -65,14 +65,17 @@ export function LanguageRegionTab({ settings }: Props) {
               <option value="IB">International Baccalaureate (IB)</option>
             </optgroup>
             <optgroup label="Higher Education">
-              <option value="University">University / College</option>
+              <option value="University">University (Degree / Postgraduate)</option>
+              <option value="College">College (Diploma / Certificate)</option>
+              <option value="TVET">TVET (Technical &amp; Vocational)</option>
             </optgroup>
             <optgroup label="Other">
               <option value="General">General (No specific curriculum)</option>
             </optgroup>
           </select>
           <p className="text-[11px] text-muted-foreground mt-1">
-            We use this to tailor explanations to your specific exam board standards.
+            We use this to tailor explanations, examples, and depth to your specific level and
+            institution.
           </p>
         </div>
 
