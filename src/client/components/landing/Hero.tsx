@@ -9,28 +9,28 @@ interface HeroProps {
 
 export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
   return (
-    <section className="relative flex-1 min-h-[calc(100dvh-130px)] sm:min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-8 py-6 sm:py-8">
+    <section className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-8 py-2 sm:py-6">
       {/* Ambient background glow & grid */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/4 w-[350px] sm:w-[550px] h-[350px] sm:h-[550px] bg-[#C96A3D]/25 blur-[100px] sm:blur-[140px] rounded-full mix-blend-screen opacity-70 motion-safe:animate-pulse [animation-duration:8s]"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[320px] sm:w-[550px] h-[320px] sm:h-[550px] bg-[#E28743]/15 blur-[110px] sm:blur-[150px] rounded-full mix-blend-screen opacity-60"></div>
+        <div className="absolute top-1/4 left-1/4 w-[320px] sm:w-[550px] h-[320px] sm:h-[550px] bg-[#C96A3D]/25 blur-[90px] sm:blur-[140px] rounded-full mix-blend-screen opacity-70 motion-safe:animate-pulse [animation-duration:8s]"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] sm:w-[550px] h-[300px] sm:h-[550px] bg-[#E28743]/15 blur-[100px] sm:blur-[150px] rounded-full mix-blend-screen opacity-60"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTSA0MCAwIEwgMCAwIDAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] opacity-50"></div>
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between gap-8 lg:gap-14 h-full">
         {/* Left Column: Core Value & CTAs */}
-        <div className="flex flex-1 flex-col items-center lg:items-start text-center lg:text-left justify-center gap-4 sm:gap-6 max-w-2xl mx-auto lg:mx-0">
+        <div className="flex flex-1 flex-col items-center lg:items-start text-center lg:text-left justify-center gap-2.5 sm:gap-5 max-w-2xl mx-auto lg:mx-0">
           {/* Live Status Pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/40 bg-[#C96A3D]/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#E28743] backdrop-blur-md shadow-[0_0_20px_rgba(201,106,61,0.25)]">
-            <span className="relative flex h-2.5 w-2.5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/40 bg-[#C96A3D]/15 px-3 py-1 sm:px-4 sm:py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#E28743] backdrop-blur-md shadow-[0_0_20px_rgba(201,106,61,0.25)]">
+            <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
               <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C96A3D] opacity-80"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C96A3D]"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-[#C96A3D]"></span>
             </span>
             <span>Live · KCSE · TVET · College · University</span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="font-serif text-4xl xs:text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.12]">
+          <h1 className="font-serif text-3xl xs:text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.14]">
             Ace your{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] via-[#E28743] to-[#F59E0B]">
               Exams
@@ -39,22 +39,22 @@ export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
           </h1>
 
           {/* Subheading */}
-          <p className="text-sm xs:text-base sm:text-lg text-white/80 max-w-lg sm:max-w-xl font-light leading-relaxed">
+          <p className="text-xs xs:text-sm sm:text-lg text-white/80 max-w-lg sm:max-w-xl font-light leading-relaxed line-clamp-3 sm:line-clamp-none">
             GilaniAI doesn't just hand you answers — it teaches you how to solve them step-by-step,{" "}
             <span className="text-white font-semibold">
               with zero hallucination and real teacher escalation.
             </span>
           </p>
 
-          {/* Action Buttons (Extra Large & Highly Visible) */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-5 w-full pt-1">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-4 w-full pt-1">
             <Button
               asChild
-              className="rounded-full bg-[#C96A3D] px-8 sm:px-10 py-4 h-13 sm:h-14 text-base sm:text-lg font-bold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_35px_rgba(201,106,61,0.5)] group"
+              className="rounded-full bg-[#C96A3D] px-6 sm:px-10 py-3 sm:py-4 h-11 sm:h-14 text-sm sm:text-lg font-bold text-white hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(201,106,61,0.45)] group"
             >
               <Link to="/login" search={{ redirect: undefined, signout: undefined }}>
                 <span>Start for Free</span>
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1.5 transition-transform" />
               </Link>
             </Button>
 
@@ -62,22 +62,22 @@ export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
               type="button"
               variant="outline"
               onClick={onOpenDemo}
-              className="rounded-full border-white/20 bg-white/10 hover:bg-white/15 hover:border-white/30 px-7 sm:px-9 py-4 h-13 sm:h-14 text-base sm:text-lg font-semibold text-white backdrop-blur-md transition-all flex items-center gap-2.5 shadow-lg"
+              className="rounded-full border-white/20 bg-white/10 hover:bg-white/15 hover:border-white/30 px-5 sm:px-9 py-3 sm:py-4 h-11 sm:h-14 text-xs sm:text-lg font-semibold text-white backdrop-blur-md transition-all flex items-center gap-2 shadow-lg cursor-pointer"
             >
-              <Play className="h-4 w-4 text-[#E28743] fill-[#E28743]" />
+              <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#E28743] fill-[#E28743]" />
               <span>Watch Demo</span>
             </Button>
           </div>
 
           {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1 sm:pt-2 text-xs sm:text-sm text-white/60">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-0.5 sm:pt-2 text-xs sm:text-sm text-white/60">
             <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-[#E28743]" />
+              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#E28743]" />
               Free to start
             </span>
             <span className="text-white/30">·</span>
             <span className="inline-flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-[#E28743]" />
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#E28743]" />
               Zero hallucination
             </span>
             <span className="text-white/30">·</span>
@@ -85,17 +85,15 @@ export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
           </div>
 
           {/* Mobile Curriculum Pills */}
-          <div className="flex lg:hidden flex-wrap items-center justify-center gap-2 pt-1 text-xs text-white/70">
-            <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-medium">
-              ∑ Mathematics
-            </span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-medium">
+          <div className="flex lg:hidden flex-wrap items-center justify-center gap-1.5 pt-0.5 text-[11px] text-white/70">
+            <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-0.5">∑ Math</span>
+            <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-0.5">
               🧪 Sciences
             </span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-medium">
-              ⚡ TVET & Engineering
+            <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-0.5">
+              ⚡ TVET
             </span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-medium">
+            <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-0.5">
               🏛️ Humanities
             </span>
           </div>
