@@ -44,7 +44,7 @@ function TutorIndex() {
   const { session, loading: authLoading } = useAuth();
   const authToken = session?.access_token ?? null;
   const userId = session?.user?.id ?? null;
-  const { profileName } = useProfile(userId);
+  const { profileName, curriculum } = useProfile(userId);
 
   const [creatingThread, setCreatingThread] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
@@ -165,8 +165,11 @@ function TutorIndex() {
             onVoiceClick={composer.toggleVoiceInput}
             isListening={composer.isListening}
             recentThreads={threads}
-            allThreadsPath="/tutor/chats"
             userName={profileName || (session?.user?.user_metadata?.full_name ?? null)}
+            curriculum={curriculum}
+            userId={userId}
+            activeInput={composer.input}
+            onInputChange={composer.setInput}
           />
         </PullToRefresh>
         <div className="flex-shrink-0 z-20 lg:relative fixed bottom-0 left-0 right-0">
