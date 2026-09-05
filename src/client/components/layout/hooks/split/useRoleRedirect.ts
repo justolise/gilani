@@ -37,12 +37,11 @@ export function useRoleRedirect(params: {
 
   useEffect(() => {
     if (loading || signingOutRef.current || !user || roles.length === 0) return;
-    const studentOnlyPaths = ["/tutor", "/tutor"];
-    const isOnStudentRoute = studentOnlyPaths.some((p) => path === p || path.startsWith(p + "/"));
-    if (isAdmin && isOnStudentRoute) navigate({ to: "/admin/users" as any });
-    else if (isTeacher && isOnStudentRoute) navigate({ to: "/teacher/escalations" as any });
-    else if (isStudent && (path.startsWith("/admin") || path.startsWith("/teacher")))
+    if (isStudent && (path.startsWith("/admin") || path.startsWith("/teacher"))) {
       navigate({ to: "/tutor" as any });
+    } else if (isTeacher && path.startsWith("/admin")) {
+      navigate({ to: "/teacher/escalations" as any });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, roles, path]);
 }

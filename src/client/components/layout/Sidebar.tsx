@@ -141,6 +141,8 @@ export function Sidebar({ shell }: Props) {
       userEmail={user?.email}
       currentPlan={currentPlan}
       curriculum={curriculum}
+      isAdmin={isAdmin}
+      isTeacher={isTeacher}
       onCloseSidebar={() => setSidebarOpen(false)}
       onSignOut={signOut}
     />
@@ -191,7 +193,7 @@ export function Sidebar({ shell }: Props) {
                   <TooltipContent side="right">Expand sidebar (⌘B)</TooltipContent>
                 </Tooltip>
 
-                {/* Quick New Chat Icon */}
+                {/* Quick New Chat Icon – students only */}
                 {isStudent && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -208,66 +210,103 @@ export function Sidebar({ shell }: Props) {
                 )}
               </div>
 
-              {/* Middle: Primary Navigation Icons */}
+              {/* Middle: Primary Navigation Icons – all roles see their full nav */}
               <nav className="flex flex-col items-center gap-1.5 w-full px-2">
-                {isStudent &&
-                  STUDENT_NAV.map((item) => {
-                    const active = isNavActive(
-                      path,
-                      item.to,
-                      "exact" in item ? item.exact : undefined,
-                    );
-                    return (
-                      <Tooltip key={item.to}>
-                        <TooltipTrigger asChild>
-                          <Link
-                            to={item.to as any}
-                            className={`
-                              relative flex items-center justify-center w-9 h-9 rounded-xl transition-all
-                              ${
-                                active
-                                  ? "bg-primary/15 text-primary font-semibold"
-                                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                              }
-                            `}
-                          >
-                            {active && (
-                              <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 bg-primary rounded-r" />
-                            )}
-                            <item.icon className="h-4 w-4" />
-                          </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">{item.label}</TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
+                {STUDENT_NAV.map((item) => {
+                  const active = isNavActive(
+                    path,
+                    item.to,
+                    "exact" in item ? item.exact : undefined,
+                  );
+                  return (
+                    <Tooltip key={item.to}>
+                      <TooltipTrigger asChild>
+                        <Link
+                          to={item.to as any}
+                          className={`
+                            relative flex items-center justify-center w-9 h-9 rounded-xl transition-all
+                            ${
+                              active
+                                ? "bg-primary/15 text-primary font-semibold"
+                                : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                            }
+                          `}
+                        >
+                          {active && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 bg-primary rounded-r" />
+                          )}
+                          <item.icon className="h-4 w-4" />
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">{item.label}</TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+
+                {(isTeacher || isAdmin) && (
+                  <span className="w-5 h-px bg-border/40 mx-auto my-0.5" />
+                )}
 
                 {isTeacher && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link
                         to="/teacher/escalations"
-                        className="flex items-center justify-center w-9 h-9 rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all"
+                        className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
+                          path.startsWith("/teacher")
+                            ? "bg-primary/15 text-primary"
+                            : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        }`}
                       >
+                        {path.startsWith("/teacher") && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 bg-primary rounded-r" />
+                        )}
                         <ShieldAlert className="h-4 w-4" />
                       </Link>
                     </TooltipTrigger>
-                    <TooltipContent side="right">Escalations</TooltipContent>
+                    <TooltipContent side="right">Student Escalations</TooltipContent>
                   </Tooltip>
                 )}
 
                 {isAdmin && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        to="/admin/users"
-                        className="flex items-center justify-center w-9 h-9 rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all"
-                      >
-                        <Users className="h-4 w-4" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Dashboard</TooltipContent>
-                  </Tooltip>
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          to="/teacher/escalations"
+                          className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
+                            path.startsWith("/teacher")
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                          }`}
+                        >
+                          {path.startsWith("/teacher") && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 bg-primary rounded-r" />
+                          )}
+                          <ShieldAlert className="h-4 w-4" />
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">Escalations</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          to="/admin/users"
+                          className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
+                            path.startsWith("/admin")
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                          }`}
+                        >
+                          {path.startsWith("/admin") && (
+                            <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 bg-primary rounded-r" />
+                          )}
+                          <Users className="h-4 w-4" />
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">User Management</TooltipContent>
+                    </Tooltip>
+                  </>
                 )}
               </nav>
 
@@ -324,7 +363,7 @@ export function Sidebar({ shell }: Props) {
               </div>
             </div>
 
-            {/* ── 2. Vercel Action Button: "+ New Chat" ── */}
+            {/* ── 2. Vercel Action Button: "+ New Chat" – students only ── */}
             {isStudent && (
               <div className="px-3 pt-3 pb-1 flex-shrink-0">
                 <button
@@ -347,106 +386,128 @@ export function Sidebar({ shell }: Props) {
 
             {/* ── 3. Scrollable Navigation & Recents ── */}
             <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
-              {/* Section: Platform Navigation */}
+              {/* Section: Platform Navigation – all roles */}
               <div className="space-y-0.5">
                 <p className="px-2.5 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
-                  {isTeacher ? "Teacher Tools" : isAdmin ? "Admin Tools" : "Platform"}
+                  Platform
                 </p>
 
-                {isStudent && (
-                  <>
-                    {STUDENT_NAV.map((item) => {
-                      const active = isNavActive(
-                        path,
-                        item.to,
-                        "exact" in item ? item.exact : undefined,
-                      );
-                      return (
-                        <Link
-                          key={item.to}
-                          to={item.to as any}
-                          onClick={() => setSidebarOpen(false)}
-                          className={`
-                            group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer select-none
-                            ${
-                              active
-                                ? "bg-muted/70 text-foreground font-semibold shadow-xs"
-                                : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-                            }
-                          `}
-                        >
-                          <span className="flex items-center gap-2.5 min-w-0 truncate">
-                            <item.icon
-                              className={`h-4 w-4 flex-shrink-0 transition-colors ${
-                                active
-                                  ? "text-primary"
-                                  : "text-muted-foreground/70 group-hover:text-foreground"
-                              }`}
-                            />
-                            <span className="truncate">{item.label}</span>
-                          </span>
-                          {active && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                          )}
-                        </Link>
-                      );
-                    })}
-
-                    {/* Escalate button */}
-                    <button
-                      onClick={() => {
-                        setSidebarOpen(false);
-                        const isTutorThread =
-                          path.startsWith("/tutor/") && path !== "/tutor" && path !== "/tutor/";
-                        if (isTutorThread) {
-                          window.dispatchEvent(new CustomEvent("custom:trigger-escalation"));
+                {/* Student nav tabs – visible to everyone */}
+                {STUDENT_NAV.map((item) => {
+                  const active = isNavActive(
+                    path,
+                    item.to,
+                    "exact" in item ? item.exact : undefined,
+                  );
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to as any}
+                      onClick={() => setSidebarOpen(false)}
+                      className={`
+                        group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer select-none
+                        ${
+                          active
+                            ? "bg-muted/70 text-foreground font-semibold shadow-xs"
+                            : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
                         }
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer"
+                      `}
                     >
-                      <span className="flex items-center gap-2.5 min-w-0">
-                        <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground/70" />
-                        <span>Teacher Help</span>
+                      <span className="flex items-center gap-2.5 min-w-0 truncate">
+                        <item.icon
+                          className={`h-4 w-4 flex-shrink-0 transition-colors ${
+                            active
+                              ? "text-primary"
+                              : "text-muted-foreground/70 group-hover:text-foreground"
+                          }`}
+                        />
+                        <span className="truncate">{item.label}</span>
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70">
-                        Escalate
-                      </span>
-                    </button>
-                  </>
+                      {active && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                      )}
+                    </Link>
+                  );
+                })}
+
+                {/* Escalate to teacher – student only */}
+                {isStudent && (
+                  <button
+                    onClick={() => {
+                      setSidebarOpen(false);
+                      const isTutorThread =
+                        path.startsWith("/tutor/") && path !== "/tutor" && path !== "/tutor/";
+                      if (isTutorThread) {
+                        window.dispatchEvent(new CustomEvent("custom:trigger-escalation"));
+                      }
+                    }}
+                    className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2.5 min-w-0">
+                      <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground/70" />
+                      <span>Teacher Help</span>
+                    </span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70">
+                      Escalate
+                    </span>
+                  </button>
                 )}
 
-                {isTeacher && (
-                  <Link
-                    to="/teacher/escalations"
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
-                      path.startsWith("/teacher/escalations")
-                        ? "bg-muted/70 text-foreground font-semibold shadow-xs"
-                        : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-                    }`}
-                  >
-                    <ShieldAlert className="h-4 w-4 text-primary" />
-                    <span>Student Escalations</span>
-                  </Link>
-                )}
+                {/* Teacher / Admin portal nav – below a divider */}
+                {(isTeacher || isAdmin) && (
+                  <div className="pt-2 mt-1 border-t border-border/20 space-y-0.5">
+                    <p className="px-2.5 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
+                      {isAdmin ? "Admin Tools" : "Teacher Tools"}
+                    </p>
 
-                {isAdmin && (
-                  <Link
-                    to="/admin/users"
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
-                      path.startsWith("/admin")
-                        ? "bg-muted/70 text-foreground font-semibold shadow-xs"
-                        : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-                    }`}
-                  >
-                    <Users className="h-4 w-4 text-primary" />
-                    <span>User Management</span>
-                  </Link>
+                    {(isTeacher || isAdmin) && (
+                      <Link
+                        to="/teacher/escalations"
+                        onClick={() => setSidebarOpen(false)}
+                        className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
+                          path.startsWith("/teacher")
+                            ? "bg-muted/70 text-foreground font-semibold shadow-xs"
+                            : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <ShieldAlert
+                            className={`h-4 w-4 flex-shrink-0 ${path.startsWith("/teacher") ? "text-primary" : "text-purple-400"}`}
+                          />
+                          <span>Student Escalations</span>
+                        </span>
+                        {path.startsWith("/teacher") && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                        )}
+                      </Link>
+                    )}
+
+                    {isAdmin && (
+                      <Link
+                        to="/admin/users"
+                        onClick={() => setSidebarOpen(false)}
+                        className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
+                          path.startsWith("/admin")
+                            ? "bg-muted/70 text-foreground font-semibold shadow-xs"
+                            : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <Users
+                            className={`h-4 w-4 flex-shrink-0 ${path.startsWith("/admin") ? "text-primary" : "text-blue-400"}`}
+                          />
+                          <span>User Management</span>
+                        </span>
+                        {path.startsWith("/admin") && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                        )}
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
 
-              {/* Section: Recent Threads (Student Only) */}
+              {/* Section: Recent Chats – students only */}
               {isStudent && (
                 <div className="space-y-1.5 pt-1 border-t border-border/20">
                   <div className="flex items-center justify-between px-2.5 py-1">

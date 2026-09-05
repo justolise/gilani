@@ -46,21 +46,6 @@ function AuthedShell() {
   const navigate = useNavigate();
   const [timedOut, setTimedOut] = useState(false);
 
-  const studentOnlyPaths = ["/tutor", "/tutor"];
-  const isOnStudentRoute = studentOnlyPaths.some(
-    (p) => shell.path === p || shell.path.startsWith(p + "/"),
-  );
-  const shouldRedirectOffStudentRoute = (shell.isAdmin || shell.isTeacher) && isOnStudentRoute;
-
-  useEffect(() => {
-    if (shouldRedirectOffStudentRoute) {
-      navigate({
-        to: shell.isAdmin ? "/admin/users" : "/teacher/escalations",
-        replace: true,
-      } as any);
-    }
-  }, [shouldRedirectOffStudentRoute, shell.isAdmin]);
-
   // Safety timeout — if auth is still loading after 6s, stop blocking the UI
   useEffect(() => {
     if (!shell.loading) {
@@ -86,10 +71,6 @@ function AuthedShell() {
   }
 
   if (shell.loading || !shell.user || shell.roles.length === 0) {
-    return <GilaniLoader />;
-  }
-
-  if (shouldRedirectOffStudentRoute) {
     return <GilaniLoader />;
   }
 

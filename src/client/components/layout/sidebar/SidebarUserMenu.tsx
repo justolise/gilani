@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Settings, Mail, LogOut, Sparkles, ChevronRight, User } from "lucide-react";
+import { Settings, Mail, LogOut, Sparkles, ChevronRight, ShieldAlert, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -18,6 +18,8 @@ export function SidebarUserMenu({
   userEmail,
   currentPlan,
   curriculum,
+  isAdmin = false,
+  isTeacher = false,
   onCloseSidebar,
   onSignOut,
 }: {
@@ -27,11 +29,14 @@ export function SidebarUserMenu({
   userEmail?: string | null;
   currentPlan: string;
   curriculum?: string | null;
+  isAdmin?: boolean;
+  isTeacher?: boolean;
   onCloseSidebar: () => void;
   onSignOut: () => void;
 }) {
   const { t } = useI18n();
-  const displayName = profileName || userEmail?.split("@")[0] || "Student";
+  const roleLabel = isAdmin ? "Admin" : isTeacher ? "Teacher" : "Student";
+  const displayName = profileName || userEmail?.split("@")[0] || roleLabel;
   const isPro = currentPlan.toLowerCase() === "pro";
 
   return (
@@ -76,11 +81,9 @@ export function SidebarUserMenu({
                   >
                     {isPro ? "PRO" : "FREE"}
                   </span>
-                  {curriculum && (
-                    <span className="text-[10px] text-muted-foreground/60 truncate font-mono">
-                      {curriculum}
-                    </span>
-                  )}
+                  <span className="text-[10px] text-muted-foreground/60 truncate font-mono">
+                    {curriculum || (isAdmin ? "Admin" : isTeacher ? "Teacher" : null)}
+                  </span>
                 </div>
               </div>
               <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
@@ -117,23 +120,57 @@ export function SidebarUserMenu({
           <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-white/[0.06]">
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
-                isPro
-                  ? "bg-[#C96A3D]/20 text-[#E28743] border border-[#C96A3D]/30"
-                  : "bg-white/[0.06] text-white/60"
+                isAdmin
+                  ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                  : isTeacher
+                    ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                    : isPro
+                      ? "bg-[#C96A3D]/20 text-[#E28743] border border-[#C96A3D]/30"
+                      : "bg-white/[0.06] text-white/60"
               }`}
             >
               <Sparkles className="h-2.5 w-2.5" />
-              {currentPlan.toUpperCase()}
+              {isAdmin ? "ADMIN" : isTeacher ? "TEACHER" : currentPlan.toUpperCase()}
             </span>
-            {curriculum && (
+            {(curriculum || isAdmin || isTeacher) && (
               <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 font-mono text-[9px] font-semibold text-white/60">
-                {curriculum}
+                {curriculum || (isAdmin ? "Admin Panel" : "Teacher Portal")}
               </span>
             )}
           </div>
         </DropdownMenuLabel>
 
         <DropdownMenuSeparator className="my-1 bg-white/[0.06]" />
+
+        {/* Teacher-specific nav items visible in dropdown */}
+        {isTeacher && (
+          <DropdownMenuItem asChild>
+            <Link
+              to="/teacher/escalations"
+              onClick={onCloseSidebar}
+              className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            >
+              <ShieldAlert className="h-4 w-4 text-purple-400" />
+              <span>Student Escalations</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {/* Admin-specific nav items visible in dropdown */}
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link
+              to="/admin/users"
+              onClick={onCloseSidebar}
+              className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            >
+              <Users className="h-4 w-4 text-blue-400" />
+              <span>User Management</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {(isAdmin || isTeacher) && <DropdownMenuSeparator className="my-1 bg-white/[0.06]" />}
 
         <DropdownMenuItem asChild>
           <Link
