@@ -151,7 +151,7 @@ export function CompleteProfileForm({
                       autoFocus
                       placeholder="e.g. Alex Onunga"
                       {...register("displayName")}
-                      className={`w-full rounded-xl border bg-white/[0.05] px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full rounded-xl border bg-white/[0.05] px-4 py-3.5 text-base sm:text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 transition-all ${
                         errors.displayName
                           ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
                           : "border-white/[0.12] focus:border-primary focus:ring-primary/30 focus:bg-white/[0.08]"
@@ -172,7 +172,7 @@ export function CompleteProfileForm({
                     <button
                       type="button"
                       onClick={() => setValue("role", "student", { shouldValidate: true })}
-                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
+                      className={`min-h-[48px] flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
                         selectedRole === "student"
                           ? "border-primary bg-primary/20 text-white font-semibold ring-2 ring-primary/30"
                           : "border-white/[0.1] bg-white/[0.03] text-white/70 hover:bg-white/[0.06] hover:text-white"
@@ -184,7 +184,7 @@ export function CompleteProfileForm({
                     <button
                       type="button"
                       onClick={() => setValue("role", "teacher", { shouldValidate: true })}
-                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
+                      className={`min-h-[48px] flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer ${
                         selectedRole === "teacher"
                           ? "border-primary bg-primary/20 text-white font-semibold ring-2 ring-primary/30"
                           : "border-white/[0.1] bg-white/[0.03] text-white/70 hover:bg-white/[0.06] hover:text-white"
@@ -207,7 +207,7 @@ export function CompleteProfileForm({
                   </label>
                   <select
                     {...register("curriculum")}
-                    className="w-full appearance-none rounded-xl border border-white/[0.12] bg-[#1a1c29] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-white/[0.12] bg-[#1a1c29] px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer"
                   >
                     <optgroup label="Secondary School (Kenya)">
                       <option value="KCSE">8-4-4 / KCSE (Kenya)</option>
@@ -233,7 +233,7 @@ export function CompleteProfileForm({
               <button
                 type="submit"
                 disabled={isSubmitting || (missingName && !isValid)}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-primary/25 cursor-pointer mt-2"
+                className="w-full min-h-[48px] flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 active:scale-[0.99] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-primary/25 cursor-pointer mt-2"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -252,7 +252,7 @@ export function CompleteProfileForm({
                 type="button"
                 disabled={isLoggingOut}
                 onClick={handleSignOut}
-                className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white/80 transition-colors disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 py-2.5 px-3 text-xs text-white/40 hover:text-white/80 active:text-white transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isLoggingOut ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

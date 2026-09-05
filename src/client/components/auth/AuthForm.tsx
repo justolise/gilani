@@ -376,7 +376,7 @@ export function AuthForm() {
                     maxLength={254}
                     disabled={loadingProvider !== null}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3.5 text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
+                    className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3.5 text-base sm:text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -432,7 +432,6 @@ export function AuthForm() {
               )}
 
               {/* 6-box OTP input */}
-              {/* 6-box OTP input */}
               <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-[340px] mx-auto">
                 {otp.map((digit, i) => (
                   <input
@@ -471,7 +470,7 @@ export function AuthForm() {
                 )}
               </button>
 
-              {/* Footer actions */}
+              {/* Footer actions with thumb-friendly touch targets */}
               <div className="flex items-center justify-between pt-1">
                 <button
                   type="button"
@@ -480,7 +479,7 @@ export function AuthForm() {
                     setOtp(["", "", "", "", "", ""]);
                     setEmailStatus(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 py-2.5 px-1 text-xs font-medium text-white/40 hover:text-white/70 active:text-white transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   Change email
@@ -490,7 +489,7 @@ export function AuthForm() {
                   type="button"
                   onClick={onResendOtp}
                   disabled={loadingProvider !== null || resendCooldown > 0}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40 disabled:hover:text-white/40 cursor-pointer disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 py-2.5 px-1 text-xs font-medium text-white/40 hover:text-[#E28743] active:text-[#E28743] transition-colors disabled:opacity-40 disabled:hover:text-white/40 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {loadingProvider === "email" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />

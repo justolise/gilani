@@ -55,7 +55,7 @@ const FEATURES = [
 
 function LoginPage() {
   return (
-    <main className="min-h-screen w-full flex bg-[#0d0f18] selection:bg-[#C96A3D]/60 selection:text-white">
+    <main className="min-h-dvh w-full flex bg-[#0d0f18] selection:bg-[#C96A3D]/60 selection:text-white">
       {/* ── Left panel — branding (hidden on mobile) ── */}
       <div className="hidden lg:flex lg:w-[52%] xl:w-[55%] relative flex-col justify-between p-12 xl:p-16 overflow-hidden">
         {/* Background gradient mesh */}
@@ -144,22 +144,15 @@ function LoginPage() {
 
       {/* ── Right panel — auth form ── */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 relative">
-        {/* Back button */}
+        {/* Back button with generous mobile touch target */}
         <Link
           to="/"
-          className="absolute top-4 left-4 lg:top-6 lg:left-6 inline-flex items-center gap-1.5 text-sm font-medium text-white/40 hover:text-white/80 transition-colors group"
+          className="absolute top-4 left-4 lg:top-6 lg:left-6 inline-flex items-center gap-1.5 p-2.5 -m-2.5 text-sm font-medium text-white/40 hover:text-white/80 active:text-white transition-colors group cursor-pointer"
           aria-label="Back to home"
         >
-          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          <ArrowLeft className="h-5 w-5 sm:h-4 sm:w-4 group-hover:-translate-x-0.5 transition-transform" />
           <span className="hidden sm:inline">Back</span>
         </Link>
-
-        {/* Mobile logo */}
-        <div className="lg:hidden mb-8">
-          <Link to="/" className="block w-fit mx-auto hover:opacity-80 transition-opacity">
-            <span className="font-bold italic text-[#E2725B] text-3xl">GilaniAI</span>
-          </Link>
-        </div>
 
         <AuthForm />
       </div>
