@@ -61,7 +61,7 @@ export function LanguageRegionTab({ settings }: Props) {
             </optgroup>
             <optgroup label="International Secondary">
               <option value="IGCSE">Cambridge IGCSE</option>
-              <option value="A-LEVEL">A-Level</option>
+              <option value="A-Level">A-Level</option>
               <option value="IB">International Baccalaureate (IB)</option>
             </optgroup>
             <optgroup label="Higher Education">
@@ -94,6 +94,18 @@ export function LanguageRegionTab({ settings }: Props) {
             <option value="WAT">West Africa Time (WAT)</option>
             <option value="SAST">South Africa Standard Time (SAST)</option>
           </select>
+        </div>
+
+        <div className="pt-2 flex justify-end">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => handleProfileSave(undefined, false)}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+          >
+            {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+            <span>{busy ? "Saving..." : "Save Changes"}</span>
+          </button>
         </div>
       </div>
     </section>

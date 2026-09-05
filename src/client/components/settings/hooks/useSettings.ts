@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { persistLang } from "@/client/i18n/I18nContext";
 import type { LangCode } from "@/client/i18n/translations";
+import { saveUserSettingsFn } from "@/fns/settings.server-fns";
 
 export type TabType =
   | "profile"
@@ -20,6 +21,24 @@ export type TabType =
 type SettingsServerFns = {
   deleteAccount: (args: { data: { otp: string } }) => Promise<void>;
 };
+
+export function applyAccessibilityPrefs(prefs: {
+  highContrast?: boolean;
+  reduceMotion?: boolean;
+  fontSize?: string;
+}) {
+  if (typeof window === "undefined") return;
+  document.documentElement.classList.toggle("high-contrast", !!prefs.highContrast);
+  document.documentElement.classList.toggle("reduce-motion", !!prefs.reduceMotion);
+  document.documentElement.classList.remove("text-sm", "text-base", "text-lg");
+  if (prefs.fontSize === "compact") {
+    document.documentElement.classList.add("text-sm");
+  } else if (prefs.fontSize === "large") {
+    document.documentElement.classList.add("text-lg");
+  } else {
+    document.documentElement.classList.add("text-base");
+  }
+}
 
 export function useSettings(user: any, serverFns: SettingsServerFns) {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -112,10 +131,22 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
           if ((data as any).tutor_tone) setTutorTone((data as any).tutor_tone);
           if ((data as any).tutor_style) setTutorStyle((data as any).tutor_style);
           if ((data as any).tutor_depth) setTutorDepth((data as any).tutor_depth);
+
+          const dbCurriculum =
+            (data as any).curriculum || (data as any).preferences?.curriculum || "KCSE";
+
           if ((data as any).preferences) {
-            setPreferences((prev) => ({ ...prev, ...(data as any).preferences }));
+            setPreferences((prev) => ({
+              ...prev,
+              ...(data as any).preferences,
+              curriculum: dbCurriculum,
+            }));
           } else {
-            // Fallback: load from localStorage if DB column not migrated yet
+            setPreferences((prev) => ({
+              ...prev,
+              curriculum: dbCurriculum,
+            }));
+            // Fallback: load from localStorage if DB preferences not populated yet
             const local = localStorage.getItem(`gilani_prefs_${user.id}`);
             if (local) {
               try {
@@ -123,8 +154,13 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
                 if (parsed.tutorTone) setTutorTone(parsed.tutorTone);
                 if (parsed.tutorStyle) setTutorStyle(parsed.tutorStyle);
                 if (parsed.tutorDepth) setTutorDepth(parsed.tutorDepth);
-                if (parsed.preferences)
-                  setPreferences((prev) => ({ ...prev, ...parsed.preferences }));
+                if (parsed.preferences) {
+                  setPreferences((prev) => ({
+                    ...prev,
+                    ...parsed.preferences,
+                    curriculum: dbCurriculum || parsed.preferences?.curriculum || prev.curriculum,
+                  }));
+                }
               } catch {
                 /* ignore */
               }
@@ -165,21 +201,16 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
   // ─── Accessibility CSS Hookup ────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    // High Contrast
-    document.documentElement.classList.toggle("high-contrast", !!preferences.highContrast);
-
-    // Reduce Motion
-    document.documentElement.classList.toggle("reduce-motion", !!preferences.reduceMotion);
-
-    // Font Size
-    document.documentElement.classList.remove("text-sm", "text-base", "text-lg");
-    if (preferences.fontSize === "compact") {
-      document.documentElement.classList.add("text-sm");
-    } else if (preferences.fontSize === "large") {
-      document.documentElement.classList.add("text-lg");
-    } else {
-      document.documentElement.classList.add("text-base");
+    const accPrefs = {
+      highContrast: !!preferences.highContrast,
+      reduceMotion: !!preferences.reduceMotion,
+      fontSize: preferences.fontSize || "standard",
+    };
+    applyAccessibilityPrefs(accPrefs);
+    try {
+      localStorage.setItem("gilani_accessibility_prefs", JSON.stringify(accPrefs));
+    } catch {
+      /* ignore */
     }
   }, [preferences.highContrast, preferences.reduceMotion, preferences.fontSize]);
 
@@ -218,57 +249,53 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
 
     setBusy(true);
     try {
-      // Step 1: Save core fields that are always present in the profiles table
-      const corePayload: Record<string, any> = {
-        id: user.id,
-        display_name: displayName,
-        avatar_url: avatarUrl,
-        updated_at: new Date().toISOString(),
-      };
+      const activeCurriculum = preferences.curriculum || "KCSE";
 
-      const { error: coreError } = await supabase.from("profiles").upsert(corePayload as any);
+      await saveUserSettingsFn({
+        data: {
+          displayName,
+          avatarUrl,
+          curriculum: activeCurriculum,
+          tutorTone,
+          tutorStyle,
+          tutorDepth,
+          disclaimerAccepted,
+          cookieConsent,
+          analyticsConsent,
+          preferences: {
+            ...preferences,
+            curriculum: activeCurriculum,
+          },
+        },
+      });
 
-      if (coreError) throw coreError;
-
-      // Step 2: Attempt to save extended columns; silently ignore if columns don't exist yet.
-      // These will work once the DB migration has been applied.
-      const extPayload: Record<string, any> = {
-        id: user.id,
-        tutor_tone: tutorTone,
-        tutor_style: tutorStyle,
-        tutor_depth: tutorDepth,
-        disclaimer_accepted: disclaimerAccepted,
-        cookie_consent: cookieConsent,
-        analytics_consent: analyticsConsent,
-        preferences,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error: extError } = await supabase.from("profiles").upsert(extPayload as any);
-
-      if (extError) {
-        // Extended columns missing — store preferences locally as fallback
-        console.warn(
-          "[Settings] Extended columns not yet migrated, using localStorage fallback:",
-          extError.message,
-        );
+      // Also persist to localStorage for offline resilience
+      try {
         localStorage.setItem(
           `gilani_prefs_${user.id}`,
           JSON.stringify({
+            displayName,
+            avatarUrl,
             tutorTone,
             tutorStyle,
             tutorDepth,
             disclaimerAccepted,
             cookieConsent,
             analyticsConsent,
-            preferences,
+            preferences: {
+              ...preferences,
+              curriculum: activeCurriculum,
+            },
           }),
         );
+      } catch {
+        /* ignore */
       }
 
       // Analytics: log which tab/preferences were saved
       fireSettingsEvent("settings.preferences_saved", {
         tab: activeTab,
+        curriculum: activeCurriculum,
         tutorTone,
         tutorStyle,
         tutorDepth,
@@ -293,6 +320,8 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     return () => clearTimeout(timer);
   }, [
     initialLoaded,
+    displayName,
+    avatarUrl,
     tutorTone,
     tutorStyle,
     tutorDepth,
@@ -342,7 +371,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
               return;
             }
             setAvatarUrl(base64);
-            toast.success("Photo uploaded and optimized! Save settings to sync. 📸");
+            toast.success("Photo updated! ✨");
           }
         };
         img.src = event.target?.result as string;
@@ -399,10 +428,9 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     localStorage.removeItem("gilani_disclaimer_accepted");
     setDisclaimerAccepted(false);
     if (user?.id) {
-      await supabase
-        .from("profiles")
-        .update({ disclaimer_accepted: false, updated_at: new Date().toISOString() })
-        .eq("id", user.id);
+      await saveUserSettingsFn({
+        data: { disclaimerAccepted: false },
+      }).catch(console.error);
     }
     toast.info(
       "AI Disclaimer consent revoked. You will be prompted to read it again on your next dashboard visit.",
@@ -422,11 +450,9 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
       );
     }
     if (user?.id) {
-      const updateData =
-        type === "cookie"
-          ? { cookie_consent: value, updated_at: new Date().toISOString() }
-          : { analytics_consent: value, updated_at: new Date().toISOString() };
-      await supabase.from("profiles").update(updateData).eq("id", user.id);
+      await saveUserSettingsFn({
+        data: type === "cookie" ? { cookieConsent: value } : { analyticsConsent: value },
+      }).catch(console.error);
     }
   };
 

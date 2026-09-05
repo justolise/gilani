@@ -25,6 +25,10 @@ export function setCachedProfile(userId: string, data: CachedProfile) {
   _profileCache.set(userId, { data, expiresAt: Date.now() + 60_000 });
 }
 
+export function invalidateCachedProfile(userId: string) {
+  _profileCache.delete(userId);
+}
+
 export function isRateLimitError(error: unknown): boolean {
   if (!error) return false;
   const err = error as any;

@@ -65,6 +65,18 @@ export function ProfileDetailsTab({ settings, userEmail, PresetAvatarSVG }: Prop
             className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-all"
           />
         </div>
+
+        <div className="pt-2 flex justify-end">
+          <button
+            type="button"
+            disabled={settings.busy}
+            onClick={() => settings.handleProfileSave(undefined, false)}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+          >
+            {settings.busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+            <span>{settings.busy ? "Saving..." : "Save Changes"}</span>
+          </button>
+        </div>
       </div>
     </section>
   );

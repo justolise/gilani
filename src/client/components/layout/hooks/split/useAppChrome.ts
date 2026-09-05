@@ -20,6 +20,25 @@ export function useAppChrome() {
         document.documentElement.classList.toggle("dark", hasDark);
         setIsDark(hasDark);
       }
+
+      try {
+        const raw = localStorage.getItem("gilani_accessibility_prefs");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          document.documentElement.classList.toggle("high-contrast", !!parsed.highContrast);
+          document.documentElement.classList.toggle("reduce-motion", !!parsed.reduceMotion);
+          document.documentElement.classList.remove("text-sm", "text-base", "text-lg");
+          if (parsed.fontSize === "compact") {
+            document.documentElement.classList.add("text-sm");
+          } else if (parsed.fontSize === "large") {
+            document.documentElement.classList.add("text-lg");
+          } else {
+            document.documentElement.classList.add("text-base");
+          }
+        }
+      } catch {
+        /* ignore */
+      }
     }
   }, []);
 
