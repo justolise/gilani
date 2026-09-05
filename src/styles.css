@@ -137,6 +137,89 @@
   --sidebar-ring: #c96a3d;
 }
 
+/* ─── Study Accent Palettes (Light Mode) ────────────────────────────────── */
+[data-theme-accent="emerald"] {
+  --primary: hsl(158 64% 32%);
+  --primary-foreground: hsl(158 30% 98%);
+  --ring: hsl(158 64% 32% / 0.4);
+  --sidebar-primary: hsl(158 64% 32%);
+  --sidebar-primary-foreground: hsl(158 30% 98%);
+  --sidebar-ring: hsl(158 64% 32% / 0.4);
+}
+
+[data-theme-accent="sapphire"] {
+  --primary: hsl(215 85% 42%);
+  --primary-foreground: hsl(215 30% 98%);
+  --ring: hsl(215 85% 42% / 0.4);
+  --sidebar-primary: hsl(215 85% 42%);
+  --sidebar-primary-foreground: hsl(215 30% 98%);
+  --sidebar-ring: hsl(215 85% 42% / 0.4);
+}
+
+[data-theme-accent="amber"] {
+  --primary: hsl(38 92% 38%);
+  --primary-foreground: hsl(38 30% 98%);
+  --ring: hsl(38 92% 38% / 0.4);
+  --sidebar-primary: hsl(38 92% 38%);
+  --sidebar-primary-foreground: hsl(38 30% 98%);
+  --sidebar-ring: hsl(38 92% 38% / 0.4);
+}
+
+[data-theme-accent="amethyst"] {
+  --primary: hsl(270 65% 45%);
+  --primary-foreground: hsl(270 30% 98%);
+  --ring: hsl(270 65% 45% / 0.4);
+  --sidebar-primary: hsl(270 65% 45%);
+  --sidebar-primary-foreground: hsl(270 30% 98%);
+  --sidebar-ring: hsl(270 65% 45% / 0.4);
+}
+
+/* ─── Study Accent Palettes (Dark Mode) ─────────────────────────────────── */
+.dark[data-theme-accent="emerald"],
+.dark [data-theme-accent="emerald"] {
+  --primary: #2ea071;
+  --primary-foreground: #14231b;
+  --ring: #2ea071;
+  --sidebar-primary: #2ea071;
+  --sidebar-primary-foreground: #14231b;
+  --sidebar-ring: #2ea071;
+}
+
+.dark[data-theme-accent="sapphire"],
+.dark [data-theme-accent="sapphire"] {
+  --primary: #3b82f6;
+  --primary-foreground: #0f172a;
+  --ring: #3b82f6;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-ring: #3b82f6;
+}
+
+.dark[data-theme-accent="amber"],
+.dark [data-theme-accent="amber"] {
+  --primary: #f59e0b;
+  --primary-foreground: #261704;
+  --ring: #f59e0b;
+  --sidebar-primary: #f59e0b;
+  --sidebar-primary-foreground: #261704;
+  --sidebar-ring: #f59e0b;
+}
+
+.dark[data-theme-accent="amethyst"],
+.dark [data-theme-accent="amethyst"] {
+  --primary: #a855f7;
+  --primary-foreground: #220f38;
+  --ring: #a855f7;
+  --sidebar-primary: #a855f7;
+  --sidebar-primary-foreground: #220f38;
+  --sidebar-ring: #a855f7;
+}
+
+/* ─── Academic Serif Typography Variant ─────────────────────────────────── */
+html[data-font-family="serif"] body {
+  font-family: var(--font-serif);
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;

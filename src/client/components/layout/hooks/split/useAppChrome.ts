@@ -39,6 +39,25 @@ export function useAppChrome() {
       } catch {
         /* ignore */
       }
+
+      try {
+        const visualRaw = localStorage.getItem("gilani_visual_prefs");
+        if (visualRaw) {
+          const parsed = JSON.parse(visualRaw);
+          if (parsed.themeAccent && parsed.themeAccent !== "terracotta") {
+            document.documentElement.setAttribute("data-theme-accent", parsed.themeAccent);
+          } else {
+            document.documentElement.removeAttribute("data-theme-accent");
+          }
+          if (parsed.fontFamily === "serif") {
+            document.documentElement.setAttribute("data-font-family", "serif");
+          } else {
+            document.documentElement.removeAttribute("data-font-family");
+          }
+        }
+      } catch {
+        /* ignore */
+      }
     }
   }, []);
 

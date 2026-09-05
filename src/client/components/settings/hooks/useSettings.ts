@@ -5,6 +5,7 @@ import { friendlyError } from "@/shared/utils/async";
 import { persistLang } from "@/client/i18n/I18nContext";
 import type { LangCode } from "@/client/i18n/translations";
 import { saveUserSettingsFn } from "@/fns/settings.server-fns";
+import { setClientCookie } from "@/shared/utils/cookies";
 
 export type TabType =
   | "profile"
@@ -40,6 +41,23 @@ export function applyAccessibilityPrefs(prefs: {
   }
 }
 
+export function applyVisualThemePrefs(prefs: { themeAccent?: string; fontFamily?: string }) {
+  if (typeof window === "undefined") return;
+  const accent = prefs.themeAccent || "terracotta";
+  if (accent === "terracotta") {
+    document.documentElement.removeAttribute("data-theme-accent");
+  } else {
+    document.documentElement.setAttribute("data-theme-accent", accent);
+  }
+
+  const font = prefs.fontFamily || "sans";
+  if (font === "serif") {
+    document.documentElement.setAttribute("data-font-family", "serif");
+  } else {
+    document.documentElement.removeAttribute("data-font-family");
+  }
+}
+
 export function useSettings(user: any, serverFns: SettingsServerFns) {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -71,7 +89,16 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     fontSize: "standard",
     reduceMotion: false,
     highContrast: false,
+    themeAccent: "terracotta",
+    fontFamily: "sans",
+    targetExam: "",
+    targetExamDate: "",
+    answerStyle: "socratic",
+    checkQuestionDefault: false,
+    silentMode: false,
   });
+
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   const updatePreference = useCallback((key: string, value: any) => {
     setPreferences((prev) => ({ ...prev, [key]: value }));
@@ -214,6 +241,23 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     }
   }, [preferences.highContrast, preferences.reduceMotion, preferences.fontSize]);
 
+  // ─── Visual Theme Accent & Typography Hookup ─────────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const visualPrefs = {
+      themeAccent: preferences.themeAccent || "terracotta",
+      fontFamily: preferences.fontFamily || "sans",
+    };
+    applyVisualThemePrefs(visualPrefs);
+    try {
+      localStorage.setItem("gilani_visual_prefs", JSON.stringify(visualPrefs));
+      setClientCookie("gilani_theme_accent", visualPrefs.themeAccent);
+      setClientCookie("gilani_font_family", visualPrefs.fontFamily);
+    } catch {
+      /* ignore */
+    }
+  }, [preferences.themeAccent, preferences.fontFamily]);
+
   // ─── Analytics ────────────────────────────────────────────────────────────────
   const fireSettingsEvent = useCallback(
     (action: string, payload?: Record<string, any>) => {
@@ -302,6 +346,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
         preferencesKeys: Object.keys(preferences),
       });
 
+      setLastSavedAt(new Date());
       if (!quiet) toast.success("Settings saved successfully! ✨");
       window.dispatchEvent(new CustomEvent("custom:profile-updated"));
     } catch (err: any) {
@@ -385,6 +430,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     setIsDark(nextDark);
     if (typeof window !== "undefined") {
       localStorage.setItem("theme", theme);
+      setClientCookie("gilani_theme", theme);
       document.documentElement.classList.toggle("dark", nextDark);
       toast.success(nextDark ? "Dark theme active 🌙" : "Light theme active ☀️", {
         duration: 1500,
@@ -519,5 +565,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     handleDisclaimerRevoke,
     toggleConsent,
     handleEmailChange,
+    isSyncing: busy,
+    lastSavedAt,
   };
 }
