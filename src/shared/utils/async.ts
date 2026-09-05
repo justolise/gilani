@@ -26,10 +26,17 @@ const ERROR_PATTERNS: Array<{ test: RegExp | string; message: string }> = [
     message: "Password too short — use at least 8 characters.",
   },
   {
+    test: /over_email_send_rate_limit|email rate limit/i,
+    message: "Too many code requests. Please wait a minute before requesting another code.",
+  },
+  {
+    test: /token.*(expired|invalid)/i,
+    message: "The 6-digit verification code is invalid or has expired. Please request a new code.",
+  },
+  {
     test: /for security purposes.*after \d+ seconds/i,
     message: "Too many attempts. Please wait and try again.",
   },
-  { test: /token has expired/i, message: "Your session has expired. Please sign in again." },
   { test: /jwt expired/i, message: "Your session has expired. Please sign in again." },
   { test: /unauthorized/i, message: "Please sign in to continue." },
   { test: /401/i, message: "Your session has expired. Please sign in again." },

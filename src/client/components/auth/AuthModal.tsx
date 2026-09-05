@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from "react";
+import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Logo } from "@/client/components/ui/logo";
 import { supabase } from "@/client/supabase";
@@ -28,8 +28,18 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
   const [loadingProvider, setLoadingProvider] = useState<"google" | "email" | "otp" | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const otpString = otpDigits.join("");
+
+  // ── Cooldown timer ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const onGoogle = async () => {
     setLoadingProvider("google");
@@ -77,6 +87,56 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     }
   };
 
+  const verifyOtpWithCode = useCallback(
+    async (codeToVerify: string) => {
+      if (codeToVerify.length !== 6) return toast.error("Please enter the 6-digit code.");
+      setLoadingProvider("otp");
+
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: email.trim().toLowerCase(),
+          token: codeToVerify,
+          type: "email",
+        });
+
+        if (error || !data.session) {
+          setLoadingProvider(null);
+          setOtpDigits(["", "", "", "", "", ""]);
+          setTimeout(() => otpRefs.current[0]?.focus(), 80);
+          return toast.error(
+            friendlyError(
+              error as { message?: string },
+              "The 6-digit code is incorrect or has expired. Please try again.",
+            ),
+          );
+        }
+
+        const userId = data.session.user.id;
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("display_name, onboarding_completed")
+          .eq("id", userId)
+          .maybeSingle();
+
+        setLoadingProvider(null);
+        if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
+          setShowProfileForm(true);
+        } else {
+          setShowLoader(true);
+          await routeToDestination();
+          onAuthComplete?.();
+          onClose();
+        }
+      } catch (err) {
+        setLoadingProvider(null);
+        toast.error(
+          friendlyError(err as { message?: string }, "Failed to verify code. Please try again."),
+        );
+      }
+    },
+    [email, onAuthComplete, onClose],
+  );
+
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
       const digits = value.replace(/\D/g, "").slice(0, 6).split("");
@@ -86,13 +146,26 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
       });
       setOtpDigits(next);
       otpRefs.current[Math.min(index + digits.length, 5)]?.focus();
+
+      const fullCode = next.join("");
+      if (fullCode.length === 6 && next.every((d) => d !== "")) {
+        verifyOtpWithCode(fullCode);
+      }
       return;
     }
     const digit = value.replace(/\D/g, "");
     const next = [...otpDigits];
     next[index] = digit;
     setOtpDigits(next);
-    if (digit && index < 5) otpRefs.current[index + 1]?.focus();
+
+    if (digit && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+
+    const fullCode = next.join("");
+    if (fullCode.length === 6 && next.every((d) => d !== "")) {
+      verifyOtpWithCode(fullCode);
+    }
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -106,17 +179,18 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
 
   const onEmailContinue = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email) return toast.error("Please enter your email address.");
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return toast.error("Please enter your email address.");
     setLoadingProvider("email");
     onAuthStart?.();
 
     try {
-      const { status } = await checkEmailStatus({ data: { email } });
+      const { status } = await checkEmailStatus({ data: { email: cleanEmail } });
       setEmailStatus(status);
 
       if (status === "registered") {
         // Fully onboarded returning user — instant session, no OTP
-        const result = await instantLogin({ data: { email } });
+        const result = await instantLogin({ data: { email: cleanEmail } });
         const { error } = await supabase.auth.setSession({
           access_token: result.access_token,
           refresh_token: result.refresh_token,
@@ -144,9 +218,10 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
         onClose();
       } else {
         // 'new' or 'incomplete' — always require OTP
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await supabase.auth.signInWithOtp({ email: cleanEmail });
         if (error) throw error;
         setOtpSent(true);
+        setResendCooldown(60);
         setLoadingProvider(null);
         setTimeout(() => otpRefs.current[0]?.focus(), 80);
       }
@@ -160,13 +235,17 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
   };
 
   const onResendOtp = async () => {
+    if (resendCooldown > 0 || loadingProvider !== null) return;
     setLoadingProvider("email");
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email });
+      const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase() });
       if (error) throw error;
-      toast.success("A new code has been sent.");
-    } catch {
-      toast.error("Failed to resend code.");
+      setResendCooldown(60);
+      toast.success("A new 6-digit code has been sent.");
+    } catch (err) {
+      toast.error(
+        friendlyError(err as { message?: string }, "Failed to resend code. Please try again."),
+      );
     } finally {
       setLoadingProvider(null);
     }
@@ -174,39 +253,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
 
   const onVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    if (otpString.length !== 6) return toast.error("Please enter the 6-digit code.");
-    setLoadingProvider("otp");
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token: otpString,
-      type: "email",
-    });
-    if (error || !data.session) {
-      setLoadingProvider(null);
-      setOtpDigits(["", "", "", "", "", ""]);
-      setTimeout(() => otpRefs.current[0]?.focus(), 80);
-      return toast.error(
-        friendlyError(error as { message?: string }, "Invalid or expired code. Please try again."),
-      );
-    }
-
-    const userId = data.session.user.id;
-    const { data: profileRow } = await supabase
-      .from("profiles")
-      .select("display_name, onboarding_completed")
-      .eq("id", userId)
-      .maybeSingle();
-
-    setLoadingProvider(null);
-    if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
-      setShowProfileForm(true);
-    } else {
-      setShowLoader(true);
-      await routeToDestination();
-      onAuthComplete?.();
-      onClose();
-    }
+    await verifyOtpWithCode(otpString);
   };
 
   const onSaveProfile = async (
@@ -239,28 +286,38 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
   }
 
   if (showProfileForm) {
-    return <CompleteProfileForm onSave={onSaveProfile} />;
+    return (
+      <CompleteProfileForm
+        onSave={onSaveProfile}
+        onCancel={() => {
+          setShowProfileForm(false);
+          setOtpSent(false);
+          setOtpDigits(["", "", "", "", "", ""]);
+          setEmailStatus(null);
+        }}
+      />
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-[420px] z-10 animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-[420px] z-10 my-auto animate-in fade-in zoom-in-95 duration-300">
         {/* Outer glow */}
         <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[#C96A3D]/20 via-transparent to-transparent blur-sm pointer-events-none" />
 
-        <div className="relative rounded-3xl border border-white/[0.08] bg-[#13151f]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="relative rounded-3xl border border-white/[0.08] bg-[#13151f]/95 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
           {/* Top accent bar */}
-          <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70" />
+          <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70 flex-shrink-0" />
 
-          <div className="p-7 sm:p-9 space-y-5">
+          <div className="overflow-y-auto p-6 sm:p-8 space-y-5">
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 rounded-full p-1.5 text-white/30 hover:text-white hover:bg-white/10 transition-all"
+              className="absolute top-4 right-4 p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -270,14 +327,30 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
             <div className="text-center space-y-2 pt-1">
               <Logo to="/" size="md" className="mx-auto" />
               <div className="space-y-1 pt-1">
-                <h1 className="font-serif text-2xl font-black text-white tracking-tight">
-                  Welcome back
-                </h1>
-                <p className="text-sm text-white/40">Continue to your account.</p>
+                {!otpSent ? (
+                  <>
+                    <h1 className="font-serif text-2xl font-black text-white tracking-tight">
+                      Sign in to GilaniAI
+                    </h1>
+                    <p className="text-xs sm:text-sm text-white/40">
+                      Access your AI tutor, notes, and study tools
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h1 className="font-serif text-2xl font-black text-white tracking-tight">
+                      Check your email
+                    </h1>
+                    <p className="text-xs sm:text-sm text-white/40">
+                      We sent a 6-digit code to{" "}
+                      <span className="text-white/70 font-medium">{email}</span>
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Google Sign-in & Email Form (Only shown if OTP is not sent) */}
+            {/* Content */}
             {!otpSent ? (
               <>
                 <button
@@ -369,7 +442,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                 )}
 
                 {/* 6-box OTP */}
-                <div className="flex gap-2 justify-center">
+                <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-[340px] mx-auto">
                   {otpDigits.map((digit, i) => (
                     <input
                       key={i}
@@ -380,13 +453,14 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                       inputMode="numeric"
                       maxLength={6}
                       value={digit}
+                      autoComplete={i === 0 ? "one-time-code" : "off"}
+                      aria-label={`Digit ${i + 1} of 6`}
                       disabled={loadingProvider !== null}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`text-center text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
+                      className={`flex-1 min-w-0 max-w-[46px] h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
                         ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
                         focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
-                      style={{ width: "2.75rem", height: "3.25rem" }}
                     />
                   ))}
                 </div>
@@ -414,7 +488,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                       setOtpDigits(["", "", "", "", "", ""]);
                       setEmailStatus(null);
                     }}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
                     Change email
@@ -422,15 +496,15 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                   <button
                     type="button"
                     onClick={onResendOtp}
-                    disabled={loadingProvider !== null}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40"
+                    disabled={loadingProvider !== null || resendCooldown > 0}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40 disabled:hover:text-white/40 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {loadingProvider === "email" ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     ) : (
                       <RefreshCw className="h-3.5 w-3.5" />
                     )}
-                    Resend code
+                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
                   </button>
                 </div>
               </form>

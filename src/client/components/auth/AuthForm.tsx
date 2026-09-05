@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from "react";
+import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Logo } from "@/client/components/ui/logo";
 import { supabase } from "@/client/supabase";
@@ -23,7 +23,17 @@ export function AuthForm() {
   const [loadingProvider, setLoadingProvider] = useState<"google" | "email" | "otp" | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // ── Cooldown timer ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -54,6 +64,59 @@ export function AuthForm() {
     if (error) throw error;
   };
 
+  // ── OTP verification logic ────────────────────────────────────────────────
+
+  const verifyOtpWithCode = useCallback(
+    async (codeToVerify: string) => {
+      if (codeToVerify.length !== 6) return toast.error("Please enter the 6-digit code.");
+      setLoadingProvider("otp");
+
+      try {
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: email.trim().toLowerCase(),
+          token: codeToVerify,
+          type: "email",
+        });
+
+        if (error || !data.session) {
+          setLoadingProvider(null);
+          setOtp(["", "", "", "", "", ""]);
+          setTimeout(() => otpRefs.current[0]?.focus(), 80);
+          return toast.error(
+            friendlyError(
+              error as { message?: string },
+              "The 6-digit code is incorrect or has expired. Please try again.",
+            ),
+          );
+        }
+
+        // OTP verified — check profile completion
+        const userId = data.session.user.id;
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("display_name, onboarding_completed")
+          .eq("id", userId)
+          .maybeSingle();
+
+        setLoadingProvider(null);
+
+        if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
+          // Profile incomplete — must complete before accessing app
+          setShowProfileForm(true);
+        } else {
+          setShowLoader(true);
+          await routeToDestination();
+        }
+      } catch (err) {
+        setLoadingProvider(null);
+        toast.error(
+          friendlyError(err as { message?: string }, "Failed to verify code. Please try again."),
+        );
+      }
+    },
+    [email],
+  );
+
   // ── OTP digit input ───────────────────────────────────────────────────────
 
   const handleOtpChange = (index: number, value: string) => {
@@ -67,13 +130,27 @@ export function AuthForm() {
       setOtp(next);
       const focusIdx = Math.min(index + digits.length, 5);
       otpRefs.current[focusIdx]?.focus();
+
+      const fullCode = next.join("");
+      if (fullCode.length === 6 && next.every((d) => d !== "")) {
+        verifyOtpWithCode(fullCode);
+      }
       return;
     }
+
     const digit = value.replace(/\D/g, "");
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
-    if (digit && index < 5) otpRefs.current[index + 1]?.focus();
+
+    if (digit && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+
+    const fullCode = next.join("");
+    if (fullCode.length === 6 && next.every((d) => d !== "")) {
+      verifyOtpWithCode(fullCode);
+    }
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -112,16 +189,17 @@ export function AuthForm() {
 
   const onEmailContinue = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email) return toast.error("Please enter your email address.");
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return toast.error("Please enter your email address.");
     setLoadingProvider("email");
 
     try {
-      const { status } = await checkEmailStatus({ data: { email } });
+      const { status } = await checkEmailStatus({ data: { email: cleanEmail } });
       setEmailStatus(status);
 
       if (status === "registered") {
         // Fully onboarded returning user — skip OTP, instant session
-        const result = await instantLogin({ data: { email } });
+        const result = await instantLogin({ data: { email: cleanEmail } });
         const { error } = await supabase.auth.setSession({
           access_token: result.access_token,
           refresh_token: result.refresh_token,
@@ -149,8 +227,9 @@ export function AuthForm() {
         await routeToDestination();
       } else {
         // 'new' or 'incomplete' — always require OTP verification first
-        await sendOtp(email);
+        await sendOtp(cleanEmail);
         setStep("otp");
+        setResendCooldown(60);
         setLoadingProvider(null);
         // Focus first OTP box after render
         setTimeout(() => otpRefs.current[0]?.focus(), 80);
@@ -165,50 +244,20 @@ export function AuthForm() {
 
   const onVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    if (otpString.length !== 6) return toast.error("Please enter the 6-digit code.");
-    setLoadingProvider("otp");
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token: otpString,
-      type: "email",
-    });
-
-    if (error || !data.session) {
-      setLoadingProvider(null);
-      setOtp(["", "", "", "", "", ""]);
-      setTimeout(() => otpRefs.current[0]?.focus(), 80);
-      return toast.error(
-        friendlyError(error as { message?: string }, "Invalid or expired code. Please try again."),
-      );
-    }
-
-    // OTP verified — check profile completion
-    const userId = data.session.user.id;
-    const { data: profileRow } = await supabase
-      .from("profiles")
-      .select("display_name, onboarding_completed")
-      .eq("id", userId)
-      .maybeSingle();
-
-    setLoadingProvider(null);
-
-    if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
-      // Profile incomplete — must complete before accessing app
-      setShowProfileForm(true);
-    } else {
-      setShowLoader(true);
-      await routeToDestination();
-    }
+    await verifyOtpWithCode(otpString);
   };
 
   const onResendOtp = async () => {
+    if (resendCooldown > 0 || loadingProvider !== null) return;
     setLoadingProvider("email");
     try {
-      await sendOtp(email);
-      toast.success("A new code has been sent to your email.");
+      await sendOtp(email.trim().toLowerCase());
+      setResendCooldown(60);
+      toast.success("A new 6-digit code has been sent to your email.");
     } catch (err) {
-      toast.error("Failed to resend code. Please try again.");
+      toast.error(
+        friendlyError(err as { message?: string }, "Failed to resend code. Please try again."),
+      );
     } finally {
       setLoadingProvider(null);
     }
@@ -240,7 +289,19 @@ export function AuthForm() {
   // ── render guards ─────────────────────────────────────────────────────────
 
   if (showLoader) return <WorkspaceLoader />;
-  if (showProfileForm) return <CompleteProfileForm onSave={onSaveProfile} />;
+  if (showProfileForm) {
+    return (
+      <CompleteProfileForm
+        onSave={onSaveProfile}
+        onCancel={() => {
+          setShowProfileForm(false);
+          setStep("email");
+          setOtp(["", "", "", "", "", ""]);
+          setEmailStatus(null);
+        }}
+      />
+    );
+  }
 
   // ── UI ────────────────────────────────────────────────────────────────────
 
@@ -371,7 +432,8 @@ export function AuthForm() {
               )}
 
               {/* 6-box OTP input */}
-              <div className="flex gap-2 justify-center">
+              {/* 6-box OTP input */}
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-[340px] mx-auto">
                 {otp.map((digit, i) => (
                   <input
                     key={i}
@@ -382,13 +444,14 @@ export function AuthForm() {
                     inputMode="numeric"
                     maxLength={6}
                     value={digit}
+                    autoComplete={i === 0 ? "one-time-code" : "off"}
+                    aria-label={`Digit ${i + 1} of 6`}
                     disabled={loadingProvider !== null}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className={`w-11 h-13 text-center text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
+                    className={`flex-1 min-w-0 max-w-[46px] h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
                       ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
                       focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
-                    style={{ width: "2.75rem", height: "3.25rem" }}
                   />
                 ))}
               </div>
@@ -417,7 +480,7 @@ export function AuthForm() {
                     setOtp(["", "", "", "", "", ""]);
                     setEmailStatus(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   Change email
@@ -426,15 +489,15 @@ export function AuthForm() {
                 <button
                   type="button"
                   onClick={onResendOtp}
-                  disabled={loadingProvider !== null}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40"
+                  disabled={loadingProvider !== null || resendCooldown > 0}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40 disabled:hover:text-white/40 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {loadingProvider === "email" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <RefreshCw className="h-3.5 w-3.5" />
                   )}
-                  Resend code
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
                 </button>
               </div>
             </form>

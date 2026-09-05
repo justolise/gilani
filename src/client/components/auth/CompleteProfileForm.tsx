@@ -1,8 +1,21 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Logo } from "@/client/components/ui/logo";
-import { ArrowRight, Loader2, User, GraduationCap, BookOpen, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  User,
+  GraduationCap,
+  BookOpen,
+  Sparkles,
+  LogOut,
+  AlertCircle,
+} from "lucide-react";
+import { supabase } from "@/client/supabase";
+import { toast } from "sonner";
+import { friendlyError } from "@/shared/utils/async";
 
 const profileSchema = z.object({
   displayName: z
@@ -22,6 +35,7 @@ interface CompleteProfileFormProps {
   missingName?: boolean;
   missingRole?: boolean;
   onSave: (displayName: string, role: "student" | "teacher", curriculum?: string) => Promise<void>;
+  onCancel?: () => void;
 }
 
 export function CompleteProfileForm({
@@ -29,7 +43,11 @@ export function CompleteProfileForm({
   missingName = true,
   missingRole = true,
   onSave,
+  onCancel,
 }: CompleteProfileFormProps) {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -49,24 +67,44 @@ export function CompleteProfileForm({
   const selectedRole = watch("role");
 
   const onSubmitForm = async (data: ProfileFormValues) => {
+    setErrorMessage(null);
     try {
       await onSave(data.displayName.trim(), data.role, data.curriculum);
+    } catch (err) {
+      const msg = friendlyError(
+        err as { message?: string },
+        "Failed to complete setup. Please try again.",
+      );
+      setErrorMessage(msg);
+      toast.error(msg);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    try {
+      if (onCancel) {
+        onCancel();
+        return;
+      }
+      await supabase.auth.signOut();
+      window.location.href = "/login";
     } catch {
-      // Error handled by caller
+      window.location.href = "/login";
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[460px] animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="relative w-full max-w-[460px] my-auto animate-in zoom-in-95 duration-300">
         {/* Outer glow */}
         <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/30 via-primary/10 to-transparent blur-md pointer-events-none" />
 
-        <div className="relative rounded-3xl border border-white/[0.12] bg-[#13151f]/95 dark:bg-[#13151f]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="relative rounded-3xl border border-white/[0.12] bg-[#13151f]/98 dark:bg-[#13151f]/98 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
           {/* Top accent bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+          <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 flex-shrink-0" />
 
-          <div className="p-6 sm:p-8 space-y-6">
+          <div className="overflow-y-auto p-5 sm:p-7 space-y-5">
             {/* Header */}
             <div className="text-center space-y-2 pt-1">
               <Logo to="/" size="md" className="mx-auto" />
@@ -83,6 +121,14 @@ export function CompleteProfileForm({
                 </p>
               </div>
             </div>
+
+            {/* Error banner if submission failed */}
+            {errorMessage && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
+                <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="leading-relaxed">{errorMessage}</p>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
               {/* Display Name / Username */}
@@ -199,6 +245,23 @@ export function CompleteProfileForm({
                 )}
               </button>
             </form>
+
+            {/* Escape hatch for signing in with another account */}
+            <div className="pt-2 border-t border-white/[0.06] text-center">
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={handleSignOut}
+                className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white/80 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <LogOut className="h-3.5 w-3.5" />
+                )}
+                Sign in with another account
+              </button>
+            </div>
           </div>
         </div>
       </div>
