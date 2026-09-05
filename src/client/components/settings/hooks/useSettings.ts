@@ -100,6 +100,8 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     answerStyle: "socratic",
     checkQuestionDefault: false,
     silentMode: false,
+    bio: "",
+    school: "",
   });
 
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -398,8 +400,8 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Original photo must be under 5MB.");
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error("Original photo must be under 8MB.");
         return;
       }
 
@@ -408,40 +410,44 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX_SIZE = 128;
-          let width = img.width;
-          let height = img.height;
+          const TARGET_SIZE = 192; // retina display resolution
+          const width = img.width;
+          const height = img.height;
 
-          if (width > height) {
-            if (width > MAX_SIZE) {
-              height *= MAX_SIZE / width;
-              width = MAX_SIZE;
-            }
-          } else {
-            if (height > MAX_SIZE) {
-              width *= MAX_SIZE / height;
-              height = MAX_SIZE;
-            }
-          }
+          // Square center-crop for a perfect circular avatar
+          const minDim = Math.min(width, height);
+          const startX = (width - minDim) / 2;
+          const startY = (height - minDim) / 2;
 
-          canvas.width = width;
-          canvas.height = height;
+          canvas.width = TARGET_SIZE;
+          canvas.height = TARGET_SIZE;
           const ctx = canvas.getContext("2d");
           if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const base64 = canvas.toDataURL("image/jpeg", 0.75);
-            if (base64.length > 50 * 1024) {
-              toast.error("Compressed avatar is too large. Choose a simpler photo.");
-              return;
+            ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, TARGET_SIZE, TARGET_SIZE);
+            let quality = 0.85;
+            let base64 = canvas.toDataURL("image/jpeg", quality);
+            while (base64.length > 65 * 1024 && quality > 0.35) {
+              quality -= 0.15;
+              base64 = canvas.toDataURL("image/jpeg", quality);
             }
             setAvatarUrl(base64);
-            toast.success("Photo updated! ✨");
+            toast.success("Profile photo updated! ✨");
           }
         };
         img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemovePhoto = () => {
+    setAvatarUrl(null);
+    toast.info("Profile photo cleared. Initial avatar active.");
+  };
+
+  const handleSelectPresetAvatar = (presetId: string) => {
+    setAvatarUrl(`preset:${presetId}`);
+    toast.success("Scholar avatar selected! ✨");
   };
 
   const toggleTheme = (theme: "light" | "dark") => {
@@ -642,6 +648,8 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     setAnalyticsConsent,
     handleProfileSave,
     handlePhotoUpload,
+    handleRemovePhoto,
+    handleSelectPresetAvatar,
     toggleTheme,
     handleRequestReauth,
     handleDeleteAccount,
