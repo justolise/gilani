@@ -4,7 +4,11 @@ import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { persistLang } from "@/client/i18n/I18nContext";
 import type { LangCode } from "@/client/i18n/translations";
-import { saveUserSettingsFn } from "@/fns/settings.server-fns";
+import {
+  saveUserSettingsFn,
+  clearAllChatHistoryFn,
+  exportUserDataFn,
+} from "@/fns/settings.server-fns";
 import { setClientCookie } from "@/shared/utils/cookies";
 
 export type TabType =
@@ -113,6 +117,8 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
   const [emailBusy, setEmailBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [reauthSending, setReauthSending] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
+  const [clearingHistory, setClearingHistory] = useState(false);
 
   // Plan & Usage
   const [showPlans, setShowPlans] = useState(false);
@@ -224,6 +230,18 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
       setIsDark(document.documentElement.classList.contains("dark"));
     }
   }, [user?.id]);
+
+  // ─── Listen for App-Wide Disclaimer & Consent Updates ────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onDisclaimerUpdated = (e: any) => {
+      if (typeof e.detail?.accepted === "boolean") {
+        setDisclaimerAccepted(e.detail.accepted);
+      }
+    };
+    window.addEventListener("custom:disclaimer-updated", onDisclaimerUpdated);
+    return () => window.removeEventListener("custom:disclaimer-updated", onDisclaimerUpdated);
+  }, []);
 
   // ─── Accessibility CSS Hookup ────────────────────────────────────────────────
   useEffect(() => {
@@ -479,9 +497,64 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
         data: { disclaimerAccepted: false },
       }).catch(console.error);
     }
-    toast.info(
-      "AI Disclaimer consent revoked. You will be prompted to read it again on your next dashboard visit.",
+    window.dispatchEvent(
+      new CustomEvent("custom:disclaimer-updated", { detail: { accepted: false } }),
     );
+    toast.info(
+      "AI Disclaimer consent revoked. You will be prompted to review it before continuing.",
+    );
+  };
+
+  const handleDisclaimerAccept = async () => {
+    localStorage.setItem("gilani_disclaimer_accepted", "true");
+    setDisclaimerAccepted(true);
+    if (user?.id) {
+      await saveUserSettingsFn({
+        data: { disclaimerAccepted: true },
+      }).catch(console.error);
+    }
+    window.dispatchEvent(
+      new CustomEvent("custom:disclaimer-updated", { detail: { accepted: true } }),
+    );
+    toast.success("AI Disclaimer and safety guidelines accepted! ✨");
+  };
+
+  const handleExportUserData = async () => {
+    if (!user?.id) return;
+    setExportingData(true);
+    try {
+      const data = await exportUserDataFn();
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `gilaniai-user-data-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("All personal data exported and downloaded successfully! 📦");
+    } catch (err: any) {
+      toast.error(friendlyError(err, "Failed to export user data."));
+    } finally {
+      setExportingData(false);
+    }
+  };
+
+  const handleClearAllChatHistory = async () => {
+    if (!user?.id) return;
+    setClearingHistory(true);
+    try {
+      await clearAllChatHistoryFn();
+      window.dispatchEvent(new CustomEvent("custom:threads-cleared"));
+      window.dispatchEvent(new CustomEvent("custom:profile-updated"));
+      toast.success("All conversation history permanently cleared. ✨");
+    } catch (err: any) {
+      toast.error(friendlyError(err, "Failed to clear chat history."));
+    } finally {
+      setClearingHistory(false);
+    }
   };
 
   const toggleConsent = async (type: "cookie" | "analytics", value: boolean) => {
@@ -499,6 +572,12 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
         value ? "Anonymous usage tracking enabled." : "Anonymous usage tracking disabled.",
       );
     }
+
+    // Immediately propagate consent change app-wide
+    window.dispatchEvent(
+      new CustomEvent("gilani:cookie-consent-changed", { detail: { type, accepted: value } }),
+    );
+
     if (user?.id) {
       await saveUserSettingsFn({
         data: type === "cookie" ? { cookieConsent: value } : { analyticsConsent: value },
@@ -567,6 +646,11 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
     handleRequestReauth,
     handleDeleteAccount,
     handleDisclaimerRevoke,
+    handleDisclaimerAccept,
+    handleExportUserData,
+    handleClearAllChatHistory,
+    exportingData,
+    clearingHistory,
     toggleConsent,
     handleEmailChange,
     isSyncing: busy,

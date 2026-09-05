@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/client/hooks/use-auth";
 import { supabase } from "@/client/supabase";
 import { toast } from "sonner";
-import { AlertTriangle, BookOpen, Shield, Heart, Cookie, BarChart } from "lucide-react";
+import { AlertTriangle, BookOpen, Shield, Heart, Cookie, BarChart, X } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
+import { setClientCookie } from "@/shared/utils/cookies";
 
 export function DisclaimerModal() {
   const { user, loading: authLoading } = useAuth();
@@ -15,6 +16,16 @@ export function DisclaimerModal() {
   const [aiDisclaimerAccepted, setAiDisclaimerAccepted] = useState(false);
   const [cookieConsent, setCookieConsent] = useState(true);
   const [analyticsConsent, setAnalyticsConsent] = useState(true);
+
+  // Allow other components (like Settings tab) to request opening this modal
+  useEffect(() => {
+    const handleOpen = () => {
+      setIsOpen(true);
+      setAiDisclaimerAccepted(false);
+    };
+    window.addEventListener("custom:open-disclaimer", handleOpen);
+    return () => window.removeEventListener("custom:open-disclaimer", handleOpen);
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -88,10 +99,21 @@ export function DisclaimerModal() {
 
       if (error) throw error;
 
-      // Sync local storage
+      // Sync local storage and cookies
       localStorage.setItem("gilani_disclaimer_accepted", "true");
       localStorage.setItem("gilani_cookie_consent", String(cookieConsent));
       localStorage.setItem("gilani_analytics_consent", String(analyticsConsent));
+      setClientCookie("gilani_cookie_consent", String(cookieConsent), { days: 365 });
+      setClientCookie("gilani_analytics_consent", String(analyticsConsent), { days: 365 });
+
+      window.dispatchEvent(
+        new CustomEvent("custom:disclaimer-updated", { detail: { accepted: true } }),
+      );
+      window.dispatchEvent(
+        new CustomEvent("gilani:cookie-consent-changed", {
+          detail: { accepted: analyticsConsent },
+        }),
+      );
 
       setIsOpen(false);
       toast.success("Consent preferences saved! Welcome to GilaniAI ✨");
@@ -102,20 +124,35 @@ export function DisclaimerModal() {
 
   if (loading || !isOpen) return null;
 
+  const isAlreadyAccepted =
+    typeof window !== "undefined" && localStorage.getItem("gilani_disclaimer_accepted") === "true";
+
   return (
     <div className="fixed inset-0 z-55 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
       <div className="bg-card/90 border border-border/80 backdrop-blur-xl rounded-2xl shadow-2xl max-w-xl w-full p-5 sm:p-8 my-8 animate-in-slide flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/40">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <BookOpen className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
+                Privacy & Safety
+              </p>
+              <h2 className="text-xl font-serif font-bold">Welcome to GilaniAI</h2>
+            </div>
           </div>
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-primary font-bold">
-              Privacy & Safety
-            </p>
-            <h2 className="text-xl font-serif font-bold">Welcome to GilaniAI</h2>
-          </div>
+          {isAlreadyAccepted && (
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
+              title="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {/* Content */}

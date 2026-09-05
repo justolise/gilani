@@ -94,3 +94,99 @@ export const saveUserSettingsFn = createServerFn({ method: "POST" })
 
     return { success: true };
   });
+
+export const clearAllChatHistoryFn = createServerFn({ method: "POST" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/server/supabase");
+  const { authenticateRequest } = await import("@/server/api-auth.server");
+
+  const request = getRequest();
+  let authResult;
+  try {
+    authResult = await authenticateRequest(request);
+  } catch (err) {
+    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+      cause: err,
+    });
+  }
+
+  const userId = authResult.userId;
+
+  // Delete all messages belonging to the user
+  await supabaseAdmin.from("messages").delete().eq("user_id", userId);
+
+  // Delete all conversations belonging to the user
+  const { error } = await supabaseAdmin.from("conversations").delete().eq("user_id", userId);
+
+  if (error) {
+    console.error("[clearAllChatHistoryFn] Error deleting conversations:", error.message);
+    throw new Error(`Failed to clear chat history: ${error.message}`, { cause: error });
+  }
+
+  return { success: true };
+});
+
+export const exportUserDataFn = createServerFn({ method: "POST" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/server/supabase");
+  const { authenticateRequest } = await import("@/server/api-auth.server");
+
+  const request = getRequest();
+  let authResult;
+  try {
+    authResult = await authenticateRequest(request);
+  } catch (err) {
+    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
+      cause: err,
+    });
+  }
+
+  const userId = authResult.userId;
+  const userEmail = authResult.user.email;
+
+  // Fetch profile
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  // Fetch conversations
+  const { data: conversations } = await supabaseAdmin
+    .from("conversations")
+    .select("id, title, curriculum, created_at, updated_at")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+
+  // Fetch messages (up to 1000 most recent)
+  const { data: messages } = await supabaseAdmin
+    .from("messages")
+    .select("id, conversation_id, role, content, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true })
+    .limit(1000);
+
+  // Fetch notes
+  const { data: notes } = await supabaseAdmin
+    .from("notes")
+    .select("*")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+
+  // Fetch study goals
+  const { data: studyGoals } = await (supabaseAdmin.from as any)("study_goals")
+    .select("*")
+    .eq("user_id", userId);
+
+  return {
+    exportedAt: new Date().toISOString(),
+    user: {
+      id: userId,
+      email: userEmail,
+    },
+    profile: profile || {},
+    conversations: conversations || [],
+    messagesCount: (messages || []).length,
+    messages: messages || [],
+    notes: notes || [],
+    studyGoals: studyGoals || [],
+  };
+});

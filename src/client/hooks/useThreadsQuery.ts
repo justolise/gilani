@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/client/supabase";
 import { withTimeout } from "@/shared/utils/async";
@@ -14,6 +15,20 @@ export function useThreadsQuery(
 ) {
   const queryClient = useQueryClient();
   const enabled = (options?.enabled ?? true) && !!userId;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onCleared = () => {
+      queryClient.setQueryData(["threads", userId], []);
+      queryClient.invalidateQueries({ queryKey: ["threads"] });
+      import("@/client/db/local").then(({ localDb }) => {
+        localDb.threads.clear().catch(console.error);
+        localDb.messages.clear().catch(console.error);
+      });
+    };
+    window.addEventListener("custom:threads-cleared", onCleared);
+    return () => window.removeEventListener("custom:threads-cleared", onCleared);
+  }, [queryClient, userId]);
 
   const threadsQuery = useQuery({
     queryKey: ["threads", userId],
