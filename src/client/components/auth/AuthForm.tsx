@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Logo } from "@/client/components/ui/logo";
 import { supabase } from "@/client/supabase";
@@ -7,44 +7,27 @@ import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileFor
 import { WorkspaceLoader } from "@/client/components/auth/WorkspaceLoader";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
-import { Mail, Loader2, ArrowRight } from "lucide-react";
+import { Mail, Loader2, ArrowRight, ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
 import { Capacitor } from "@capacitor/core";
 
+type Step = "email" | "otp" | "profile";
+type EmailStatus = "new" | "incomplete" | "registered";
+
 export function AuthForm() {
   const navigate = useNavigate();
+  const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null);
   const [loadingProvider, setLoadingProvider] = useState<"google" | "email" | "otp" | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const onGoogle = async () => {
-    setLoadingProvider("google");
-    try {
-      const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
-      const nativeParam = isNative ? "&app=1" : "";
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/callback?next=/tutor${nativeParam}`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "select_account",
-          },
-        },
-      });
-      if (error) {
-        setLoadingProvider(null);
-        toast.error(friendlyError(error, "Google sign-in failed. Please try again."));
-      }
-    } catch (err) {
-      setLoadingProvider(null);
-      toast.error("An unexpected error occurred during Google sign-in.");
-      console.error(err);
-    }
-  };
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  const otpString = otp.join("");
 
   const routeToDestination = async () => {
     const { data: session } = await supabase.auth.getSession();
@@ -66,16 +49,78 @@ export function AuthForm() {
     }
   };
 
+  const sendOtp = async (targetEmail: string) => {
+    const { error } = await supabase.auth.signInWithOtp({ email: targetEmail });
+    if (error) throw error;
+  };
+
+  // ── OTP digit input ───────────────────────────────────────────────────────
+
+  const handleOtpChange = (index: number, value: string) => {
+    // Handle paste of full code
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
+      const next = [...otp];
+      digits.forEach((d, i) => {
+        if (index + i < 6) next[index + i] = d;
+      });
+      setOtp(next);
+      const focusIdx = Math.min(index + digits.length, 5);
+      otpRefs.current[focusIdx]?.focus();
+      return;
+    }
+    const digit = value.replace(/\D/g, "");
+    const next = [...otp];
+    next[index] = digit;
+    setOtp(next);
+    if (digit && index < 5) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const next = [...otp];
+      next[index - 1] = "";
+      setOtp(next);
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  // ── handlers ─────────────────────────────────────────────────────────────
+
+  const onGoogle = async () => {
+    setLoadingProvider("google");
+    try {
+      const isNative = typeof window !== "undefined" && Capacitor.isNativePlatform();
+      const nativeParam = isNative ? "&app=1" : "";
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/callback?next=/tutor${nativeParam}`,
+          queryParams: { access_type: "offline", prompt: "select_account" },
+        },
+      });
+      if (error) {
+        setLoadingProvider(null);
+        toast.error(friendlyError(error, "Google sign-in failed. Please try again."));
+      }
+    } catch (err) {
+      setLoadingProvider(null);
+      toast.error("An unexpected error occurred during Google sign-in.");
+      console.error(err);
+    }
+  };
+
   const onEmailContinue = async (e: FormEvent) => {
     e.preventDefault();
     if (!email) return toast.error("Please enter your email address.");
     setLoadingProvider("email");
 
     try {
-      const { isNewUser } = await checkEmailStatus({ data: { email } });
+      const { status } = await checkEmailStatus({ data: { email } });
+      setEmailStatus(status);
 
-      if (!isNewUser) {
-        // Returning user - bypass email verification for instant login
+      if (status === "registered") {
+        // Fully onboarded returning user — skip OTP, instant session
         const result = await instantLogin({ data: { email } });
         const { error } = await supabase.auth.setSession({
           access_token: result.access_token,
@@ -83,7 +128,7 @@ export function AuthForm() {
         });
         if (error) throw error;
 
-        // Check if existing user is missing username / display_name
+        // Final safety check — show profile form if somehow incomplete
         const { data: sessionData } = await supabase.auth.getSession();
         const userId = sessionData.session?.user?.id;
         if (userId) {
@@ -103,12 +148,12 @@ export function AuthForm() {
         setShowLoader(true);
         await routeToDestination();
       } else {
-        // New user - require OTP email verification
-        const { error } = await supabase.auth.signInWithOtp({ email });
-        if (error) throw error;
-
-        setOtpSent(true);
+        // 'new' or 'incomplete' — always require OTP verification first
+        await sendOtp(email);
+        setStep("otp");
         setLoadingProvider(null);
+        // Focus first OTP box after render
+        setTimeout(() => otpRefs.current[0]?.focus(), 80);
       }
     } catch (err) {
       setLoadingProvider(null);
@@ -120,17 +165,25 @@ export function AuthForm() {
 
   const onVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    if (!otp) return toast.error("Please enter the verification code.");
+    if (otpString.length !== 6) return toast.error("Please enter the 6-digit code.");
     setLoadingProvider("otp");
 
-    const { data, error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpString,
+      type: "email",
+    });
+
     if (error || !data.session) {
       setLoadingProvider(null);
+      setOtp(["", "", "", "", "", ""]);
+      setTimeout(() => otpRefs.current[0]?.focus(), 80);
       return toast.error(
         friendlyError(error as { message?: string }, "Invalid or expired code. Please try again."),
       );
     }
 
+    // OTP verified — check profile completion
     const userId = data.session.user.id;
     const { data: profileRow } = await supabase
       .from("profiles")
@@ -138,12 +191,26 @@ export function AuthForm() {
       .eq("id", userId)
       .maybeSingle();
 
+    setLoadingProvider(null);
+
     if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
-      setLoadingProvider(null);
+      // Profile incomplete — must complete before accessing app
       setShowProfileForm(true);
     } else {
       setShowLoader(true);
       await routeToDestination();
+    }
+  };
+
+  const onResendOtp = async () => {
+    setLoadingProvider("email");
+    try {
+      await sendOtp(email);
+      toast.success("A new code has been sent to your email.");
+    } catch (err) {
+      toast.error("Failed to resend code. Please try again.");
+    } finally {
+      setLoadingProvider(null);
     }
   };
 
@@ -170,13 +237,12 @@ export function AuthForm() {
     }
   };
 
-  if (showLoader) {
-    return <WorkspaceLoader />;
-  }
+  // ── render guards ─────────────────────────────────────────────────────────
 
-  if (showProfileForm) {
-    return <CompleteProfileForm onSave={onSaveProfile} />;
-  }
+  if (showLoader) return <WorkspaceLoader />;
+  if (showProfileForm) return <CompleteProfileForm onSave={onSaveProfile} />;
+
+  // ── UI ────────────────────────────────────────────────────────────────────
 
   return (
     <div className="w-full max-w-[420px] mx-auto animate-in fade-in zoom-in-95 duration-300">
@@ -184,20 +250,35 @@ export function AuthForm() {
         {/* Top accent bar */}
         <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70" />
 
-        <div className="p-7 sm:p-9 space-y-5">
+        <div className="p-7 sm:p-9 space-y-6">
           {/* Header */}
           <div className="text-center space-y-2 pt-1">
             <Logo to="/" size="md" className="mx-auto" />
             <div className="space-y-1 pt-1">
-              <h1 className="font-serif text-2xl font-black text-white tracking-tight">
-                Welcome back
-              </h1>
-              <p className="text-sm text-white/40">Continue to your account.</p>
+              {step === "email" && (
+                <>
+                  <h1 className="font-serif text-2xl font-black text-white tracking-tight">
+                    Welcome back
+                  </h1>
+                  <p className="text-sm text-white/40">Sign in or create your account.</p>
+                </>
+              )}
+              {step === "otp" && (
+                <>
+                  <h1 className="font-serif text-2xl font-black text-white tracking-tight">
+                    Check your email
+                  </h1>
+                  <p className="text-sm text-white/40">
+                    We sent a 6-digit code to{" "}
+                    <span className="text-white/70 font-medium">{email}</span>
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Google Sign-in & Email Form */}
-          {!otpSent ? (
+          {/* ── Step: Email ── */}
+          {step === "email" && (
             <>
               <button
                 onClick={onGoogle}
@@ -221,7 +302,7 @@ export function AuthForm() {
                 <div className="h-px flex-1 bg-white/[0.06]" />
               </div>
 
-              {/* Email Form */}
+              {/* Email form */}
               <form onSubmit={onEmailContinue} className="space-y-3">
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25 pointer-events-none" />
@@ -273,47 +354,89 @@ export function AuthForm() {
                 .
               </p>
             </>
-          ) : (
-            <form onSubmit={onVerifyOtp} className="space-y-3">
-              <div className="text-sm text-white/60 text-center mb-4">
-                We sent a 6-digit code to <br />
-                <span className="font-semibold text-white/90">{email}</span>
+          )}
+
+          {/* ── Step: OTP ── */}
+          {step === "otp" && (
+            <form onSubmit={onVerifyOtp} className="space-y-5">
+              {/* Banner for incomplete registration */}
+              {emailStatus === "incomplete" && (
+                <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
+                  <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-200/80 leading-relaxed">
+                    Your previous sign-up wasn't completed. Verify your email to finish setting up
+                    your account.
+                  </p>
+                </div>
+              )}
+
+              {/* 6-box OTP input */}
+              <div className="flex gap-2 justify-center">
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => {
+                      otpRefs.current[i] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={digit}
+                    disabled={loadingProvider !== null}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    className={`w-11 h-13 text-center text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
+                      ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
+                      focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
+                    style={{ width: "2.75rem", height: "3.25rem" }}
+                  />
+                ))}
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  required
-                  placeholder="Enter 6-digit code"
-                  value={otp}
-                  maxLength={6}
-                  disabled={loadingProvider !== null}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  className="w-full text-center tracking-[0.5em] rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3.5 text-lg font-mono text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
-                />
-              </div>
+
               <button
                 type="submit"
-                disabled={loadingProvider !== null || otp.length !== 6}
-                className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#D9784A] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20 cursor-pointer mt-2"
+                disabled={loadingProvider !== null || otpString.length !== 6}
+                className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#D9784A] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20 cursor-pointer"
               >
                 {loadingProvider === "otp" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Verify Code"
+                  <>
+                    Verify & Continue
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  </>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtp("");
-                }}
-                className="w-full text-xs font-semibold text-white/40 hover:text-white/80 py-2 mt-1"
-              >
-                Back to email
-              </button>
+
+              {/* Footer actions */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("email");
+                    setOtp(["", "", "", "", "", ""]);
+                    setEmailStatus(null);
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Change email
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onResendOtp}
+                  disabled={loadingProvider !== null}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40"
+                >
+                  {loadingProvider === "email" ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  )}
+                  Resend code
+                </button>
+              </div>
             </form>
           )}
         </div>

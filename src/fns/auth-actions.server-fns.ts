@@ -110,16 +110,23 @@ export const checkEmailStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { sendTransactionalEmail, emailTemplate, welcomeEmail, verifyEmailTemplate } =
-      await import("@/server/email.server");
+
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
-      .select("id")
+      .select("id, onboarding_completed")
       .eq("email", data.email.toLowerCase().trim())
       .maybeSingle();
 
-    return { isNewUser: !existingProfile };
+    if (!existingProfile) {
+      // No profile row at all — brand new user
+      return { status: "new" as const };
+    }
+    if (!existingProfile.onboarding_completed) {
+      // Profile row exists but registration was never finished — force OTP re-verification
+      return { status: "incomplete" as const };
+    }
+    // Fully registered returning user — safe for instant login
+    return { status: "registered" as const };
   });
 
 /**

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Logo } from "@/client/components/ui/logo";
 import { supabase } from "@/client/supabase";
@@ -7,9 +7,11 @@ import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileFor
 import { WorkspaceLoader } from "@/client/components/auth/WorkspaceLoader";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
-import { Mail, X, Loader2, ArrowRight } from "lucide-react";
+import { Mail, X, Loader2, ArrowRight, ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
 import { Capacitor } from "@capacitor/core";
+
+type EmailStatus = "new" | "incomplete" | "registered";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -20,11 +22,14 @@ interface AuthModalProps {
 export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
+  const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<"google" | "email" | "otp" | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const otpString = otpDigits.join("");
 
   const onGoogle = async () => {
     setLoadingProvider("google");
@@ -72,6 +77,33 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     }
   };
 
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
+      const next = [...otpDigits];
+      digits.forEach((d, i) => {
+        if (index + i < 6) next[index + i] = d;
+      });
+      setOtpDigits(next);
+      otpRefs.current[Math.min(index + digits.length, 5)]?.focus();
+      return;
+    }
+    const digit = value.replace(/\D/g, "");
+    const next = [...otpDigits];
+    next[index] = digit;
+    setOtpDigits(next);
+    if (digit && index < 5) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      const next = [...otpDigits];
+      next[index - 1] = "";
+      setOtpDigits(next);
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
   const onEmailContinue = async (e: FormEvent) => {
     e.preventDefault();
     if (!email) return toast.error("Please enter your email address.");
@@ -79,10 +111,11 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     onAuthStart?.();
 
     try {
-      const { isNewUser } = await checkEmailStatus({ data: { email } });
+      const { status } = await checkEmailStatus({ data: { email } });
+      setEmailStatus(status);
 
-      if (!isNewUser) {
-        // Returning user - bypass email verification for instant login
+      if (status === "registered") {
+        // Fully onboarded returning user — instant session, no OTP
         const result = await instantLogin({ data: { email } });
         const { error } = await supabase.auth.setSession({
           access_token: result.access_token,
@@ -90,7 +123,6 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
         });
         if (error) throw error;
 
-        // Check if existing user is missing username / display_name
         const { data: sessionData } = await supabase.auth.getSession();
         const userId = sessionData.session?.user?.id;
         if (userId) {
@@ -99,7 +131,6 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
             .select("display_name, onboarding_completed")
             .eq("id", userId)
             .maybeSingle();
-
           if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
             setLoadingProvider(null);
             setShowProfileForm(true);
@@ -112,12 +143,12 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
         onAuthComplete?.();
         onClose();
       } else {
-        // New user - require OTP email verification
+        // 'new' or 'incomplete' — always require OTP
         const { error } = await supabase.auth.signInWithOtp({ email });
         if (error) throw error;
-
         setOtpSent(true);
         setLoadingProvider(null);
+        setTimeout(() => otpRefs.current[0]?.focus(), 80);
       }
     } catch (err) {
       onAuthComplete?.();
@@ -128,14 +159,33 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     }
   };
 
+  const onResendOtp = async () => {
+    setLoadingProvider("email");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ email });
+      if (error) throw error;
+      toast.success("A new code has been sent.");
+    } catch {
+      toast.error("Failed to resend code.");
+    } finally {
+      setLoadingProvider(null);
+    }
+  };
+
   const onVerifyOtp = async (e: FormEvent) => {
     e.preventDefault();
-    if (!otp) return toast.error("Please enter the verification code.");
+    if (otpString.length !== 6) return toast.error("Please enter the 6-digit code.");
     setLoadingProvider("otp");
 
-    const { data, error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpString,
+      type: "email",
+    });
     if (error || !data.session) {
       setLoadingProvider(null);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setTimeout(() => otpRefs.current[0]?.focus(), 80);
       return toast.error(
         friendlyError(error as { message?: string }, "Invalid or expired code. Please try again."),
       );
@@ -148,8 +198,8 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
       .eq("id", userId)
       .maybeSingle();
 
+    setLoadingProvider(null);
     if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
-      setLoadingProvider(null);
       setShowProfileForm(true);
     } else {
       setShowLoader(true);
@@ -307,46 +357,82 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                 </p>
               </>
             ) : (
-              <form onSubmit={onVerifyOtp} className="space-y-3">
-                <div className="text-sm text-white/60 text-center mb-4">
-                  We sent a 6-digit code to <br />
-                  <span className="font-semibold text-white/90">{email}</span>
+              <form onSubmit={onVerifyOtp} className="space-y-5">
+                {emailStatus === "incomplete" && (
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
+                    <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      Your previous sign-up wasn't completed. Verify your email to finish setting up
+                      your account.
+                    </p>
+                  </div>
+                )}
+
+                {/* 6-box OTP */}
+                <div className="flex gap-2 justify-center">
+                  {otpDigits.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => {
+                        otpRefs.current[i] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={digit}
+                      disabled={loadingProvider !== null}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      className={`text-center text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
+                        ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
+                        focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
+                      style={{ width: "2.75rem", height: "3.25rem" }}
+                    />
+                  ))}
                 </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    required
-                    placeholder="Enter 6-digit code"
-                    value={otp}
-                    maxLength={6}
-                    disabled={loadingProvider !== null}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="w-full text-center tracking-[0.5em] rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3.5 text-lg font-mono text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
-                  />
-                </div>
+
                 <button
                   type="submit"
-                  disabled={loadingProvider !== null || otp.length !== 6}
-                  className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#D9784A] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20 cursor-pointer mt-2"
+                  disabled={loadingProvider !== null || otpString.length !== 6}
+                  className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#D9784A] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20 cursor-pointer"
                 >
                   {loadingProvider === "otp" ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Verify Code"
+                    <>
+                      Verify & Continue
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                    </>
                   )}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpSent(false);
-                    setOtp("");
-                  }}
-                  className="w-full text-xs font-semibold text-white/40 hover:text-white/80 py-2 mt-1"
-                >
-                  Back to email
-                </button>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false);
+                      setOtpDigits(["", "", "", "", "", ""]);
+                      setEmailStatus(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Change email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onResendOtp}
+                    disabled={loadingProvider !== null}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-[#E28743] transition-colors disabled:opacity-40"
+                  >
+                    {loadingProvider === "email" ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    Resend code
+                  </button>
+                </div>
               </form>
             )}
           </div>
