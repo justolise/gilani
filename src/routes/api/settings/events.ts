@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/server/supabase";
 import { authenticateRequest } from "@/server/api-auth.server";
+import { parseCookieHeader } from "@/shared/utils/cookies";
 
 export const Route = createFileRoute("/api/settings/events")({
   server: {
@@ -9,6 +10,20 @@ export const Route = createFileRoute("/api/settings/events")({
       POST: async () => {
         try {
           const request = getRequest();
+          const cookieHeader = request.headers.get("cookie");
+          const cookies = parseCookieHeader(cookieHeader);
+
+          // Honor cookie & analytics consent (Kenyan Data Protection Act / GDPR)
+          if (
+            cookies["gilani_analytics_consent"] === "false" ||
+            cookies["gilani_cookie_consent"] === "false"
+          ) {
+            return new Response(JSON.stringify({ ok: true, ignored: "consent_revoked" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+
           const { userId } = await authenticateRequest(request);
 
           const body = await request.json().catch(() => ({}));

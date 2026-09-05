@@ -262,6 +262,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
   const fireSettingsEvent = useCallback(
     (action: string, payload?: Record<string, any>) => {
       if (!user?.id) return;
+      if (!analyticsConsent) return; // Respect user analytics consent
       // Fire-and-forget: no await, never blocks UI
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (!session?.access_token) return;
@@ -275,7 +276,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
         }).catch(() => {}); // silently ignore failures
       });
     },
-    [user?.id],
+    [user?.id, analyticsConsent],
   );
 
   const setActiveTabTracked = useCallback(
@@ -484,13 +485,16 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
   };
 
   const toggleConsent = async (type: "cookie" | "analytics", value: boolean) => {
+    const key = type === "cookie" ? "gilani_cookie_consent" : "gilani_analytics_consent";
     if (type === "cookie") {
       setCookieConsent(value);
-      localStorage.setItem("gilani_cookie_consent", String(value));
+      localStorage.setItem(key, String(value));
+      setClientCookie(key, String(value), { days: 365 });
       toast.success(value ? "Essential cookies enabled." : "Essential cookies disabled.");
     } else {
       setAnalyticsConsent(value);
-      localStorage.setItem("gilani_analytics_consent", String(value));
+      localStorage.setItem(key, String(value));
+      setClientCookie(key, String(value), { days: 365 });
       toast.success(
         value ? "Anonymous usage tracking enabled." : "Anonymous usage tracking disabled.",
       );

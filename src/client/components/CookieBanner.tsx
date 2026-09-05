@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Cookie } from "lucide-react";
+import { getClientCookie, setClientCookie } from "@/shared/utils/cookies";
 
 const CONSENT_KEY = "gilani_cookie_consent";
 const ANALYTICS_KEY = "gilani_analytics_consent";
@@ -10,8 +11,9 @@ export function CookieBanner() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const existing = localStorage.getItem(CONSENT_KEY);
-    if (existing === null) {
+    const existingCookie = getClientCookie(CONSENT_KEY);
+    const existingLocal = localStorage.getItem(CONSENT_KEY);
+    if (existingCookie === null && existingLocal === null) {
       setVisible(true);
     }
   }, []);
@@ -19,6 +21,8 @@ export function CookieBanner() {
   const setChoice = (accepted: boolean) => {
     localStorage.setItem(CONSENT_KEY, String(accepted));
     localStorage.setItem(ANALYTICS_KEY, String(accepted));
+    setClientCookie(CONSENT_KEY, String(accepted), { days: 365 });
+    setClientCookie(ANALYTICS_KEY, String(accepted), { days: 365 });
     window.dispatchEvent(new CustomEvent(COOKIE_CONSENT_EVENT, { detail: { accepted } }));
     setVisible(false);
   };

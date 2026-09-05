@@ -16,13 +16,18 @@ import * as Sentry from "@sentry/react";
 
 import appCss from "../styles.css?url";
 import { CookieBanner, COOKIE_CONSENT_EVENT } from "@/client/components/CookieBanner";
+import { getClientCookie } from "@/shared/utils/cookies";
 
 function ConsentGatedAnalytics() {
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const check = () => setAllowed(localStorage.getItem("gilani_analytics_consent") === "true");
+    const check = () => {
+      const cookieVal = getClientCookie("gilani_analytics_consent");
+      const localVal = localStorage.getItem("gilani_analytics_consent");
+      setAllowed(cookieVal === "true" || (cookieVal === null && localVal === "true"));
+    };
     check();
     window.addEventListener(COOKIE_CONSENT_EVENT, check);
     return () => window.removeEventListener(COOKIE_CONSENT_EVENT, check);
