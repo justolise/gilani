@@ -258,7 +258,10 @@ function TutorIndex() {
             parsingFile={composer.parsingFile}
             uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
-            chatError={rateLimitState.chatError}
+            // TutorHomeCockpit already renders the rate-limit banner on the empty
+            // state — pass null here so ChatInput doesn't show a duplicate banner.
+            // isRateLimited is still passed to disable the submit button.
+            chatError={null}
             isRateLimited={rateLimitState.isRateLimited}
             messagesUsed={rateLimitState.messagesUsed}
             messagesMax={rateLimitState.messagesMax}
