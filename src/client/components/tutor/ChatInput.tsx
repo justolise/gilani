@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   FileText,
@@ -108,6 +108,8 @@ export function ChatInput({
 }: Props) {
   const internalRef = useRef<HTMLTextAreaElement | null>(null);
   const textareaRef = externalInputRef ?? internalRef;
+  const [isFocused, setIsFocused] = useState(false);
+
   const isRateLimited = useMemo(
     () =>
       Boolean(
@@ -139,6 +141,9 @@ export function ChatInput({
   const isImageAttachment = !!(
     attachedFile?.mimeType?.startsWith("image/") || attachedFile?.previewUrl
   );
+
+  // Compact mode: single-row on mobile when idle and empty
+  const isCompact = !input.trim() && !attachedFile && !isPending && !isListening && !isFocused;
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -257,13 +262,15 @@ export function ChatInput({
             disabled={isDisabled}
           />
           {/* Text Area */}
-          <div className="px-4 pt-3">
+          <div className={`px-4 ${isCompact ? "pt-2 pb-1 flex items-center gap-2" : "pt-3"}`}>
             <textarea
               ref={textareaRef}
-              className="min-h-[44px] sm:min-h-[40px] w-full resize-none bg-transparent py-1 text-[15px] sm:text-base leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 transition-opacity duration-200"
+              className={`w-full resize-none bg-transparent text-[15px] sm:text-base leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 transition-all duration-200 ${isCompact ? "min-h-[36px] py-1.5 flex-1" : "min-h-[44px] sm:min-h-[40px] py-1"}`}
               rows={1}
               value={input}
               onChange={onInputChange}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               placeholder={
                 isPending
                   ? "Waiting for response…"
@@ -281,10 +288,62 @@ export function ChatInput({
               onKeyDown={handleKeyDown}
               style={{ maxHeight: 160, overflowY: "hidden" }}
             />
+
+            {/* Compact inline action buttons (mobile idle state) */}
+            {isCompact && (
+              <div className="flex items-center gap-1 flex-shrink-0 sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      disabled={isDisabled}
+                      aria-label="Add attachment or voice"
+                      className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all active:scale-90 cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={8} className="w-48 p-1.5 z-50">
+                    <DropdownMenuItem
+                      asChild
+                      className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                    >
+                      <label
+                        htmlFor={isDisabled ? undefined : "chat-file-input"}
+                        className="flex w-full items-center cursor-pointer"
+                      >
+                        <Paperclip className="h-4 w-4 text-muted-foreground mr-2" />
+                        <span className="text-sm font-medium">Document / Image</span>
+                      </label>
+                    </DropdownMenuItem>
+                    {onScanClick && (
+                      <DropdownMenuItem
+                        onClick={onScanClick}
+                        className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                      >
+                        <Camera className="h-4 w-4 text-muted-foreground mr-2" />
+                        <span className="text-sm font-medium">Scan (Camera)</span>
+                      </DropdownMenuItem>
+                    )}
+                    {onVoiceClick && (
+                      <DropdownMenuItem
+                        onClick={onVoiceClick}
+                        className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                      >
+                        <Mic className="h-4 w-4 text-muted-foreground mr-2" />
+                        <span className="text-sm font-medium">Voice</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
 
-          {/* Action Row */}
-          <div className="flex items-center justify-between px-3 pb-3 pt-1">
+          {/* Action Row — hidden on mobile when compact */}
+          <div
+            className={`flex items-center justify-between px-3 pb-3 pt-1 ${isCompact ? "hidden sm:flex" : "flex"}`}
+          >
             {/* Action Menu (replaces individual attachment buttons) */}
             <div className="flex items-center justify-center">
               <DropdownMenu>
