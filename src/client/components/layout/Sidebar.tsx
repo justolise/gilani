@@ -174,7 +174,7 @@ export function Sidebar({ shell }: Props) {
               <div className="flex flex-col items-center gap-3">
                 <Link
                   to="/tutor"
-                  className="w-8 h-8 rounded-xl bg-[#C96A3D] text-white flex items-center justify-center font-serif font-black text-sm shadow-md hover:opacity-90 transition-opacity"
+                  className="w-8 h-8 flex items-center justify-center font-serif font-black text-sm text-primary hover:opacity-70 transition-opacity"
                   title="GilaniAI"
                 >
                   G
@@ -324,14 +324,9 @@ export function Sidebar({ shell }: Props) {
                 onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted/40 transition-colors group cursor-pointer max-w-[220px]"
               >
-                {/* Brand icon */}
-                <div className="w-6 h-6 rounded-lg bg-[#C96A3D] text-white flex items-center justify-center font-serif font-black text-xs shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
-                  G
-                </div>
-
-                {/* Workspace / Scope details */}
+                {/* Workspace / Scope details — no G icon in expanded view */}
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-bold text-xs text-foreground tracking-tight">GilaniAI</span>
+                  <span className="font-bold text-xs text-primary tracking-tight">GilaniAI</span>
                   <span className="text-muted-foreground/30 text-xs font-mono">/</span>
                   <span className="text-[11px] font-mono font-medium text-muted-foreground truncate">
                     {curriculum || (isTeacher ? "Teacher" : isAdmin ? "Admin" : "KCSE")}

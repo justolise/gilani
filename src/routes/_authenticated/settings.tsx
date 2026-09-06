@@ -201,11 +201,7 @@ function SettingsPage() {
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              {/* Brand */}
-              <div className="w-5 h-5 rounded-md bg-[#C96A3D] text-white flex items-center justify-center font-serif font-black text-[10px]">
-                G
-              </div>
-              <span className="font-bold text-xs text-foreground tracking-tight">GilaniAI</span>
+              <span className="font-bold text-xs text-primary tracking-tight">GilaniAI</span>
               <span className="text-muted-foreground/30 text-xs font-mono">/</span>
               <span className="text-xs font-mono font-medium text-muted-foreground">Settings</span>
             </div>
@@ -280,13 +276,9 @@ function SettingsPage() {
             {/* Scope-switcher header — matches sidebar exactly */}
             <div className="flex items-center justify-between px-3 pt-3.5 pb-2 flex-shrink-0 border-b border-sidebar-border/40">
               <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted/40 transition-colors group cursor-default max-w-full min-w-0">
-                {/* Brand icon */}
-                <div className="w-6 h-6 rounded-lg bg-[#C96A3D] text-white flex items-center justify-center font-serif font-black text-xs shadow-xs flex-shrink-0">
-                  G
-                </div>
-                {/* Breadcrumb */}
+                {/* Breadcrumb — no G icon, GilaniAI in primary */}
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-bold text-xs text-foreground tracking-tight">GilaniAI</span>
+                  <span className="font-bold text-xs text-primary tracking-tight">GilaniAI</span>
                   <span className="text-muted-foreground/30 text-xs font-mono">/</span>
                   <span className="text-[11px] font-mono font-medium text-muted-foreground truncate">
                     Settings
