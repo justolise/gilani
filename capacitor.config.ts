@@ -8,6 +8,11 @@ const config: CapacitorConfig = {
     url: "https://gilaniai.site",
     cleartext: true,
   },
+  plugins: {
+    SystemBars: {
+      insetsHandling: "disable",
+    },
+  },
 };
 
 export default config;

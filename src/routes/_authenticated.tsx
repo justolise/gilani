@@ -104,7 +104,7 @@ function AuthedShell() {
   return (
     <I18nProvider>
       <LayoutContext.Provider value={layoutValue}>
-        <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground">
+        <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground pt-[var(--safe-top,0px)] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)]">
           <DisclaimerModal />
           <AppGuideModal />
           {needsProfileSetup && (
@@ -130,7 +130,7 @@ function AuthedShell() {
           <Sidebar shell={shell} />
 
           <main
-            className={`flex-1 min-w-0 min-h-0 flex flex-col overflow-x-hidden pb-16 lg:pb-0 ${shell.path.startsWith("/tutor") ? "overflow-hidden h-full" : "overflow-y-auto scroll-smooth"}`}
+            className={`flex-1 min-w-0 min-h-0 flex flex-col overflow-x-hidden ${shell.path.startsWith("/tutor") ? "overflow-hidden h-full pb-0" : "overflow-y-auto scroll-smooth pb-[calc(4rem+var(--safe-bottom,0px))] lg:pb-0"}`}
           >
             <div className="w-full flex-1 flex flex-col min-h-0">
               <Sentry.ErrorBoundary

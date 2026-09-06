@@ -64,6 +64,12 @@
 :root {
   --radius: 0.625rem;
 
+  /* Safe Area Inset Tokens (supports iOS, Android Capacitor & mobile browsers) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
   /* Claude-like pure white chat background, warm ink foreground */
   --background: hsl(0 0% 100%);
   --foreground: hsl(24 20% 10%);
@@ -135,6 +141,12 @@
   --sidebar-accent-foreground: #f5f5f5;
   --sidebar-border: rgba(255, 255, 255, 0.05);
   --sidebar-ring: #c96a3d;
+}
+
+/* Fallback for Capacitor Android when running without native insets padding */
+html.capacitor-android:not(.native-insets-applied) {
+  --safe-top: max(env(safe-area-inset-top, 0px), 32px);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 48px);
 }
 
 /* ─── Study Accent Palettes (Light Mode) ────────────────────────────────── */

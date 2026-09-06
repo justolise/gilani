@@ -348,6 +348,11 @@ function RootComponent() {
     import("@capacitor/core").then(({ Capacitor }) => {
       if (!Capacitor.isNativePlatform()) return;
 
+      document.documentElement.classList.add("capacitor-native");
+      if (Capacitor.getPlatform() === "android") {
+        document.documentElement.classList.add("capacitor-android");
+      }
+
       import("@capacitor/app")
         .then(({ App }) => {
           App.addListener("backButton", ({ canGoBack }) => {

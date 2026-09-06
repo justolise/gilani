@@ -158,7 +158,7 @@ export function ChatInput({
   };
 
   return (
-    <div className="px-3 pb-4 pt-2 sm:px-6 sm:pb-6 relative z-10 w-full transition-all">
+    <div className="px-3 pb-[calc(1rem+var(--safe-bottom,0px))] pt-2 sm:px-6 sm:pb-6 relative z-10 w-full transition-all">
       <div className="lg:max-w-3xl lg:mx-auto">
         {/* Shared Usage & Error Banners */}
         <UsageBanners
