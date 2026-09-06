@@ -7,7 +7,7 @@ import { parseDocument } from "@/shared/utils/document-parser";
 import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { generateThreadTitleFn, renameThreadFn } from "@/fns/tutor.server-fns";
-import { consumePendingMessage } from "@/shared/utils/pending-message";
+import { consumePendingMessage, hasPendingMessage } from "@/shared/utils/pending-message";
 import { useAuth } from "@/client/hooks/use-auth";
 
 import { useTutorChat } from "@/client/components/tutor/hooks/useTutorChat";
@@ -51,7 +51,7 @@ function TutorThread() {
   const { profileName } = useProfile(userId);
   const userName = profileName || (session?.user?.user_metadata?.full_name ?? null);
 
-  if (authLoading) return <GilaniLoader />;
+  if (authLoading && !session && !hasPendingMessage(threadId)) return <GilaniLoader />;
 
   return (
     <TutorThreadInner key={threadId} authToken={authToken} userId={userId} userName={userName} />
@@ -247,6 +247,7 @@ function TutorThreadInner({
 
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           <MessageList
+            threadId={threadId as string}
             messages={chatState.messages}
             messagesLoading={chatState.messagesLoading}
             messagesLoadError={chatState.messagesLoadError}
@@ -289,6 +290,7 @@ function TutorThreadInner({
             input={composer.input}
             isPending={chatState.isPending}
             parsingFile={composer.parsingFile}
+            uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
             chatError={chatState.chatError}
             docUploadError={composer.docUploadError}

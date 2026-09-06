@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   FileText,
+  Image as ImageIcon,
   Loader2,
   Paperclip,
   Send,
@@ -26,12 +27,19 @@ type AttachedFile = {
   name: string;
   size: number;
   text: string;
+  /** Blob URL for image preview thumbnail */
+  previewUrl?: string;
+  mimeType?: string;
 };
+
+type UploadPhase = "idle" | "uploading" | "extracting";
 
 type Props = {
   input: string;
   isPending: boolean;
   parsingFile: boolean;
+  /** Fine-grained upload phase — takes precedence over parsingFile when provided */
+  uploadPhase?: UploadPhase;
   attachedFile: AttachedFile | null;
   chatError: string | null;
   docUploadError: string | null;
@@ -64,6 +72,7 @@ export function ChatInput({
   input,
   isPending,
   parsingFile,
+  uploadPhase = "idle",
   attachedFile,
   chatError,
   docUploadError,
@@ -86,11 +95,27 @@ export function ChatInput({
   const textareaRef = externalInputRef ?? internalRef;
   const isRateLimited = useMemo(() => checkIsRateLimited(chatError), [chatError]);
 
+  // Use uploadPhase when available; fall back to parsingFile boolean for compat
+  const activePhase: UploadPhase =
+    uploadPhase !== "idle" ? uploadPhase : parsingFile ? "uploading" : "idle";
+  const isProcessingFile = activePhase !== "idle";
+
+  const phaseLabel =
+    activePhase === "uploading"
+      ? "Uploading…"
+      : activePhase === "extracting"
+        ? "Extracting text…"
+        : null;
+
   const { secondsLeft } = useRateLimitCountdown(
     isRateLimited ? chatError : null,
     onRateLimitExpired,
   );
-  const isDisabled = isPending || parsingFile || isRateLimited;
+  const isDisabled = isPending || isProcessingFile || isRateLimited;
+
+  const isImageAttachment = !!(
+    attachedFile?.mimeType?.startsWith("image/") || attachedFile?.previewUrl
+  );
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -124,21 +149,60 @@ export function ChatInput({
           className="mb-2.5"
         />
 
-        {/* Attached file pill */}
-        {attachedFile && (
-          <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <FileText className="h-4 w-4 text-primary" />
+        {/* Loading pill — shown while uploading / extracting text */}
+        {isProcessingFile && (
+          <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3 shadow-sm animate-in fade-in duration-300">
+            {/* Spinner */}
+            <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+              <Loader2 className="h-4 w-4 text-primary animate-spin" />
             </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-foreground leading-tight">
+                {attachedFile?.name ?? "Preparing file…"}
+              </p>
+              <p className="text-xs text-primary/80 font-medium mt-0.5 leading-tight flex items-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                {phaseLabel}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Attached file pill — shown after processing is complete */}
+        {attachedFile && !isProcessingFile && (
+          <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
+            {/* Thumbnail for images, document icon for everything else */}
+            {isImageAttachment && attachedFile.previewUrl ? (
+              <div className="flex-shrink-0 h-10 w-10 rounded-xl overflow-hidden border border-primary/20 bg-muted">
+                <img
+                  src={attachedFile.previewUrl}
+                  alt={attachedFile.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                {isImageAttachment ? (
+                  <ImageIcon className="h-4 w-4 text-primary" />
+                ) : (
+                  <FileText className="h-4 w-4 text-primary" />
+                )}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-foreground leading-tight">
                 {attachedFile.name}
               </p>
-              <p className="font-mono text-xs text-muted-foreground mt-0.5 leading-tight">
+              <p className="font-mono text-xs text-muted-foreground mt-0.5 leading-tight flex flex-wrap items-center gap-x-1.5">
                 {formatFileSize(attachedFile.size)}
-                {attachedFile.text.length > 8000 && (
-                  <span className="ml-1.5 text-amber-500 font-medium">
-                    · will be truncated to 8 000 chars
+                {isImageAttachment && (
+                  <span className="text-emerald-500 dark:text-emerald-400 font-semibold">
+                    · Text extracted
+                  </span>
+                )}
+                {!isImageAttachment && attachedFile.text.length > 8000 && (
+                  <span className="text-amber-500 font-medium">
+                    · will be truncated to 8 000 chars
                   </span>
                 )}
               </p>
@@ -156,12 +220,12 @@ export function ChatInput({
 
         {/* Main input container with theme-aware borders & elevation */}
         <div className="relative flex flex-col rounded-3xl border border-border/80 bg-card shadow-sm dark:shadow-none hover:border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 dark:focus-within:border-primary/50 dark:focus-within:ring-primary/20 transition-all duration-200 overflow-hidden">
-          {/* File input: hidden with onClick reset so the file blob is untouched during onChange */}
+          {/* File input: hidden — accepts documents AND images from gallery */}
           <input
             id="chat-file-input"
             type="file"
             className="hidden"
-            accept=".pdf,.docx,.doc,.txt,.md,.csv,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept="image/*,.pdf,.docx,.doc,.txt,.md,.csv,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={onFileChange}
             onClick={(e) => {
               (e.target as HTMLInputElement).value = "";
@@ -211,7 +275,7 @@ export function ChatInput({
                           : "cursor-pointer text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:border-border/60 active:scale-90"
                     }`}
                   >
-                    {parsingFile ? (
+                    {isProcessingFile ? (
                       <Loader2 className="h-4 w-4 animate-spin text-primary" />
                     ) : isListening ? (
                       <span className="relative flex h-4 w-4 items-center justify-center">
@@ -224,14 +288,14 @@ export function ChatInput({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" sideOffset={8} className="w-48 p-1.5 z-50">
-                  {/* 1. Upload Document */}
+                  {/* 1. Upload Document or pick Image from gallery */}
                   <DropdownMenuItem asChild className="cursor-pointer gap-2.5 p-2 rounded-lg">
                     <label
                       htmlFor={isDisabled ? undefined : "chat-file-input"}
                       className="flex w-full items-center"
                     >
                       <Paperclip className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Document</span>
+                      <span className="text-sm font-medium">Document / Image</span>
                     </label>
                   </DropdownMenuItem>
 
@@ -242,7 +306,7 @@ export function ChatInput({
                       className="cursor-pointer gap-2.5 p-2 rounded-lg"
                     >
                       <Camera className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Image</span>
+                      <span className="text-sm font-medium">Scan (Camera)</span>
                     </DropdownMenuItem>
                   )}
 

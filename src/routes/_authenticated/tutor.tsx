@@ -70,10 +70,29 @@ function TutorIndex() {
   // Must be declared before any conditional return (rules of hooks).
   useEffect(() => {
     if (isExactTutor) {
+      if (typeof window !== "undefined" && window.location.search.includes("new=1")) {
+        composer.clearDraft();
+        try {
+          sessionStorage.removeItem("gilani_tutor_home_draft");
+        } catch {}
+      }
       navigate({ to: "/tutor", replace: true } as any);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Clear the input whenever the user lands back on the empty-state home.
+  // TutorIndex never unmounts (it's the persistent layout), so composer.input
+  // would otherwise survive the round-trip to a thread and back.
+  useEffect(() => {
+    if (isExactTutor) {
+      composer.clearDraft();
+      try {
+        sessionStorage.removeItem("gilani_tutor_home_draft");
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExactTutor]);
 
   useEffect(() => {
     if (!isExactTutor) return;
@@ -111,8 +130,11 @@ function TutorIndex() {
         ? `Uploaded a document: ${composer.attachedFile.name}`
         : "Started a new session");
 
-    composer.setInput("");
-    composer.onRemoveFile();
+    // Clear composer and sessionStorage draft immediately so it doesn't linger
+    composer.clearDraft();
+    try {
+      sessionStorage.removeItem("gilani_tutor_home_draft");
+    } catch {}
 
     // Generate an ID locally for instant transition. The server will auto-create
     // the row when the first message hits the chat API.
@@ -177,6 +199,7 @@ function TutorIndex() {
             input={composer.input}
             isPending={creatingThread}
             parsingFile={composer.parsingFile}
+            uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
             chatError={null}
             docUploadError={composer.docUploadError}

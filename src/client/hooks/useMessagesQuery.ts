@@ -88,7 +88,7 @@ export function useMessagesQuery(threadId?: string | null, userId?: string | nul
 
         const escalationStatus = (escalationRes.data?.status as string) || null;
 
-        let userVotes: Record<string, 1 | -1> = {};
+        const userVotes: Record<string, 1 | -1> = {};
         if (feedbackRes.data && feedbackRes.data.length > 0) {
           for (const row of feedbackRes.data as any[]) {
             if (row.message_id && row.vote != null) {

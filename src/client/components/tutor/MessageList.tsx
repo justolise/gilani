@@ -4,8 +4,10 @@ import { MessageBubble } from "./MessageBubble";
 import { EmptyState } from "./EmptyState";
 import { ThinkingSweep } from "./ThinkingSweep";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { hasPendingMessage, peekPendingMessage } from "@/shared/utils/pending-message";
 
 type Props = {
+  threadId?: string;
   messages: any[];
   messagesLoading: boolean;
   messagesLoadError: string | null;
@@ -38,6 +40,7 @@ type Props = {
 };
 
 export const MessageList = React.memo(function MessageList({
+  threadId,
   messages,
   messagesLoading,
   messagesLoadError,
@@ -73,10 +76,31 @@ export const MessageList = React.memo(function MessageList({
   const isAutoScrollingRef = useRef(true);
   const lastMessageCountRef = useRef(0);
 
+  // If this is a fresh thread transition, read the pending message so it renders on Frame 1 without delay
+  const pending = threadId && hasPendingMessage(threadId) ? peekPendingMessage(threadId) : null;
+  const effectiveMessages = useMemo(() => {
+    if (messages.length > 0) return messages;
+    if (pending) {
+      return [
+        {
+          id: "optimistic-pending-" + threadId,
+          role: "user",
+          content: pending.finalMessage,
+          parts: [{ type: "text", text: pending.finalMessage }],
+          createdAt: new Date(),
+        },
+      ];
+    }
+    return messages;
+  }, [messages, pending, threadId]);
+
+  const effectiveLoading = pending ? false : messagesLoading;
+
   // Memoize the "should show thinking" logic
   const showThinking = useMemo(() => {
+    if (pending) return true;
     if (!isPending) return false;
-    const last = messages[messages.length - 1];
+    const last = effectiveMessages[effectiveMessages.length - 1];
     if (!last) return true;
     if (last.role === "user") return true;
     const text =
@@ -87,7 +111,7 @@ export const MessageList = React.memo(function MessageList({
       last.content ||
       "";
     return text.trim().length === 0;
-  }, [isPending, messages]);
+  }, [isPending, effectiveMessages, pending]);
 
   // While streaming, surface the actual tool currently in flight (if any),
   // by finding the most recent tool-call part with no matching tool-result yet.
@@ -225,7 +249,7 @@ export const MessageList = React.memo(function MessageList({
     >
       <div ref={innerRef} className="space-y-3 flex flex-col pb-4 min-h-full">
         {/* Loading state */}
-        {messagesLoading && (
+        {effectiveLoading && (
           <div
             className="flex flex-col items-center justify-center h-full gap-3"
             role="status"
@@ -249,7 +273,7 @@ export const MessageList = React.memo(function MessageList({
         )}
 
         {/* Empty state */}
-        {!messagesLoading && !messagesLoadError && messages.length === 0 && (
+        {!effectiveLoading && !messagesLoadError && effectiveMessages.length === 0 && (
           <EmptyState
             onPromptClick={onPromptClick}
             recentThreads={recentThreads ?? []}
@@ -269,9 +293,9 @@ export const MessageList = React.memo(function MessageList({
         )}
 
         {/* Messages */}
-        {!messagesLoading &&
+        {!effectiveLoading &&
           !messagesLoadError &&
-          messages.map((m, idx: number) => (
+          effectiveMessages.map((m, idx: number) => (
             <Sentry.ErrorBoundary
               key={m.id ?? idx}
               fallback={
@@ -283,8 +307,8 @@ export const MessageList = React.memo(function MessageList({
               <MessageBubble
                 message={m}
                 idx={idx}
-                isLast={idx === messages.length - 1}
-                isPending={isPending && idx === messages.length - 1}
+                isLast={idx === effectiveMessages.length - 1}
+                isPending={(isPending || !!pending) && idx === effectiveMessages.length - 1}
                 isRateLimited={isRateLimited}
                 onReload={onReload}
                 onEditRequest={onEditRequest}
@@ -302,16 +326,14 @@ export const MessageList = React.memo(function MessageList({
             </Sentry.ErrorBoundary>
           ))}
 
-        {/* Thinking indicator — shimmer skeleton, matches assistant bubble layout */}
+        {/* Thinking indicator — premium animated indicator */}
         {showThinking && (
           <div
-            className="w-full max-w-[96%] sm:max-w-full animate-in fade-in duration-500"
+            className="w-full animate-in fade-in slide-in-from-bottom-1 duration-400 px-2 py-2"
             role="status"
             aria-label="AI is thinking"
           >
-            <div className="flex flex-col gap-2.5 px-1 py-3">
-              <ThinkingSweep label={activeToolLabel ?? undefined} />
-            </div>
+            <ThinkingSweep label={activeToolLabel ?? undefined} />
           </div>
         )}
 

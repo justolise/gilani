@@ -10,22 +10,35 @@ export type AttachedFile = {
   size: number;
   storageUrl?: string;
   mimeType?: string;
+  /** Blob URL for image thumbnail preview — revoke when no longer needed */
+  previewUrl?: string;
 };
 
 const MAX_DOC_CHARS = 8000;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+export type UploadPhase = "idle" | "uploading" | "extracting";
+
 export function useComposer() {
   const [input, setInput] = useState("");
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
-  const [parsingFile, setParsingFile] = useState(false);
+  const [uploadPhase, setUploadPhase] = useState<UploadPhase>("idle");
   const [docUploadError, setDocUploadError] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const chatInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
   const baseInputRef = useRef("");
+  const previewUrlRef = useRef<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState("free");
+
+  /** Helper: revoke any existing blob preview URL */
+  const revokePreview = () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -171,7 +184,13 @@ export function useComposer() {
       return;
     }
 
-    setParsingFile(true);
+    // Generate a local blob preview URL for images immediately (before any async work)
+    const isImage = file.type.startsWith("image/");
+    revokePreview();
+    const newPreviewUrl = isImage ? URL.createObjectURL(file) : undefined;
+    if (newPreviewUrl) previewUrlRef.current = newPreviewUrl;
+
+    setUploadPhase("uploading");
     setDocUploadError(null);
     const toastId = toast.loading(`Uploading ${file.name}...`);
     try {
@@ -193,19 +212,22 @@ export function useComposer() {
         console.warn("[Storage] Storage unavailable, proceeding without file URL:", storageErr);
       }
 
-      // 2. Extract text for AI context
+      // 2. Extract text for AI context (OCR for images, PDF.js/Mammoth for docs)
+      setUploadPhase("extracting");
       toast.loading(`Extracting text from ${file.name}...`, { id: toastId });
       const parsed = await parseDocument(file);
-      setAttachedFile({ ...parsed, storageUrl, mimeType: file.type });
+      setAttachedFile({ ...parsed, storageUrl, mimeType: file.type, previewUrl: newPreviewUrl });
       localStorage.setItem(key, (count + 1).toString());
-      toast.success("Document attached!", { id: toastId });
+      const successLabel = isImage ? "Image attached — text extracted!" : "Document attached!";
+      toast.success(successLabel, { id: toastId });
     } catch (err: any) {
-      // Use the explicit, friendly error from document-parser, falling back to friendlyError for unknown issues.
+      // On failure, revoke the preview URL since we won't be showing the pill
+      revokePreview();
       const errMsg = err.message || friendlyError(err, "Failed to attach document.");
       setDocUploadError(errMsg);
       toast.error(errMsg, { id: toastId });
     } finally {
-      setParsingFile(false);
+      setUploadPhase("idle");
     }
   };
 
@@ -218,11 +240,25 @@ export function useComposer() {
   };
 
   const onRemoveFile = () => {
+    revokePreview();
     setAttachedFile(null);
     setDocUploadError(null);
   };
 
   const onClearDocError = () => setDocUploadError(null);
+
+  const clearDraft = () => {
+    revokePreview();
+    setInput("");
+    setAttachedFile(null);
+    setDocUploadError(null);
+    try {
+      sessionStorage.removeItem("gilani_tutor_home_draft");
+    } catch {}
+    if (chatInputRef.current) {
+      chatInputRef.current.value = "";
+    }
+  };
 
   const focusInputAtEnd = (text: string) => {
     setTimeout(() => {
@@ -260,7 +296,9 @@ export function useComposer() {
     input,
     setInput,
     attachedFile,
-    parsingFile,
+    uploadPhase,
+    /** Derived boolean for backwards-compat with any site that already checks parsingFile */
+    parsingFile: uploadPhase !== "idle",
     docUploadError,
     chatInputRef,
     isListening,
@@ -270,6 +308,7 @@ export function useComposer() {
     handleScanClick,
     onRemoveFile,
     onClearDocError,
+    clearDraft,
     handlePromptClick,
     handleEditRequest,
     buildMessageText,

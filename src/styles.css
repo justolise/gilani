@@ -438,6 +438,32 @@ html[data-font-family="serif"] body {
   animation: shimmer-sweep 2.8s ease-in-out 1;
 }
 
+/* ── LLM Thinking continuous shimmer ────────────────────────────── */
+@keyframes thinking-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-thinking-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--foreground) / 0.45) 0%,
+    hsl(var(--primary)) 40%,
+    hsl(var(--foreground)) 50%,
+    hsl(var(--primary)) 60%,
+    hsl(var(--foreground) / 0.45) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: thinking-shimmer 2.5s ease-in-out infinite;
+}
+
 /* ── Premium loader progress fill ───────────────────────────────── */
 @keyframes progress-fill {
   0% {

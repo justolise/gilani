@@ -31,3 +31,11 @@ export function consumePendingMessage(threadId: string): PendingMessage | null {
 export function hasPendingMessage(threadId: string): boolean {
   return !!pending && pending.threadId === threadId;
 }
+
+/** Non-destructive read — returns the pending message without clearing it. */
+export function peekPendingMessage(threadId: string): PendingMessage | null {
+  if (pending && pending.threadId === threadId) {
+    return { finalMessage: pending.finalMessage, titleSeedText: pending.titleSeedText };
+  }
+  return null;
+}

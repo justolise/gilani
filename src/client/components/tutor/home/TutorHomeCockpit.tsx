@@ -53,6 +53,12 @@ export function TutorHomeCockpit({
   // Draft restoration from sessionStorage if activeInput is empty on initial mount
   useEffect(() => {
     try {
+      const isNewSession =
+        typeof window !== "undefined" && window.location.search.includes("new=1");
+      if (isNewSession) {
+        sessionStorage.removeItem("gilani_tutor_home_draft");
+        return;
+      }
       const savedDraft = sessionStorage.getItem("gilani_tutor_home_draft");
       if (savedDraft && (!activeInput || activeInput.trim() === "") && onInputChange) {
         onInputChange(savedDraft);
