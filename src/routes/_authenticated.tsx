@@ -48,6 +48,27 @@ function AuthedShell() {
   const navigate = useNavigate();
   const [timedOut, setTimedOut] = useState(false);
 
+  const { sidebarOpen, setSidebarOpen, user, createNewThread, startRename, setDeleteConfirmId } =
+    shell;
+
+  const layoutValue = useMemo(
+    () => ({
+      sidebarOpen,
+      setSidebarOpen,
+      user,
+      createNewThread,
+      requestRenameThread: (id: string, title: string) => {
+        setSidebarOpen(true);
+        startRename(id, title);
+      },
+      requestDeleteThread: (id: string) => {
+        setSidebarOpen(true);
+        setDeleteConfirmId(id);
+      },
+    }),
+    [sidebarOpen, setSidebarOpen, user, createNewThread, startRename, setDeleteConfirmId],
+  );
+
   // Safety timeout — if auth is still loading after 6s, stop blocking the UI
   useEffect(() => {
     if (!shell.loading) {
@@ -79,31 +100,6 @@ function AuthedShell() {
   const isProfileLoaded = !shell.loading && !shell.profileLoading;
   const needsProfileSetup =
     isProfileLoaded && (!shell.onboardingCompleted || !shell.profileName?.trim());
-
-  const layoutValue = useMemo(
-    () => ({
-      sidebarOpen: shell.sidebarOpen,
-      setSidebarOpen: shell.setSidebarOpen,
-      user: shell.user,
-      createNewThread: shell.createNewThread,
-      requestRenameThread: (id: string, title: string) => {
-        shell.setSidebarOpen(true);
-        shell.startRename(id, title);
-      },
-      requestDeleteThread: (id: string) => {
-        shell.setSidebarOpen(true);
-        shell.setDeleteConfirmId(id);
-      },
-    }),
-    [
-      shell.sidebarOpen,
-      shell.setSidebarOpen,
-      shell.user,
-      shell.createNewThread,
-      shell.startRename,
-      shell.setDeleteConfirmId,
-    ],
-  );
 
   return (
     <I18nProvider>
