@@ -81,11 +81,18 @@ function TutorThreadInner({
   // Capture the pending first-message text synchronously at init time so that
   // Frame 1 can render the optimistic user bubble BEFORE the useEffect fires
   // and calls consumePendingMessage (which clears the global store).
-  const [initialUserMessage] = useState<string | null>(() => {
+  const [initialUserMessage, setInitialUserMessage] = useState<string | null>(() => {
     if (!threadId) return null;
     const p = peekPendingMessage(threadId);
     return p ? p.finalMessage : null;
   });
+
+  // Clear initialUserMessage as soon as real messages exist in state
+  useEffect(() => {
+    if (chatState.messages.length > 0 && initialUserMessage) {
+      setInitialUserMessage(null);
+    }
+  }, [chatState.messages.length, initialUserMessage]);
 
   const [timerOpen, setTimerOpen] = useState(false);
   const [showPlans, setShowPlans] = useState(false);

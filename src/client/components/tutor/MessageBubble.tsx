@@ -200,30 +200,34 @@ export const MessageBubble = memo(function MessageBubble({
   const lastTextRef = useRef<string>("");
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  // Single consolidated stall-detection effect.
+  // When stream ends, immediately clear isStalled and cancel any pending timer.
+  // While streaming, restart the 750ms timer on every text change.
   useEffect(() => {
+    // Always clear any pending timer first.
+    if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
+    stallTimerRef.current = undefined;
+
     if (!isStreamActive) {
+      // Stream just finished — ensure stall indicator is gone.
       setIsStalled(false);
       return;
     }
+
+    // Stream is active. If text changed, clear stall and restart the timer.
     if (displayText !== lastTextRef.current) {
       lastTextRef.current = displayText;
       setIsStalled(false);
-      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
-      // Fast responsiveness: trigger thinking indicator after 750ms of stream inactivity
-      stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
     }
+
+    // (Re)start a 750ms inactivity timer. If text keeps arriving the effect
+    // will re-run before the timer fires, restarting it each time.
+    stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
+
     return () => {
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
     };
   }, [displayText, isStreamActive]);
-
-  useEffect(() => {
-    if (!isStreamActive) return;
-    stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
-    return () => {
-      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
-    };
-  }, [isStreamActive]);
 
   const showBubbleCard = displayText.length > 0;
   const isUser = m.role === "user";
@@ -293,9 +297,32 @@ export const MessageBubble = memo(function MessageBubble({
           } text-[15px] sm:text-base leading-relaxed relative transition-colors duration-200`}
         >
           {!isUser ? (
-            <div className="flex flex-col w-full min-h-[38px]">
-              {showBubbleCard ? (
-                <div className="prose-ai relative animate-in fade-in duration-200">
+            <div className="flex flex-col w-full">
+              {/* Initial thinking/tool indicator — shown before first text arrives.
+                  Uses opacity fade-out (not unmount) so layout doesn't shift. */}
+              {isStreamActive && !showBubbleCard && (
+                <div className="py-1">
+                  {toolSteps.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-200">
+                      {toolSteps.map((step) => (
+                        <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
+                      ))}
+                    </div>
+                  )}
+                  <ThinkingSweep
+                    label={
+                      pauseLabel ||
+                      (hasActiveTool && activeToolStep
+                        ? formatToolInProgressLabel(activeToolStep.toolName)
+                        : undefined)
+                    }
+                  />
+                </div>
+              )}
+
+              {/* Content area — always rendered when text exists */}
+              {showBubbleCard && (
+                <div className="prose-ai relative">
                   <BubbleThinkingPanel reasoningSteps={reasoningSteps} />
 
                   <SmoothMarkdownRenderer
@@ -308,7 +335,8 @@ export const MessageBubble = memo(function MessageBubble({
                         : "transition-opacity duration-200"
                     }
                   />
-                  {/* Midstream thinking or active tool call indicator */}
+
+                  {/* Midstream pause indicator: shown when AI stops mid-response to think/use a tool */}
                   {isStreamActive && (pauseLabel || isStalled || hasActiveTool) && (
                     <div className="mt-2 flex flex-col gap-1.5 animate-in fade-in duration-250">
                       {hasActiveTool && activeToolStep && (
@@ -331,7 +359,7 @@ export const MessageBubble = memo(function MessageBubble({
                     </div>
                   )}
 
-                  {/* Completed tool pills (or all tool pills once stream is finished) */}
+                  {/* Completed tool pills */}
                   {toolSteps.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {toolSteps
@@ -346,31 +374,13 @@ export const MessageBubble = memo(function MessageBubble({
                     </div>
                   )}
                 </div>
-              ) : isStreamActive ? (
-                /* In-flight initial thinking & tool execution in place inside the bubble */
-                <div className="py-1 animate-in fade-in duration-200">
-                  {toolSteps.length > 0 && (
-                    <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-250">
-                      {toolSteps.map((step) => (
-                        <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
-                      ))}
-                    </div>
-                  )}
-                  <ThinkingSweep
-                    label={
-                      pauseLabel ||
-                      (hasActiveTool && activeToolStep
-                        ? formatToolInProgressLabel(activeToolStep.toolName)
-                        : undefined)
-                    }
-                  />
-                </div>
-              ) : (
-                toolSteps.length === 0 && (
-                  <span className="text-xs text-muted-foreground italic mt-1">
-                    No response generated. Please resend your question.
-                  </span>
-                )
+              )}
+
+              {/* Empty response fallback (stream done, no content) */}
+              {!isStreamActive && !showBubbleCard && toolSteps.length === 0 && (
+                <span className="text-xs text-muted-foreground italic mt-1">
+                  No response generated. Please resend your question.
+                </span>
               )}
 
               {/* Footer: action buttons + persistent G badge (only when finished and settled) */}

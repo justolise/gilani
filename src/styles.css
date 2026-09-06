@@ -499,7 +499,6 @@ html[data-font-family="serif"] body {
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
-  overflow: hidden;
 }
 
 /* Code blocks - wrap instead of scroll */
@@ -646,7 +645,6 @@ html[data-font-family="serif"] body {
 /* Ensure all direct children respect width */
 .prose-ai > * {
   max-width: 100%;
-  overflow: hidden;
 }
 
 /* Force break on extremely long strings */
@@ -706,33 +704,6 @@ html[data-font-family="serif"] body {
 /* Dark mode adjustments for Prism */
 .dark .prose-ai pre[class*="language-"] {
   background: #1e1e2e !important;
-}
-
-/* ─── Global Scrollbar Hiding ───────────────────────────────────────────────── */
-
-/* Hide scrollbar for Chrome, Safari, Edge, and Opera */
-*::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for Firefox, IE, and Edge */
-* {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-/* ─── Utility to re-enable scrollbars if ever needed ────────────────────────── */
-.scrollbar-visible::-webkit-scrollbar {
-  display: block;
-  width: 8px;
-  height: 8px;
-}
-
-.scrollbar-visible {
-  -ms-overflow-style: auto;
-  scrollbar-width: auto;
 }
 
 /* Thinking indicator animations */
