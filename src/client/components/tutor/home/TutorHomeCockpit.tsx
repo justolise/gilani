@@ -77,7 +77,7 @@ export function TutorHomeCockpit({
   }, [activeInput]);
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-[calc(11rem+var(--safe-bottom,0px))] lg:pb-28">
+    <div className="w-full flex flex-col items-center justify-start px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-[calc(13rem+env(safe-area-inset-bottom,0px))] lg:pb-28">
       {/* Academic Header & Curriculum Indicator */}
       <div className="flex flex-col items-center text-center space-y-2.5 max-w-xl">
         <div className="flex flex-wrap items-center justify-center gap-2">
