@@ -118,7 +118,14 @@ export function TutorHomeCockpit({
       <StudyContinuityCard
         latestThread={latestThread}
         todayPlanTask={todayPlanTask}
-        onStartPlanTask={onPromptClick}
+        disabled={isRateLimited}
+        onStartPlanTask={(prompt) => {
+          if (isRateLimited) {
+            onUpgrade?.();
+            return;
+          }
+          onPromptClick(prompt);
+        }}
       />
 
       {/* Pedagogical Action Accelerators */}
@@ -127,11 +134,30 @@ export function TutorHomeCockpit({
           <Sparkles className="w-3.5 h-3.5 text-primary/70" />
           <span>How would you like to learn?</span>
         </div>
-        <PedagogicalActions onSelectAction={onPromptClick} />
+        <PedagogicalActions
+          disabled={isRateLimited}
+          onSelectAction={(prompt) => {
+            if (isRateLimited) {
+              onUpgrade?.();
+              return;
+            }
+            onPromptClick(prompt);
+          }}
+        />
       </div>
 
       {/* Curriculum Subject Quick Launchers */}
-      <CurriculumSubjectBar curriculum={curriculum} onSelectSubjectPrompt={onPromptClick} />
+      <CurriculumSubjectBar
+        curriculum={curriculum}
+        disabled={isRateLimited}
+        onSelectSubjectPrompt={(prompt) => {
+          if (isRateLimited) {
+            onUpgrade?.();
+            return;
+          }
+          onPromptClick(prompt);
+        }}
+      />
     </div>
   );
 }

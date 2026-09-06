@@ -6,12 +6,14 @@ interface CurriculumSubjectBarProps {
   curriculum?: string | null;
   onSelectSubjectPrompt: (prompt: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function CurriculumSubjectBar({
   curriculum,
   onSelectSubjectPrompt,
   className = "",
+  disabled = false,
 }: CurriculumSubjectBarProps) {
   const config = getCurriculumConfig(curriculum);
 
@@ -27,11 +29,22 @@ export function CurriculumSubjectBar({
           <button
             key={subj.id}
             type="button"
-            onClick={() => onSelectSubjectPrompt(subj.starterPrompt)}
-            className="group inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/80 hover:bg-primary/5 hover:border-primary/40 px-3 py-1.5 text-xs font-medium text-foreground/80 hover:text-foreground transition-all duration-200 cursor-pointer shadow-xs active:scale-95"
-            title={`Start a session for ${subj.name}`}
+            disabled={disabled}
+            onClick={() => !disabled && onSelectSubjectPrompt(subj.starterPrompt)}
+            className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+              disabled
+                ? "border-border/40 bg-background/50 text-muted-foreground/60 opacity-50 cursor-not-allowed shadow-none"
+                : "border-border/50 bg-background/80 hover:bg-primary/5 hover:border-primary/40 text-foreground/80 hover:text-foreground cursor-pointer shadow-xs active:scale-95"
+            }`}
+            title={disabled ? "Daily limit reached" : `Start a session for ${subj.name}`}
           >
-            <BookOpen className="w-3 h-3 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+            <BookOpen
+              className={`w-3 h-3 transition-colors ${
+                disabled
+                  ? "text-muted-foreground/40"
+                  : "text-muted-foreground/60 group-hover:text-primary"
+              }`}
+            />
             <span>{subj.name}</span>
           </button>
         ))}

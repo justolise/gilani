@@ -20,6 +20,8 @@ import { useLayout } from "@/client/contexts/layout-context";
 import { useAuth } from "@/client/hooks/use-auth";
 import { PullToRefresh } from "@/client/components/ui/PullToRefresh";
 import { useProfile } from "@/client/components/layout/hooks/split/useProfile";
+import { useRateLimitState } from "@/client/components/tutor/hooks/split/useRateLimitState";
+import { PlansModal } from "@/client/components/PlansModal";
 
 export const Route = createFileRoute("/_authenticated/tutor")({
   component: TutorIndex,
@@ -45,6 +47,8 @@ function TutorIndex() {
   const authToken = session?.access_token ?? null;
   const userId = session?.user?.id ?? null;
   const { profileName, curriculum } = useProfile(userId);
+  const rateLimitState = useRateLimitState(userId);
+  const [showPlans, setShowPlans] = useState(false);
 
   const [creatingThread, setCreatingThread] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
@@ -120,6 +124,12 @@ function TutorIndex() {
 
   const handleDraftSubmit = async (event?: { preventDefault?: () => void }) => {
     event?.preventDefault?.();
+    if (rateLimitState.isRateLimited) {
+      toast.error("Daily message limit reached. Upgrade your plan to continue learning today.");
+      setShowPlans(true);
+      return;
+    }
+
     const trimmedInput = composer.input.trim();
     if (!composer.hasContent(trimmedInput)) return;
 
@@ -176,18 +186,62 @@ function TutorIndex() {
           className="flex-1 min-h-0"
           onRefresh={async () => {
             invalidateThreads();
+            rateLimitState.refreshRateLimitStatus();
             // small delay so the spinner is visible
             await new Promise((r) => setTimeout(r, 600));
           }}
         >
           <EmptyState
-            onPromptClick={composer.handlePromptClick}
+            onPromptClick={(prompt) => {
+              if (rateLimitState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.handlePromptClick(prompt);
+            }}
+            chatError={rateLimitState.chatError}
+            isRateLimited={rateLimitState.isRateLimited}
+            messagesUsed={rateLimitState.messagesUsed}
+            messagesMax={rateLimitState.messagesMax}
+            onUpgrade={() => setShowPlans(true)}
+            onRateLimitExpired={() => {
+              rateLimitState.setChatError(null);
+              rateLimitState.refreshRateLimitStatus();
+            }}
             onUploadClick={() => {
+              if (rateLimitState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
               const el = document.getElementById("chat-file-input") as HTMLInputElement | null;
               el?.click();
             }}
-            onScanClick={composer.handleScanClick}
-            onVoiceClick={composer.toggleVoiceInput}
+            onScanClick={() => {
+              if (rateLimitState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.handleScanClick();
+            }}
+            onVoiceClick={() => {
+              if (rateLimitState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.toggleVoiceInput();
+            }}
             isListening={composer.isListening}
             recentThreads={threads}
             userName={profileName || (session?.user?.user_metadata?.full_name ?? null)}
@@ -204,7 +258,15 @@ function TutorIndex() {
             parsingFile={composer.parsingFile}
             uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
-            chatError={null}
+            chatError={rateLimitState.chatError}
+            isRateLimited={rateLimitState.isRateLimited}
+            messagesUsed={rateLimitState.messagesUsed}
+            messagesMax={rateLimitState.messagesMax}
+            onUpgrade={() => setShowPlans(true)}
+            onRateLimitExpired={() => {
+              rateLimitState.setChatError(null);
+              rateLimitState.refreshRateLimitStatus();
+            }}
             docUploadError={composer.docUploadError}
             onClearDocError={composer.onClearDocError}
             onInputChange={(e) => composer.setInput(e.target.value)}
@@ -230,6 +292,8 @@ function TutorIndex() {
           />
         </Suspense>
       )}
+
+      {showPlans && <PlansModal onClose={() => setShowPlans(false)} currentPlan="free" />}
 
       <PomodoroTimer open={timerOpen} onOpenChange={setTimerOpen} showTrigger={false} />
     </div>

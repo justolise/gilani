@@ -60,9 +60,14 @@ export const PEDAGOGICAL_ACTIONS: PedagogicalAction[] = [
 interface PedagogicalActionsProps {
   onSelectAction: (prompt: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export function PedagogicalActions({ onSelectAction, className = "" }: PedagogicalActionsProps) {
+export function PedagogicalActions({
+  onSelectAction,
+  className = "",
+  disabled = false,
+}: PedagogicalActionsProps) {
   return (
     <div className={`w-full max-w-3xl ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -72,18 +77,31 @@ export function PedagogicalActions({ onSelectAction, className = "" }: Pedagogic
             <button
               key={action.id}
               type="button"
-              onClick={() => onSelectAction(action.prompt)}
-              className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-0.5 transition-all duration-200 text-left shadow-xs hover:shadow-md active:scale-[0.99] cursor-pointer"
+              disabled={disabled}
+              onClick={() => !disabled && onSelectAction(action.prompt)}
+              className={`group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 text-left ${
+                disabled
+                  ? "border-border/40 bg-card/40 opacity-50 cursor-not-allowed shadow-none"
+                  : "border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-0.5 shadow-xs hover:shadow-md active:scale-[0.99] cursor-pointer"
+              }`}
             >
               <div
-                className={`p-2.5 rounded-xl border flex-shrink-0 transition-transform duration-200 group-hover:scale-105 ${action.colorClass}`}
+                className={`p-2.5 rounded-xl border flex-shrink-0 transition-transform duration-200 ${
+                  disabled ? "grayscale opacity-60" : "group-hover:scale-105"
+                } ${action.colorClass}`}
               >
                 <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               </div>
 
               <div className="flex-1 min-w-0 pr-4">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className="text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                  <span
+                    className={`text-xs sm:text-sm font-semibold truncate transition-colors ${
+                      disabled
+                        ? "text-muted-foreground"
+                        : "text-foreground group-hover:text-primary"
+                    }`}
+                  >
                     {action.title}
                   </span>
                 </div>
@@ -92,7 +110,9 @@ export function PedagogicalActions({ onSelectAction, className = "" }: Pedagogic
                 </p>
               </div>
 
-              <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all absolute top-3 right-3" />
+              {!disabled && (
+                <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all absolute top-3 right-3" />
+              )}
             </button>
           );
         })}

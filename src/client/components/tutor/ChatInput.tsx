@@ -54,6 +54,7 @@ type Props = {
   onRateLimitExpired?: () => void;
   messagesUsed?: number;
   messagesMax?: number;
+  isRateLimited?: boolean;
   /** Optional ref so parent can programmatically focus the textarea (e.g. after clicking Edit on a bubble) */
   inputRef?: React.RefObject<HTMLTextAreaElement | null>;
   onScanClick?: () => void;
@@ -86,6 +87,7 @@ export function ChatInput({
   onRateLimitExpired,
   messagesUsed = 0,
   messagesMax = undefined,
+  isRateLimited: explicitIsRateLimited = false,
   inputRef: externalInputRef,
   onScanClick,
   onVoiceClick,
@@ -93,7 +95,15 @@ export function ChatInput({
 }: Props) {
   const internalRef = useRef<HTMLTextAreaElement | null>(null);
   const textareaRef = externalInputRef ?? internalRef;
-  const isRateLimited = useMemo(() => checkIsRateLimited(chatError), [chatError]);
+  const isRateLimited = useMemo(
+    () =>
+      Boolean(
+        explicitIsRateLimited ||
+        checkIsRateLimited(chatError) ||
+        (messagesMax && messagesMax > 0 && messagesUsed >= messagesMax),
+      ),
+    [explicitIsRateLimited, chatError, messagesMax, messagesUsed],
+  );
 
   // Use uploadPhase when available; fall back to parsingFile boolean for compat
   const activePhase: UploadPhase =
@@ -129,6 +139,7 @@ export function ChatInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      if (isDisabled) return;
       onSubmit(e as any);
     }
   };

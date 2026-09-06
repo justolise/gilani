@@ -1,25 +1,32 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { supabase } from "@/client/supabase";
 import { getRateLimitStatus } from "@/fns/rate-limit.server-fns";
+import { checkIsRateLimited } from "@/client/components/tutor/UsageBanner";
 
 export function useRateLimitState(userId: string | null) {
   const [chatError, setChatError] = useState<string | null>(null);
   const [messagesUsed, setMessagesUsed] = useState<number>(0);
   const [messagesMax, setMessagesMax] = useState<number>(10);
+  const [serverRateLimited, setServerRateLimited] = useState<boolean>(false);
 
-  const isRateLimited = !!(
-    chatError?.includes("Rate limit") ||
-    chatError?.includes("rate limit") ||
-    chatError?.includes("Daily") ||
-    chatError?.includes("daily") ||
-    chatError?.includes("quota")
-  );
+  const isRateLimited = useMemo(() => {
+    return Boolean(
+      serverRateLimited ||
+      (messagesMax > 0 && messagesUsed >= messagesMax) ||
+      checkIsRateLimited(chatError),
+    );
+  }, [serverRateLimited, messagesMax, messagesUsed, chatError]);
 
   const refreshRateLimitStatus = useCallback(async () => {
     try {
       const status = await getRateLimitStatus({ data: "chat" });
-      setMessagesUsed((status as any).messagesUsed ?? 0);
-      setMessagesMax((status as any).messagesMax ?? 10);
+      const used = (status as any).messagesUsed ?? 0;
+      const max = (status as any).messagesMax ?? 10;
+      setMessagesUsed(used);
+      setMessagesMax(max);
+      const isLimited = Boolean(status.isRateLimited || (max > 0 && used >= max));
+      setServerRateLimited(isLimited);
+
       if (status.isRateLimited) {
         const secs = Math.ceil(status.retryAfterMs / 1000);
         setChatError(
@@ -29,6 +36,13 @@ export function useRateLimitState(userId: string | null) {
             message: status.isDaily
               ? `Daily message limit reached. Resets in ${secs}s.`
               : `Rate limit exceeded. Try again in ${secs}s.`,
+          }),
+        );
+      } else if (max > 0 && used >= max) {
+        setChatError(
+          JSON.stringify({
+            isDaily: true,
+            message: `Daily message limit reached (${used}/${max}). Upgrade your plan to continue learning today.`,
           }),
         );
       } else {

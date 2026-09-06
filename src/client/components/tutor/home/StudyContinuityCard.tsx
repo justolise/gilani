@@ -9,6 +9,7 @@ interface StudyContinuityCardProps {
   todayPlanTask: ContinuityTask | null;
   onStartPlanTask: (taskPrompt: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function StudyContinuityCard({
@@ -16,6 +17,7 @@ export function StudyContinuityCard({
   todayPlanTask,
   onStartPlanTask,
   className = "",
+  disabled = false,
 }: StudyContinuityCardProps) {
   const navigate = useNavigate();
 
@@ -79,11 +81,17 @@ export function StudyContinuityCard({
 
             <button
               type="button"
+              disabled={disabled}
               onClick={() => {
+                if (disabled) return;
                 const prompt = `Let's work on my scheduled study goal for ${todayPlanTask.item.subject}: "${todayPlanTask.item.topic}". The specific task is: "${todayPlanTask.item.task}". Please guide me through it step-by-step.`;
                 onStartPlanTask(prompt);
               }}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:opacity-80 flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors cursor-pointer"
+              className={`inline-flex items-center gap-1 text-xs font-semibold flex-shrink-0 px-2.5 py-1.5 rounded-lg transition-colors ${
+                disabled
+                  ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
+                  : "text-emerald-600 dark:text-emerald-400 hover:opacity-80 bg-emerald-500/10 hover:bg-emerald-500/15 cursor-pointer"
+              }`}
             >
               <Play className="w-3 h-3 fill-current" />
               <span>Study</span>

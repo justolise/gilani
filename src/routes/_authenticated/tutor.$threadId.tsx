@@ -133,6 +133,12 @@ function TutorThreadInner({
     titleSeedText: string,
     attachmentMeta?: { storageUrl?: string; mimeType?: string; fileName?: string },
   ) => {
+    if (chatState.isRateLimited) {
+      toast.error("Daily message limit reached. Upgrade your plan to continue learning today.");
+      setShowPlans(true);
+      return;
+    }
+
     try {
       const currentThread = chatState.threads.find((t) => t.id === threadId);
       // ── Immediate optimistic sidebar update & title generation ───────────
@@ -195,6 +201,12 @@ function TutorThreadInner({
 
   const submit = async (event?: { preventDefault?: () => void }) => {
     event?.preventDefault?.();
+    if (chatState.isRateLimited) {
+      toast.error("Daily message limit reached. Upgrade your plan to continue learning today.");
+      setShowPlans(true);
+      return;
+    }
+
     const trimmedInput = composer.input.trim();
     if (!composer.hasContent(trimmedInput)) return;
     const finalMessage = composer.buildMessageText(trimmedInput);
@@ -235,6 +247,11 @@ function TutorThreadInner({
 
       const pending = consumePendingMessage(threadId);
       if (pending) {
+        if (chatState.isRateLimited) {
+          toast.error("Daily message limit reached. Upgrade your plan to continue learning today.");
+          setShowPlans(true);
+          return;
+        }
         sendChatMessage(pending.finalMessage, pending.titleSeedText);
       }
     }
@@ -245,7 +262,7 @@ function TutorThreadInner({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [threadId]);
+  }, [threadId, chatState.isRateLimited]);
 
   useEffect(() => {
     const handleGlobalSendMessage = (e: Event) => {
@@ -300,7 +317,16 @@ function TutorThreadInner({
             onReload={chatState.handleReload}
             onEditRequest={composer.handleEditRequest}
             onDelete={chatState.handleDeleteMessage}
-            onPromptClick={composer.handlePromptClick}
+            onPromptClick={(prompt) => {
+              if (chatState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.handlePromptClick(prompt);
+            }}
             recentThreads={chatState.threads}
             userId={userId}
             userVotes={chatState.userVotes}
@@ -310,11 +336,36 @@ function TutorThreadInner({
             escalationStatus={chatState.escalationStatus}
             escalating={chatState.escalating}
             onUploadClick={() => {
+              if (chatState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
               const el = document.getElementById("chat-file-input") as HTMLInputElement | null;
               el?.click();
             }}
-            onScanClick={composer.handleScanClick}
-            onVoiceClick={composer.toggleVoiceInput}
+            onScanClick={() => {
+              if (chatState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.handleScanClick();
+            }}
+            onVoiceClick={() => {
+              if (chatState.isRateLimited) {
+                toast.error(
+                  "Daily message limit reached. Upgrade your plan to continue learning today.",
+                );
+                setShowPlans(true);
+                return;
+              }
+              composer.toggleVoiceInput();
+            }}
             isListening={composer.isListening}
             allThreadsPath="/tutor/chats"
             onRateLimitExpired={() => {
@@ -337,6 +388,7 @@ function TutorThreadInner({
             uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
             chatError={chatState.chatError}
+            isRateLimited={chatState.isRateLimited}
             docUploadError={composer.docUploadError}
             onClearDocError={composer.onClearDocError}
             onInputChange={(e) => composer.setInput(e.target.value)}
