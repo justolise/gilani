@@ -1,20 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Sparkles } from "lucide-react";
 
 const THINKING_PHRASES = [
   "Thinking…",
   "Reasoning through this…",
   "Working it out…",
-  "On it…",
-  "Analysing…",
+  "Formulating explanation…",
+  "Synthesizing answer…",
 ];
 
 export function ThinkingSweep({ label }: { label?: string }) {
   // Rotating phrase when no specific tool label is active
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [fade, setFade] = useState(true);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const phrasesEnabled = !label;
-  const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Live elapsed seconds timer
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds((s) => s + 1);
+    }, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  // Phrase rotation
   useEffect(() => {
     if (!phrasesEnabled) return;
     intervalRef.current = setInterval(() => {
@@ -22,7 +36,7 @@ export function ThinkingSweep({ label }: { label?: string }) {
       setTimeout(() => {
         setPhraseIdx((i) => (i + 1) % THINKING_PHRASES.length);
         setFade(true);
-      }, 300);
+      }, 250);
     }, 2800);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -33,60 +47,58 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
   return (
     <div
-      className="flex items-center gap-3 py-1 select-none"
+      className="flex items-center gap-2.5 py-1.5 select-none"
       role="status"
-      aria-label={displayText}
+      aria-live="polite"
+      aria-label={`${displayText} (${elapsedSeconds}s)`}
     >
-      {/* Animated orb */}
-      <div className="relative flex-shrink-0 w-7 h-7">
-        {/* Outer pulse ring */}
+      {/* Animated AI spark orb */}
+      <div className="relative flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 dark:bg-primary/20 text-primary">
+        {/* Soft glowing pulse ring */}
         <span
-          className="absolute inset-0 rounded-full animate-ping"
-          style={{
-            background: "radial-gradient(circle, hsl(var(--primary)/0.35) 0%, transparent 70%)",
-            animationDuration: "1.6s",
-          }}
+          className="absolute inset-0 rounded-full bg-primary/25 dark:bg-primary/35 animate-ping opacity-60 pointer-events-none"
+          style={{ animationDuration: "1.8s" }}
         />
-        {/* Core orb */}
+        {/* Revolving ring border */}
         <span
-          className="absolute inset-1 rounded-full"
-          style={{
-            background:
-              "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--primary)/0.4), hsl(var(--primary)))",
-            animation: "spin 2s linear infinite",
-          }}
+          className="absolute inset-0 rounded-full border border-primary/40 dark:border-primary/60 border-t-transparent"
+          style={{ animation: "spin 2.2s linear infinite" }}
         />
-        {/* Inner fill to make it look like a ring */}
-        <span className="absolute inset-[5px] rounded-full bg-background" />
+        {/* Centered Sparkles icon */}
+        <Sparkles className="w-3.5 h-3.5 text-primary relative z-10 animate-pulse" />
       </div>
 
-      {/* Text with shimmer wave */}
-      <span
-        className="text-sm font-medium tracking-wide"
-        style={{
-          opacity: fade ? 1 : 0,
-          transition: "opacity 0.3s ease",
-          background:
-            "linear-gradient(90deg, hsl(var(--foreground)/0.45) 0%, hsl(var(--foreground)) 40%, hsl(var(--primary)) 60%, hsl(var(--foreground)/0.45) 100%)",
-          backgroundSize: "200% 100%",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          animation: "shimmer-wave 2.2s ease-in-out infinite",
-        }}
-      >
-        {displayText}
-      </span>
+      {/* Text with shimmer wave & live elapsed seconds badge */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-sm font-medium tracking-tight text-foreground transition-opacity duration-250"
+          style={{
+            opacity: fade ? 1 : 0,
+            background:
+              "linear-gradient(90deg, var(--foreground) 0%, var(--primary) 50%, var(--foreground) 100%)",
+            backgroundSize: "200% auto",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            animation: "shimmer-wave 2.4s linear infinite",
+          }}
+        >
+          {displayText}
+        </span>
+
+        {/* Live elapsed timer */}
+        <span className="text-[11px] font-mono font-medium text-muted-foreground/75 bg-muted/60 dark:bg-muted/40 px-1.5 py-0.5 rounded-md border border-border/40">
+          {elapsedSeconds}s
+        </span>
+      </div>
 
       {/* Bouncing dots */}
-      <span className="flex items-center gap-[3px] pb-0.5">
+      <span className="flex items-center gap-1 pb-0.5">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="w-1 h-1 rounded-full bg-current opacity-50"
+            className="w-1.5 h-1.5 rounded-full bg-primary/80 dark:bg-primary/90"
             style={{
-              color: "hsl(var(--primary))",
-              animation: `bounce-dot 1.2s ease-in-out ${i * 0.18}s infinite`,
+              animation: `bounce-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
             }}
           />
         ))}
@@ -94,12 +106,12 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
       <style>{`
         @keyframes shimmer-wave {
-          0%   { background-position: 100% 0; }
-          100% { background-position: -100% 0; }
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
         @keyframes bounce-dot {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
-          40%            { transform: translateY(-4px); opacity: 1; }
+          40%            { transform: translateY(-3.5px); opacity: 1; }
         }
         @keyframes spin {
           from { transform: rotate(0deg); }

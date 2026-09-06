@@ -7,6 +7,7 @@ import { ThinkingSweep } from "@/client/components/tutor/ThinkingSweep";
 import { ToolStepPill } from "@/client/components/tutor/ToolStepPill";
 import { BubbleThinkingPanel } from "./bubble/BubbleThinkingPanel";
 import { BubbleAttachment } from "./bubble/BubbleAttachment";
+import { formatToolInProgressLabel } from "./tool-metadata";
 
 type Props = {
   message: any;
@@ -102,44 +103,91 @@ export const MessageBubble = memo(function MessageBubble({
     const part = m.parts?.find((p: any) => p.type === "thinking-steps");
     const steps = Array.isArray(part?.steps) ? part.steps : [];
 
-    const dbToolSteps = steps.filter(
-      (s: any) => s.type === "tool-call" || s.type === "tool-result",
-    );
+    const toolMap = new Map<string, { toolName: string; isDone: boolean }>();
 
-    const liveToolSteps: any[] = [];
-    const seenCalls = new Set<string>();
-    const seenResults = new Set<string>();
-    if (m.toolInvocations && m.toolInvocations.length > 0) {
+    // 1. Check direct m.toolInvocations
+    if (Array.isArray(m.toolInvocations)) {
       for (const inv of m.toolInvocations) {
-        const invId = inv.toolCallId || inv.toolName;
-        if (!seenCalls.has(invId)) {
-          seenCalls.add(invId);
-          liveToolSteps.push({
-            type: "tool-call",
+        const id = inv.toolCallId || inv.toolName;
+        const isDone = inv.state === "result" || "result" in inv;
+        toolMap.set(id, {
+          toolName: inv.toolName,
+          isDone: Boolean(toolMap.get(id)?.isDone || isDone),
+        });
+      }
+    }
+
+    // 2. Check m.parts for tool-invocation, tool-call, tool-result, and dynamic tool-*
+    if (Array.isArray(m.parts)) {
+      for (const p of m.parts as any[]) {
+        if (p.type === "tool-invocation" && p.toolInvocation) {
+          const inv = p.toolInvocation;
+          const id = inv.toolCallId || inv.toolName;
+          const isDone = inv.state === "result" || "result" in inv;
+          toolMap.set(id, {
             toolName: inv.toolName,
-            input: inv.args,
+            isDone: Boolean(toolMap.get(id)?.isDone || isDone),
           });
-        }
-        if ("result" in inv && !seenResults.has(invId)) {
-          seenResults.add(invId);
-          liveToolSteps.push({
-            type: "tool-result",
-            toolName: inv.toolName,
-            output: inv.result,
+        } else if (p.type === "tool-call") {
+          const id = p.toolCallId || p.toolName;
+          toolMap.set(id, {
+            toolName: p.toolName,
+            isDone: Boolean(toolMap.get(id)?.isDone),
+          });
+        } else if (p.type === "tool-result") {
+          const id = p.toolCallId || p.toolName;
+          toolMap.set(id, {
+            toolName: p.toolName,
+            isDone: true,
+          });
+        } else if (typeof p.type === "string" && p.type.startsWith("tool-")) {
+          const toolName = p.toolName || p.type.replace(/^tool-/, "");
+          const id = p.toolCallId || toolName;
+          const isDone = p.state === "output-available" || "output" in p || "result" in p;
+          toolMap.set(id, {
+            toolName,
+            isDone: Boolean(toolMap.get(id)?.isDone || isDone),
           });
         }
       }
     }
 
-    const finalToolSteps = liveToolSteps.length > 0 ? liveToolSteps : dbToolSteps;
+    // 3. Fallback to DB persisted thinking-steps if no live tools detected
+    if (toolMap.size === 0 && steps.length > 0) {
+      for (const s of steps) {
+        if (s.type === "tool-call") {
+          const id = s.toolCallId || s.toolName;
+          const hasResult = steps.some(
+            (r: any) =>
+              r.type === "tool-result" && (r.toolCallId === id || r.toolName === s.toolName),
+          );
+          toolMap.set(id, {
+            toolName: s.toolName,
+            isDone: hasResult,
+          });
+        }
+      }
+    }
+
+    const toolStepsList = Array.from(toolMap.entries()).map(([id, data]) => ({
+      id,
+      toolName: data.toolName,
+      isDone: data.isDone,
+    }));
 
     return {
       reasoningSteps: steps.filter((s: any) => s.type === "reasoning"),
-      toolSteps: finalToolSteps,
+      toolSteps: toolStepsList,
     };
   }, [m.parts, m.toolInvocations]);
 
   const isStreamActive = isPending && isLast;
+
+  const activeToolStep = useMemo(() => {
+    return toolSteps.find((s) => !s.isDone);
+  }, [toolSteps]);
+
+  const hasActiveTool = Boolean(activeToolStep);
 
   const [isStalled, setIsStalled] = useState(false);
   const lastTextRef = useRef<string>("");
@@ -154,7 +202,8 @@ export const MessageBubble = memo(function MessageBubble({
       lastTextRef.current = displayText;
       setIsStalled(false);
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
-      stallTimerRef.current = setTimeout(() => setIsStalled(true), 1500);
+      // Fast responsiveness: trigger thinking indicator after 750ms of stream inactivity
+      stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
     }
     return () => {
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
@@ -163,7 +212,7 @@ export const MessageBubble = memo(function MessageBubble({
 
   useEffect(() => {
     if (!isStreamActive) return;
-    stallTimerRef.current = setTimeout(() => setIsStalled(true), 1500);
+    stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
     return () => {
       if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
     };
@@ -229,22 +278,12 @@ export const MessageBubble = memo(function MessageBubble({
           isUser ? "max-w-[85%] sm:max-w-[75%]" : "w-full px-3 sm:px-8"
         }`}
       >
-        {/* Live tool call indicator */}
-        {!isUser && isStreamActive && toolSteps.length > 0 && !showBubbleCard && (
+        {/* Live tool call indicator (when no text card is showing yet) */}
+        {!isUser && toolSteps.length > 0 && !showBubbleCard && (
           <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-300 w-full max-w-[96%]">
-            {toolSteps.map((step: any, i: number) => {
-              if (step.type !== "tool-call") return null;
-              const isDone = toolSteps.some(
-                (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
-              );
-              return (
-                <ToolStepPill
-                  key={`${step.toolName}-${i}`}
-                  toolName={step.toolName}
-                  isDone={isDone}
-                />
-              );
-            })}
+            {toolSteps.map((step) => (
+              <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
+            ))}
           </div>
         )}
 
@@ -272,32 +311,47 @@ export const MessageBubble = memo(function MessageBubble({
                         : "transition-opacity duration-200"
                     }
                   />
-                  {isStreamActive && (pauseLabel || isStalled) && (
-                    <div className="mt-1 animate-in fade-in duration-300">
-                      <ThinkingSweep label={pauseLabel || "Thinking..."} />
+                  {/* Midstream thinking or active tool call indicator */}
+                  {isStreamActive && (pauseLabel || isStalled || hasActiveTool) && (
+                    <div className="mt-2 flex flex-col gap-1.5 animate-in fade-in duration-250">
+                      {hasActiveTool && activeToolStep && (
+                        <div className="flex items-center gap-2">
+                          <ToolStepPill
+                            key={`midstream-${activeToolStep.id}`}
+                            toolName={activeToolStep.toolName}
+                            isDone={false}
+                          />
+                        </div>
+                      )}
+                      <ThinkingSweep
+                        label={
+                          pauseLabel ||
+                          (hasActiveTool && activeToolStep
+                            ? formatToolInProgressLabel(activeToolStep.toolName)
+                            : undefined)
+                        }
+                      />
                     </div>
                   )}
 
+                  {/* Completed tool pills (or all tool pills once stream is finished) */}
                   {toolSteps.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {toolSteps.map((step: any, i: number) => {
-                        if (step.type !== "tool-call") return null;
-                        const isDone = toolSteps.some(
-                          (s: any) => s.type === "tool-result" && s.toolName === step.toolName,
-                        );
-                        return (
+                      {toolSteps
+                        .filter((step) => !isStreamActive || step.isDone)
+                        .map((step) => (
                           <ToolStepPill
-                            key={`${step.toolName}-${i}`}
+                            key={step.id}
                             toolName={step.toolName}
-                            isDone={isDone}
+                            isDone={step.isDone}
                           />
-                        );
-                      })}
+                        ))}
                     </div>
                   )}
                 </div>
               ) : (
-                !isStreamActive && (
+                !isStreamActive &&
+                toolSteps.length === 0 && (
                   <span className="text-xs text-muted-foreground italic mt-1">
                     No response generated. Please resend your question.
                   </span>

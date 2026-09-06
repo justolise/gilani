@@ -5,6 +5,7 @@ import { EmptyState } from "./EmptyState";
 import { ThinkingSweep } from "./ThinkingSweep";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { hasPendingMessage, peekPendingMessage } from "@/shared/utils/pending-message";
+import { formatToolInProgressLabel } from "./tool-metadata";
 
 type Props = {
   threadId?: string;
@@ -112,10 +113,14 @@ export const MessageList = React.memo(function MessageList({
 
   // Memoize the "should show thinking" logic
   const showThinking = useMemo(() => {
-    if (pendingText) return true;
+    // When thread has no real messages yet but we have an optimistic pending first message,
+    // show thinking while waiting for the assistant's first response
+    if (messages.length === 0) {
+      return !!pendingText;
+    }
     if (!isPending) return false;
-    const last = effectiveMessages[effectiveMessages.length - 1];
-    if (!last) return true;
+    const last = messages[messages.length - 1];
+    if (!last) return false;
     if (last.role === "user") return true;
     const text =
       last.parts
@@ -125,35 +130,55 @@ export const MessageList = React.memo(function MessageList({
       last.content ||
       "";
     return text.trim().length === 0;
-  }, [isPending, effectiveMessages, pendingText]);
+  }, [isPending, messages, pendingText]);
 
-  // While streaming, surface the actual tool currently in flight (if any),
-  // by finding the most recent tool-call part with no matching tool-result yet.
-  const TOOL_LABELS: Record<string, string> = {
-    searchWeb: "Searching the web...",
-    evaluateCode: "Checking your work...",
-    setCurriculum: "Saving your preferences...",
-  };
+  // While streaming, surface the actual tool currently in flight across all formats
   const activeToolLabel = useMemo(() => {
     if (!isPending) return null;
     const last = messages[messages.length - 1];
-    if (!last || last.role !== "assistant" || !Array.isArray(last.parts)) return null;
+    if (!last || last.role !== "assistant") return null;
 
-    // Live UI message stream parts use type "tool-{toolName}" with a state
-    // field, NOT the separate "tool-call"/"tool-result" types from server-side
-    // step results. A tool is still in flight while state is input-streaming
-    // or input-available (no output yet).
-    const inFlight = last.parts.filter(
-      (p: any) =>
-        typeof p.type === "string" &&
-        p.type.startsWith("tool-") &&
-        (p.state === "input-streaming" || p.state === "input-available"),
-    );
-    if (inFlight.length === 0) return null;
+    // 1. Check last.toolInvocations
+    if (Array.isArray(last.toolInvocations)) {
+      const inFlightInv = last.toolInvocations.find(
+        (inv: any) => inv.state !== "result" && !("result" in inv),
+      );
+      if (inFlightInv?.toolName) {
+        return formatToolInProgressLabel(inFlightInv.toolName);
+      }
+    }
 
-    const latest = inFlight[inFlight.length - 1];
-    const toolName = String(latest.type).replace(/^tool-/, "");
-    return TOOL_LABELS[toolName] || `Using ${toolName}...`;
+    // 2. Check last.parts
+    if (Array.isArray(last.parts)) {
+      for (let i = last.parts.length - 1; i >= 0; i--) {
+        const p = last.parts[i];
+        if (p.type === "tool-invocation" && p.toolInvocation) {
+          const inv = p.toolInvocation;
+          if (inv.state !== "result" && !("result" in inv)) {
+            return formatToolInProgressLabel(inv.toolName);
+          }
+        }
+        if (p.type === "tool-call") {
+          const id = p.toolCallId || p.toolName;
+          const hasResult = last.parts.some(
+            (r: any) =>
+              r.type === "tool-result" && (r.toolCallId === id || r.toolName === p.toolName),
+          );
+          if (!hasResult) {
+            return formatToolInProgressLabel(p.toolName);
+          }
+        }
+        if (typeof p.type === "string" && p.type.startsWith("tool-")) {
+          const isDone = p.state === "output-available" || "output" in p || "result" in p;
+          if (!isDone) {
+            const toolName = p.toolName || p.type.replace(/^tool-/, "");
+            return formatToolInProgressLabel(toolName);
+          }
+        }
+      }
+    }
+
+    return null;
   }, [isPending, messages]);
 
   // Smart scroll: only auto-scroll if user is near bottom
