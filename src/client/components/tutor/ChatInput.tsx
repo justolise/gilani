@@ -349,6 +349,7 @@ export function ChatInput({
             }
             disabled={isDisabled}
             onKeyDown={handleKeyDown}
+            maxLength={4000}
             style={{ maxHeight: 160, overflowY: input ? "auto" : "hidden" }}
           />
 
