@@ -59,9 +59,10 @@ export const createNote = createServerFn({ method: "POST" })
     const rateLimit = await checkPlanRateLimit(userId, "notes");
     if (!rateLimit.allowed) {
       const secs = Math.ceil(rateLimit.retryAfterMs / 1000);
+      const hours = Math.max(1, Math.floor(secs / 3600));
       throw new Error(
         rateLimit.isDaily
-          ? `Daily notes limit reached for your plan. Resets in ${secs}s.`
+          ? `Daily limit reached. Resets in ${hours} ${hours === 1 ? "Hour" : "Hours"}`
           : `Please slow down — try again in ${secs}s.`,
       );
     }

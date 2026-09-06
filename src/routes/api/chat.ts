@@ -67,8 +67,9 @@ export const Route = createFileRoute("/api/chat")({
           const rlResult = await checkPlanRateLimit(userId, "chat", !!isRetry);
           if (!rlResult.allowed) {
             const seconds = Math.ceil(rlResult.retryAfterMs / 1000);
+            const hours = Math.max(1, Math.floor(seconds / 3600));
             const msg = rlResult.isDaily
-              ? `Daily message limit reached. Resets in ${seconds}s.`
+              ? `Daily limit reached. Resets in ${hours} ${hours === 1 ? "Hour" : "Hours"}`
               : `Rate limit exceeded. Try again in ${seconds}s.`;
             return new Response(
               JSON.stringify({

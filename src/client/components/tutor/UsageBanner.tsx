@@ -15,6 +15,20 @@ export function formatTime(seconds: number): string {
   return parts.join(" ");
 }
 
+export function formatDailyResetHours(seconds: number): string {
+  const effectiveSecs =
+    seconds > 0
+      ? seconds
+      : (() => {
+          const now = new Date();
+          const midnight = new Date(now);
+          midnight.setHours(24, 0, 0, 0);
+          return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+        })();
+  const hours = Math.max(1, Math.floor(effectiveSecs / 3600));
+  return `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
+}
+
 export function checkIsRateLimited(chatError: string | null | undefined): boolean {
   if (!chatError) return false;
   try {
@@ -78,11 +92,24 @@ export function useRateLimitCountdown(
       }
       msg = parsed.error || parsed.message || null;
     } catch {
-      // Fallback: Parse "Try again in Xs" or "Resets in Xs"
-      const match = chatError.match(/(?:Try again|Resets) in (\d+)s/);
+      // Fallback: Parse "Try again in Xs" or "Resets in Xs" or "resets in X Hours"
+      const match = chatError.match(/(?:Try again|Resets) in (\d+)s/i);
       if (match) {
         secs = parseInt(match[1], 10);
+      } else {
+        const hourMatch = chatError.match(/resets in\s+(\d+)\s+Hours?/i);
+        if (hourMatch) {
+          secs = parseInt(hourMatch[1], 10) * 3600;
+        }
       }
+    }
+
+    // If daily limit and secs <= 0, calculate seconds remaining until midnight
+    if (daily && secs <= 0) {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      secs = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
     }
 
     setIsDaily(daily);
@@ -214,9 +241,7 @@ export function UsageBanners({
               <Clock className="h-4 w-4 flex-shrink-0 text-destructive dark:text-red-400" />
               <p className="text-xs font-semibold text-destructive dark:text-red-300 leading-snug">
                 {isDaily
-                  ? secondsLeft > 0
-                    ? `Daily limit hit — resets in ${formatTime(secondsLeft)}`
-                    : "Daily limit hit — resets at midnight (EAT)"
+                  ? `Daily limit reached. Resets in ${formatDailyResetHours(secondsLeft)}`
                   : secondsLeft > 0
                     ? `Too many messages — try again in ${formatTime(secondsLeft)}`
                     : "Too many messages — please wait a moment"}

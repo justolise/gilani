@@ -89,9 +89,10 @@ export function useRateLimitRestore(setError: (msg: string) => void, currentErro
         const status = await getRateLimitStatus({ data: "notes" });
         if (mounted && status.isRateLimited && !currentError) {
           const secs = Math.ceil(status.retryAfterMs / 1000);
+          const hours = Math.max(1, Math.floor(secs / 3600));
           setError(
             status.isDaily
-              ? `Daily notes limit reached. Resets in ${secs}s.`
+              ? `Daily limit reached. Resets in ${hours} ${hours === 1 ? "Hour" : "Hours"}`
               : `Rate limit exceeded. Please try again in ${secs}s.`,
           );
         }

@@ -18,10 +18,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/client/components/ui/dropdown-menu";
-import { UsageBanners, useRateLimitCountdown, formatTime, checkIsRateLimited } from "./UsageBanner";
+import {
+  UsageBanners,
+  useRateLimitCountdown,
+  formatTime,
+  formatDailyResetHours,
+  checkIsRateLimited,
+} from "./UsageBanner";
 
 // Re-export countdown utilities for backwards compatibility
-export { useRateLimitCountdown, formatTime, checkIsRateLimited };
+export { useRateLimitCountdown, formatTime, formatDailyResetHours, checkIsRateLimited };
 
 type AttachedFile = {
   name: string;
@@ -117,7 +123,7 @@ export function ChatInput({
         ? "Extracting text…"
         : null;
 
-  const { secondsLeft } = useRateLimitCountdown(
+  const { secondsLeft, isDaily } = useRateLimitCountdown(
     isRateLimited ? chatError : null,
     onRateLimitExpired,
   );
@@ -255,9 +261,11 @@ export function ChatInput({
                 isPending
                   ? "Waiting for response…"
                   : isRateLimited
-                    ? secondsLeft > 0
-                      ? `Cooling down… ${formatTime(secondsLeft)}`
-                      : "Rate limit reached…"
+                    ? isDaily
+                      ? `Daily limit reached. Resets in ${formatDailyResetHours(secondsLeft)}`
+                      : secondsLeft > 0
+                        ? `Cooling down… ${formatTime(secondsLeft)}`
+                        : "Rate limit reached…"
                     : parsingFile
                       ? "Parsing document…"
                       : "Ask GilaniAI anything…"

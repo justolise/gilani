@@ -29,20 +29,27 @@ export function useRateLimitState(userId: string | null) {
 
       if (status.isRateLimited) {
         const secs = Math.ceil(status.retryAfterMs / 1000);
+        const hours = Math.max(1, Math.floor(secs / 3600));
         setChatError(
           JSON.stringify({
             retryAfterMs: status.retryAfterMs,
             isDaily: status.isDaily,
             message: status.isDaily
-              ? `Daily message limit reached. Resets in ${secs}s.`
+              ? `Daily limit reached. Resets in ${hours} ${hours === 1 ? "Hour" : "Hours"}`
               : `Rate limit exceeded. Try again in ${secs}s.`,
           }),
         );
       } else if (max > 0 && used >= max) {
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setHours(24, 0, 0, 0);
+        const msUntilMidnight = Math.max(0, midnight.getTime() - now.getTime());
+        const hours = Math.max(1, Math.floor(msUntilMidnight / 3600000));
         setChatError(
           JSON.stringify({
             isDaily: true,
-            message: `Daily message limit reached (${used}/${max}). Upgrade your plan to continue learning today.`,
+            retryAfterMs: msUntilMidnight,
+            message: `Daily limit reached. Resets in ${hours} ${hours === 1 ? "Hour" : "Hours"}`,
           }),
         );
       } else {
