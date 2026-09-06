@@ -182,6 +182,13 @@ export const MessageBubble = memo(function MessageBubble({
   }, [m.parts, m.toolInvocations]);
 
   const isStreamActive = isPending && isLast;
+  const [typewriterFinished, setTypewriterFinished] = useState(!isStreamActive);
+
+  useEffect(() => {
+    if (isStreamActive) {
+      setTypewriterFinished(false);
+    }
+  }, [isStreamActive]);
 
   const activeToolStep = useMemo(() => {
     return toolSteps.find((s) => !s.isDone);
@@ -272,41 +279,31 @@ export const MessageBubble = memo(function MessageBubble({
   };
 
   return (
-    <div className={`flex w-full group py-4 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex w-full group py-2.5 sm:py-3 ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`flex flex-col relative ${
           isUser ? "max-w-[85%] sm:max-w-[75%]" : "w-full px-3 sm:px-8"
         }`}
       >
-        {/* Live tool call indicator (when no text card is showing yet) */}
-        {!isUser && toolSteps.length > 0 && !showBubbleCard && (
-          <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-300 w-full max-w-[96%]">
-            {toolSteps.map((step) => (
-              <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
-            ))}
-          </div>
-        )}
-
         <div
           className={`${
             isUser
               ? "px-5 py-3.5 bg-muted/60 text-foreground rounded-3xl rounded-tr-sm"
-              : isStreamActive && !showBubbleCard
-                ? "opacity-0 pointer-events-none"
-                : "px-0 py-1 bg-transparent text-foreground"
-          } text-[15px] sm:text-base leading-relaxed relative transition-all duration-200`}
+              : "px-0 py-1 bg-transparent text-foreground"
+          } text-[15px] sm:text-base leading-relaxed relative transition-colors duration-200`}
         >
           {!isUser ? (
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full min-h-[38px]">
               {showBubbleCard ? (
-                <div className="prose-ai relative">
+                <div className="prose-ai relative animate-in fade-in duration-200">
                   <BubbleThinkingPanel reasoningSteps={reasoningSteps} />
 
                   <SmoothMarkdownRenderer
                     content={displayText}
                     isStreaming={isStreamActive}
+                    onAnimationComplete={() => setTypewriterFinished(true)}
                     className={
-                      isStreamActive && !pauseLabel && !isStalled
+                      (isStreamActive || !typewriterFinished) && !pauseLabel && !isStalled
                         ? "transition-opacity duration-200 streaming-cursor"
                         : "transition-opacity duration-200"
                     }
@@ -349,8 +346,26 @@ export const MessageBubble = memo(function MessageBubble({
                     </div>
                   )}
                 </div>
+              ) : isStreamActive ? (
+                /* In-flight initial thinking & tool execution in place inside the bubble */
+                <div className="py-1 animate-in fade-in duration-200">
+                  {toolSteps.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-250">
+                      {toolSteps.map((step) => (
+                        <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
+                      ))}
+                    </div>
+                  )}
+                  <ThinkingSweep
+                    label={
+                      pauseLabel ||
+                      (hasActiveTool && activeToolStep
+                        ? formatToolInProgressLabel(activeToolStep.toolName)
+                        : undefined)
+                    }
+                  />
+                </div>
               ) : (
-                !isStreamActive &&
                 toolSteps.length === 0 && (
                   <span className="text-xs text-muted-foreground italic mt-1">
                     No response generated. Please resend your question.
@@ -358,9 +373,9 @@ export const MessageBubble = memo(function MessageBubble({
                 )
               )}
 
-              {/* Footer: action buttons + persistent G badge */}
-              <div className="flex flex-col gap-1.5 mt-2">
-                {showBubbleCard && !isStreamActive && (
+              {/* Footer: action buttons + persistent G badge (only when finished and settled) */}
+              {showBubbleCard && !isStreamActive && typewriterFinished && (
+                <div className="flex flex-col gap-1.5 mt-2 animate-in fade-in duration-300">
                   <div className="flex items-center gap-1 transition-opacity duration-200">
                     <button
                       onClick={handleCopy}
@@ -419,20 +434,20 @@ export const MessageBubble = memo(function MessageBubble({
                       <ThumbsDown className="h-3.5 w-3.5" />
                     </button>
                   </div>
-                )}
 
-                {isLast && (
-                  <div className="flex items-center pt-1">
-                    <div
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
-                      aria-hidden="true"
-                      title="GilaniAI"
-                    >
-                      G
+                  {isLast && (
+                    <div className="flex items-center pt-1">
+                      <div
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
+                        aria-hidden="true"
+                        title="GilaniAI"
+                      >
+                        G
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             /* User message */

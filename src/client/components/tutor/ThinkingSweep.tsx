@@ -71,28 +71,29 @@ export function ThinkingSweep({ label }: { label?: string }) {
       {/* Text with shimmer wave & live elapsed seconds badge */}
       <div className="flex items-center gap-2">
         <span
-          className="text-sm font-medium tracking-tight text-foreground transition-opacity duration-250"
+          className="inline-block min-w-[170px] text-sm font-medium tracking-tight transition-opacity duration-250"
           style={{
             opacity: fade ? 1 : 0,
             background:
-              "linear-gradient(90deg, var(--foreground) 0%, var(--primary) 50%, var(--foreground) 100%)",
-            backgroundSize: "200% auto",
+              "linear-gradient(110deg, var(--muted-foreground) 10%, var(--primary) 45%, var(--foreground) 55%, var(--muted-foreground) 90%)",
+            backgroundSize: "250% 100%",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            animation: "shimmer-wave 2.4s linear infinite",
+            backgroundClip: "text",
+            animation: "shimmer-wave 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
           }}
         >
           {displayText}
         </span>
 
         {/* Live elapsed timer */}
-        <span className="text-[11px] font-mono font-medium text-muted-foreground/75 bg-muted/60 dark:bg-muted/40 px-1.5 py-0.5 rounded-md border border-border/40">
+        <span className="text-[11px] font-mono tabular-nums font-medium text-muted-foreground/75 bg-muted/60 dark:bg-muted/40 px-1.5 py-0.5 rounded-md border border-border/40 shrink-0">
           {elapsedSeconds}s
         </span>
       </div>
 
       {/* Bouncing dots */}
-      <span className="flex items-center gap-1 pb-0.5">
+      <span className="flex items-center gap-1 pb-0.5 shrink-0">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
@@ -106,8 +107,8 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
       <style>{`
         @keyframes shimmer-wave {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+          0%   { background-position: 150% 0; }
+          100% { background-position: -150% 0; }
         }
         @keyframes bounce-dot {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }

@@ -84,6 +84,10 @@ export const MessageList = React.memo(function MessageList({
   const innerRef = useRef<HTMLDivElement>(null);
   const isAutoScrollingRef = useRef(true);
   const lastMessageCountRef = useRef(0);
+  const isPendingRef = useRef(isPending);
+  isPendingRef.current = isPending;
+  const activeAssistantKeyRef = useRef<string | null>(null);
+  const lastUserMsgCountRef = useRef(0);
 
   // Show the optimistic user bubble on Frame 1 using the prop captured
   // synchronously before consumePendingMessage cleared the store.
@@ -94,43 +98,56 @@ export const MessageList = React.memo(function MessageList({
     null;
 
   const effectiveMessages = useMemo(() => {
-    if (messages.length > 0) return messages;
+    if (messages.length > 0) {
+      const last = messages[messages.length - 1];
+      // When AI is actively generating but hasn't created the assistant message yet,
+      // include the optimistic assistant bubble so layout never shifts or jumps
+      if (isPending && last.role === "user") {
+        return [
+          ...messages,
+          {
+            id: "optimistic-assistant-" + (threadId || "draft"),
+            role: "assistant",
+            content: "",
+            parts: [],
+            createdAt: new Date(),
+          },
+        ];
+      }
+      return messages;
+    }
     if (pendingText) {
       return [
         {
-          id: "optimistic-pending-" + threadId,
+          id: "optimistic-pending-user-" + (threadId || "draft"),
           role: "user",
           content: pendingText,
           parts: [{ type: "text", text: pendingText }],
           createdAt: new Date(),
         },
+        {
+          id: "optimistic-pending-assistant-" + (threadId || "draft"),
+          role: "assistant",
+          content: "",
+          parts: [],
+          createdAt: new Date(),
+        },
       ];
     }
     return messages;
-  }, [messages, pendingText, threadId]);
+  }, [messages, pendingText, threadId, isPending]);
+
+  // Reset active assistant key whenever a new user turn starts
+  const currentUserMsgCount = useMemo(
+    () => effectiveMessages.filter((m) => m.role === "user").length,
+    [effectiveMessages],
+  );
+  if (currentUserMsgCount !== lastUserMsgCountRef.current) {
+    lastUserMsgCountRef.current = currentUserMsgCount;
+    activeAssistantKeyRef.current = null;
+  }
 
   const effectiveLoading = pendingText ? false : messagesLoading;
-
-  // Memoize the "should show thinking" logic
-  const showThinking = useMemo(() => {
-    // When thread has no real messages yet but we have an optimistic pending first message,
-    // show thinking while waiting for the assistant's first response
-    if (messages.length === 0) {
-      return !!pendingText;
-    }
-    if (!isPending) return false;
-    const last = messages[messages.length - 1];
-    if (!last) return false;
-    if (last.role === "user") return true;
-    const text =
-      last.parts
-        ?.filter((p: any) => p.type === "text")
-        .map((p: any) => p.text || "")
-        .join("") ||
-      last.content ||
-      "";
-    return text.trim().length === 0;
-  }, [isPending, messages, pendingText]);
 
   // While streaming, surface the actual tool currently in flight across all formats
   const activeToolLabel = useMemo(() => {
@@ -235,18 +252,22 @@ export const MessageList = React.memo(function MessageList({
       const newHeight = inner.scrollHeight;
 
       if (newHeight > lastHeight) {
-        // Check if user is near bottom
-        const distanceFromBottom =
-          container.scrollHeight - container.scrollTop - container.clientHeight;
+        // Only auto-scroll while streaming is actively in progress
+        // This prevents jumping when post-stream action buttons or badges appear
+        if (isPendingRef.current) {
+          const distanceFromBottom =
+            container.scrollHeight - container.scrollTop - container.clientHeight;
 
-        if (distanceFromBottom < 200) {
-          // Use rAF for smooth scrolling during streaming
-          cancelAnimationFrame(rafId);
-          rafId = requestAnimationFrame(() => {
-            container.scrollTop = container.scrollHeight;
-          });
+          if (distanceFromBottom < 200 || isAutoScrollingRef.current) {
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+              container.scrollTop = container.scrollHeight;
+            });
+          }
         }
 
+        lastHeight = newHeight;
+      } else {
         lastHeight = newHeight;
       }
     };
@@ -284,9 +305,8 @@ export const MessageList = React.memo(function MessageList({
       className={`flex-1 min-h-0 overflow-y-auto px-2 py-2 sm:px-5 sm:py-5 ${
         isRateLimited ? "pb-80" : "pb-56"
       }`}
-      style={{ scrollBehavior: "smooth" }}
     >
-      <div ref={innerRef} className="space-y-3 flex flex-col pb-4 min-h-full">
+      <div ref={innerRef} className="space-y-2 sm:space-y-3 flex flex-col pb-4 min-h-full">
         {/* Loading state */}
         {effectiveLoading && (
           <div
@@ -334,47 +354,48 @@ export const MessageList = React.memo(function MessageList({
         {/* Messages */}
         {!effectiveLoading &&
           !messagesLoadError &&
-          effectiveMessages.map((m, idx: number) => (
-            <Sentry.ErrorBoundary
-              key={m.id ?? idx}
-              fallback={
-                <div className="mx-auto my-2 w-full max-w-[96%] sm:max-w-full rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-xs text-destructive opacity-80">
-                  <p>Sorry, we couldn't render this specific message properly.</p>
-                </div>
-              }
-            >
-              <MessageBubble
-                message={m}
-                idx={idx}
-                isLast={idx === effectiveMessages.length - 1}
-                isPending={(isPending || !!pendingText) && idx === effectiveMessages.length - 1}
-                isRateLimited={isRateLimited}
-                onReload={onReload}
-                onEditRequest={onEditRequest}
-                onDelete={onDelete}
-                userId={userId}
-                initialVote={userVotes?.[m.id] ?? null}
-                onVote={onVote}
-                onExportPDF={onExportPDF}
-                onEscalate={onEscalate}
-                escalationStatus={escalationStatus}
-                escalating={escalating}
-                messagesLoading={messagesLoading}
-                pauseLabel={idx === messages.length - 1 ? activeToolLabel : null}
-              />
-            </Sentry.ErrorBoundary>
-          ))}
+          effectiveMessages.map((m, idx: number) => {
+            const isLastAssistant = m.role === "assistant" && idx === effectiveMessages.length - 1;
 
-        {/* Thinking indicator — premium animated indicator */}
-        {showThinking && (
-          <div
-            className="w-full animate-in fade-in slide-in-from-bottom-1 duration-400 px-2 py-2"
-            role="status"
-            aria-label="AI is thinking"
-          >
-            <ThinkingSweep label={activeToolLabel ?? undefined} />
-          </div>
-        )}
+            if (isLastAssistant && !activeAssistantKeyRef.current) {
+              activeAssistantKeyRef.current = m.id || `assistant-${threadId || "active"}-${idx}`;
+            }
+
+            const itemKey = isLastAssistant
+              ? activeAssistantKeyRef.current || m.id || idx
+              : (m.id ?? idx);
+
+            return (
+              <Sentry.ErrorBoundary
+                key={itemKey}
+                fallback={
+                  <div className="mx-auto my-2 w-full max-w-[96%] sm:max-w-full rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-xs text-destructive opacity-80">
+                    <p>Sorry, we couldn't render this specific message properly.</p>
+                  </div>
+                }
+              >
+                <MessageBubble
+                  message={m}
+                  idx={idx}
+                  isLast={idx === effectiveMessages.length - 1}
+                  isPending={(isPending || !!pendingText) && idx === effectiveMessages.length - 1}
+                  isRateLimited={isRateLimited}
+                  onReload={onReload}
+                  onEditRequest={onEditRequest}
+                  onDelete={onDelete}
+                  userId={userId}
+                  initialVote={userVotes?.[m.id] ?? null}
+                  onVote={onVote}
+                  onExportPDF={onExportPDF}
+                  onEscalate={onEscalate}
+                  escalationStatus={escalationStatus}
+                  escalating={escalating}
+                  messagesLoading={messagesLoading}
+                  pauseLabel={idx === messages.length - 1 ? activeToolLabel : null}
+                />
+              </Sentry.ErrorBoundary>
+            );
+          })}
 
         {chatError && !isRateLimited && (
           <div className="mx-auto my-4 w-full max-w-xl rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2">

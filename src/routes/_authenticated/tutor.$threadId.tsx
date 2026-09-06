@@ -210,10 +210,33 @@ function TutorThreadInner({
 
   useEffect(() => {
     if (!threadId) return;
-    const pending = consumePendingMessage(threadId);
-    if (pending) {
-      sendChatMessage(pending.finalMessage, pending.titleSeedText);
+    let cancelled = false;
+
+    async function processPending() {
+      // Ensure session is available or refreshed before consuming and firing the pending message
+      if (!authToken) {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (!data.session?.access_token) {
+            await supabase.auth.refreshSession();
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+      if (cancelled) return;
+
+      const pending = consumePendingMessage(threadId);
+      if (pending) {
+        sendChatMessage(pending.finalMessage, pending.titleSeedText);
+      }
     }
+
+    processPending();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId]);
 

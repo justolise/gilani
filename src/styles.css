@@ -403,7 +403,8 @@ html[data-font-family="serif"] body {
   }
 }
 
-.streaming-cursor::after {
+.streaming-cursor > p:last-of-type::after,
+.streaming-cursor:not(:has(p))::after {
   content: "▋";
   display: inline-block;
   animation: streamCursor 1s infinite;

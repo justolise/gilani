@@ -81,17 +81,67 @@ export function useTutorChat({
           Authorization: `Bearer ${authToken ?? ""}`,
         },
         fetch: async (input, init) => {
-          if (attachmentMetaRef.current && init?.body) {
+          // 1. Resolve freshest token directly from Supabase client to avoid stale props
+          let token = authToken;
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data.session?.access_token) {
+              token = data.session.access_token;
+            }
+          } catch {
+            /* ignore */
+          }
+
+          // If token is missing, attempt an immediate session refresh
+          if (!token) {
             try {
-              const parsed = JSON.parse(init.body as string);
+              const { data: refreshed } = await supabase.auth.refreshSession();
+              if (refreshed.session?.access_token) {
+                token = refreshed.session.access_token;
+              }
+            } catch {
+              /* ignore */
+            }
+          }
+
+          const reqHeaders = new Headers(init?.headers);
+          if (token) {
+            reqHeaders.set("Authorization", `Bearer ${token}`);
+          }
+          reqHeaders.set("x-thread-id", threadId ?? "");
+          reqHeaders.set("x-model-id", "gemini-2.5-flash");
+
+          let requestInit: RequestInit = { ...init, headers: reqHeaders };
+
+          if (attachmentMetaRef.current && requestInit?.body) {
+            try {
+              const parsed = JSON.parse(requestInit.body as string);
               parsed.attachmentMeta = attachmentMetaRef.current;
               attachmentMetaRef.current = null;
-              init = { ...init, body: JSON.stringify(parsed) };
+              requestInit = { ...requestInit, body: JSON.stringify(parsed) };
             } catch {
               /* ignore parse errors */
             }
           }
-          const res = await fetch(input, init);
+
+          let res = await fetch(input, requestInit);
+
+          // 2. Self-healing retry on 401: if token expired during the session, refresh and retry once seamlessly
+          if (res.status === 401) {
+            console.warn(
+              "[useTutorChat] 401 received from chat endpoint, refreshing session and retrying...",
+            );
+            try {
+              const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession();
+              if (!refreshErr && refreshData.session?.access_token) {
+                reqHeaders.set("Authorization", `Bearer ${refreshData.session.access_token}`);
+                res = await fetch(input, { ...requestInit, headers: reqHeaders });
+              }
+            } catch (retryErr) {
+              console.error("[useTutorChat] Retry after 401 failed:", retryErr);
+            }
+          }
+
           if (!res.ok) {
             let errText: string;
             try {

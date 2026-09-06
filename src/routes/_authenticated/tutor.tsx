@@ -136,6 +136,9 @@ function TutorIndex() {
       sessionStorage.removeItem("gilani_tutor_home_draft");
     } catch {}
 
+    // Proactively touch session in background so token is fresh
+    supabase.auth.getSession().catch(() => {});
+
     // Generate an ID locally for instant transition. The server will auto-create
     // the row when the first message hits the chat API.
     const id = crypto.randomUUID();
