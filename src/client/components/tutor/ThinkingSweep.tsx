@@ -8,6 +8,18 @@ const THINKING_PHRASES = [
   "Synthesizing answer",
 ];
 
+// Shared gradient: dim base with a bright primary highlight stripe that sweeps through
+const SHIMMER_GRADIENT =
+  "linear-gradient(90deg," +
+  "  var(--color-muted-foreground) 0%," +
+  "  var(--color-muted-foreground) 25%," +
+  "  var(--color-primary) 45%," +
+  "  var(--color-foreground) 50%," +
+  "  var(--color-primary) 55%," +
+  "  var(--color-muted-foreground) 75%," +
+  "  var(--color-muted-foreground) 100%" +
+  ")";
+
 export function ThinkingSweep({ label }: { label?: string }) {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [fade, setFade] = useState(true);
@@ -39,6 +51,17 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
   const displayText = phrasesEnabled ? THINKING_PHRASES[phraseIdx] : (label ?? THINKING_PHRASES[0]);
 
+  // Applied to every text-bearing child so background-clip:text takes effect
+  const shimmerTextStyle: React.CSSProperties = {
+    background: SHIMMER_GRADIENT,
+    backgroundSize: "250% 100%",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+    animation: "ts-shimmer 1.8s linear infinite",
+    display: "inline",
+  };
+
   return (
     <div
       className="inline-flex items-baseline py-1.5 select-none"
@@ -47,57 +70,31 @@ export function ThinkingSweep({ label }: { label?: string }) {
       aria-label={`${displayText} ${elapsedSeconds}s`}
       style={{ opacity: fade ? 1 : 0, transition: "opacity 0.25s ease" }}
     >
-      {/*
-        Single container — the shimmer gradient animates across the whole row.
-        Bright narrow highlight stripe on a dimmer base creates a clearly
-        visible sweep.
-      */}
-      <span
-        className="inline-flex items-baseline gap-0 text-sm font-medium tracking-tight"
-        style={{
-          background:
-            "linear-gradient(90deg," +
-            "  hsl(var(--muted-foreground)/0.55) 0%," +
-            "  hsl(var(--muted-foreground)/0.55) 30%," +
-            "  hsl(var(--primary-foreground,255 255 255)/0.0) 42%," +
-            "  hsl(var(--primary)) 48%," +
-            "  hsl(var(--foreground)) 50%," +
-            "  hsl(var(--primary)) 52%," +
-            "  hsl(var(--primary-foreground,255 255 255)/0.0) 58%," +
-            "  hsl(var(--muted-foreground)/0.55) 70%," +
-            "  hsl(var(--muted-foreground)/0.55) 100%" +
-            ")",
-          backgroundSize: "220% 100%",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          animation: "ts-shimmer 1.8s linear infinite",
-        }}
-      >
-        {/* Label text */}
-        <span>{displayText}</span>
+      {/* Label */}
+      <span className="text-sm font-medium tracking-tight" style={shimmerTextStyle}>
+        {displayText}
+      </span>
 
-        {/* Dots */}
-        <span className="inline-flex items-end gap-[3px] mx-[5px] translate-y-[-1px]">
-          {[0, 1, 2, 3].map((i) => (
-            <span
-              key={i}
-              className="inline-block rounded-full"
-              style={{
-                width: "3px",
-                height: "3px",
-                background: "currentColor",
-                WebkitTextFillColor: "initial",
-                backgroundColor: "var(--color-primary, hsl(var(--primary)))",
-                opacity: 0.6,
-                animation: `ts-dot 1.4s ease-in-out ${i * 0.18}s infinite`,
-              }}
-            />
-          ))}
-        </span>
+      {/* Bouncing dots */}
+      <span className="inline-flex items-end gap-[3px] mx-[5px] translate-y-[-1px]">
+        {[0, 1, 2, 3].map((i) => (
+          <span
+            key={i}
+            className="inline-block rounded-full"
+            style={{
+              width: "3px",
+              height: "3px",
+              background: "var(--color-primary)",
+              opacity: 0.7,
+              animation: `ts-dot 1.4s ease-in-out ${i * 0.18}s infinite`,
+            }}
+          />
+        ))}
+      </span>
 
-        {/* Timer */}
-        <span className="tabular-nums">{elapsedSeconds}s</span>
+      {/* Timer */}
+      <span className="text-sm font-medium tabular-nums" style={shimmerTextStyle}>
+        {elapsedSeconds}s
       </span>
 
       <style>{`
