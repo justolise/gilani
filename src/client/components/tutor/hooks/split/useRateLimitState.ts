@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "@/client/supabase";
 import { getRateLimitStatus } from "@/fns/rate-limit.server-fns";
 import { checkIsRateLimited } from "@/client/components/tutor/UsageBanner";
@@ -68,25 +68,43 @@ export function useRateLimitState(userId: string | null) {
     }
   }, []);
 
+  // Initial fetch
   useEffect(() => {
     refreshRateLimitStatus();
   }, [refreshRateLimitStatus]);
 
+  // Keep a stable ref to refreshRateLimitStatus so the realtime handler never
+  // captures a stale closure, and the effect doesn't re-run on every render.
+  const refreshRef = useRef(refreshRateLimitStatus);
+  useEffect(() => {
+    refreshRef.current = refreshRateLimitStatus;
+  }, [refreshRateLimitStatus]);
+
   useEffect(() => {
     if (!userId) return;
+
     const dailyKey = `${userId}:chat:day`;
+
+    // Use a unique channel name per mount so we never accidentally call
+    // .on() on an already-subscribed channel that Supabase cached internally.
+    const channelName = `rate-limit-${userId}-${Date.now()}`;
+
     const channel = supabase
-      .channel(`rate-limit-${userId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "rate_limits", filter: `key=eq.${dailyKey}` },
-        () => refreshRateLimitStatus(),
+        // Use the ref so we always call the latest version without re-subscribing
+        () => refreshRef.current(),
       )
       .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, refreshRateLimitStatus]);
+    // Only userId is a dependency — the channel is recreated when the user changes.
+    // refreshRef is always up-to-date so it is intentionally omitted.
+  }, [userId]);
 
   return {
     chatError,
