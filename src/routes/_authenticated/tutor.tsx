@@ -202,15 +202,8 @@ function TutorIndex() {
               }
               composer.handlePromptClick(prompt);
             }}
-            chatError={rateLimitState.chatError}
             isRateLimited={rateLimitState.isRateLimited}
-            messagesUsed={rateLimitState.messagesUsed}
-            messagesMax={rateLimitState.messagesMax}
             onUpgrade={() => setShowPlans(true)}
-            onRateLimitExpired={() => {
-              rateLimitState.setChatError(null);
-              rateLimitState.refreshRateLimitStatus();
-            }}
             onUploadClick={() => {
               if (rateLimitState.isRateLimited) {
                 toast.error(
@@ -258,10 +251,7 @@ function TutorIndex() {
             parsingFile={composer.parsingFile}
             uploadPhase={composer.uploadPhase}
             attachedFile={composer.attachedFile}
-            // TutorHomeCockpit already renders the rate-limit banner on the empty
-            // state — pass null here so ChatInput doesn't show a duplicate banner.
-            // isRateLimited is still passed to disable the submit button.
-            chatError={null}
+            chatError={rateLimitState.chatError}
             isRateLimited={rateLimitState.isRateLimited}
             messagesUsed={rateLimitState.messagesUsed}
             messagesMax={rateLimitState.messagesMax}

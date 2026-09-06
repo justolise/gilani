@@ -24,12 +24,8 @@ type Props = {
 
 export function EmptyState({
   onPromptClick,
-  chatError,
   isRateLimited,
-  messagesUsed = 0,
-  messagesMax,
   onUpgrade,
-  onRateLimitExpired,
   userName,
   curriculum,
   userId,
@@ -39,12 +35,8 @@ export function EmptyState({
   return (
     <TutorHomeCockpit
       onPromptClick={onPromptClick}
-      chatError={chatError}
       isRateLimited={isRateLimited}
-      messagesUsed={messagesUsed}
-      messagesMax={messagesMax}
       onUpgrade={onUpgrade}
-      onRateLimitExpired={onRateLimitExpired}
       userName={userName}
       curriculum={curriculum}
       userId={userId}

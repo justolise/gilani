@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { UsageBanners } from "../UsageBanner";
 import { PedagogicalActions } from "./PedagogicalActions";
 import { CurriculumSubjectBar } from "./CurriculumSubjectBar";
 import { StudyContinuityCard } from "./StudyContinuityCard";
@@ -8,12 +7,8 @@ import { GraduationCap, Sparkles } from "lucide-react";
 
 interface TutorHomeCockpitProps {
   onPromptClick: (prompt: string) => void;
-  chatError?: string | null;
   isRateLimited?: boolean;
-  messagesUsed?: number;
-  messagesMax?: number;
   onUpgrade?: () => void;
-  onRateLimitExpired?: () => void;
   userName?: string | null;
   curriculum?: string | null;
   userId?: string | null;
@@ -23,12 +18,8 @@ interface TutorHomeCockpitProps {
 
 export function TutorHomeCockpit({
   onPromptClick,
-  chatError,
   isRateLimited,
-  messagesUsed = 0,
-  messagesMax,
   onUpgrade,
-  onRateLimitExpired,
   userName,
   curriculum,
   userId,
@@ -86,17 +77,6 @@ export function TutorHomeCockpit({
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-36 lg:pb-28">
-      {/* Usage & Rate Limit Banners */}
-      <UsageBanners
-        chatError={chatError}
-        onUpgrade={onUpgrade}
-        onRateLimitExpired={onRateLimitExpired}
-        messagesUsed={messagesUsed}
-        messagesMax={messagesMax}
-        isRateLimited={isRateLimited}
-        className="w-full max-w-2xl"
-      />
-
       {/* Academic Header & Curriculum Indicator */}
       <div className="flex flex-col items-center text-center space-y-2 max-w-xl">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide">
