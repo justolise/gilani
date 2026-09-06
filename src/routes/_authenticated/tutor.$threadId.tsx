@@ -7,7 +7,11 @@ import { parseDocument } from "@/shared/utils/document-parser";
 import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { generateThreadTitleFn, renameThreadFn } from "@/fns/tutor.server-fns";
-import { consumePendingMessage, hasPendingMessage } from "@/shared/utils/pending-message";
+import {
+  consumePendingMessage,
+  hasPendingMessage,
+  peekPendingMessage,
+} from "@/shared/utils/pending-message";
 import { useAuth } from "@/client/hooks/use-auth";
 
 import { useTutorChat } from "@/client/components/tutor/hooks/useTutorChat";
@@ -73,6 +77,15 @@ function TutorThreadInner({
 
   const chatState = useTutorChat({ threadId, userId, authToken });
   const composer = useComposer();
+
+  // Capture the pending first-message text synchronously at init time so that
+  // Frame 1 can render the optimistic user bubble BEFORE the useEffect fires
+  // and calls consumePendingMessage (which clears the global store).
+  const [initialUserMessage] = useState<string | null>(() => {
+    if (!threadId) return null;
+    const p = peekPendingMessage(threadId);
+    return p ? p.finalMessage : null;
+  });
 
   const [timerOpen, setTimerOpen] = useState(false);
   const [showPlans, setShowPlans] = useState(false);
@@ -282,6 +295,7 @@ function TutorThreadInner({
             messagesMax={chatState.messagesMax}
             onUpgrade={() => setShowPlans(true)}
             userName={userName}
+            initialUserMessage={initialUserMessage}
           />
         </div>
 

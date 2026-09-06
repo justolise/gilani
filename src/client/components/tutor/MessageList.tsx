@@ -37,6 +37,13 @@ type Props = {
   isListening?: boolean;
   allThreadsPath?: string;
   userName?: string | null;
+  /**
+   * The text of the first user message, captured synchronously from the
+   * pending-message store BEFORE consumePendingMessage clears it.
+   * Passed as a prop so MessageList can show the optimistic bubble on Frame 1
+   * without a race against the useEffect that consumes the store.
+   */
+  initialUserMessage?: string | null;
 };
 
 export const MessageList = React.memo(function MessageList({
@@ -69,6 +76,7 @@ export const MessageList = React.memo(function MessageList({
   isListening,
   allThreadsPath,
   userName,
+  initialUserMessage,
 }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,29 +84,35 @@ export const MessageList = React.memo(function MessageList({
   const isAutoScrollingRef = useRef(true);
   const lastMessageCountRef = useRef(0);
 
-  // If this is a fresh thread transition, read the pending message so it renders on Frame 1 without delay
-  const pending = threadId && hasPendingMessage(threadId) ? peekPendingMessage(threadId) : null;
+  // Show the optimistic user bubble on Frame 1 using the prop captured
+  // synchronously before consumePendingMessage cleared the store.
+  // Fall back to peekPendingMessage for any legacy call paths.
+  const pendingText =
+    initialUserMessage ??
+    (threadId && hasPendingMessage(threadId) ? peekPendingMessage(threadId)?.finalMessage : null) ??
+    null;
+
   const effectiveMessages = useMemo(() => {
     if (messages.length > 0) return messages;
-    if (pending) {
+    if (pendingText) {
       return [
         {
           id: "optimistic-pending-" + threadId,
           role: "user",
-          content: pending.finalMessage,
-          parts: [{ type: "text", text: pending.finalMessage }],
+          content: pendingText,
+          parts: [{ type: "text", text: pendingText }],
           createdAt: new Date(),
         },
       ];
     }
     return messages;
-  }, [messages, pending, threadId]);
+  }, [messages, pendingText, threadId]);
 
-  const effectiveLoading = pending ? false : messagesLoading;
+  const effectiveLoading = pendingText ? false : messagesLoading;
 
   // Memoize the "should show thinking" logic
   const showThinking = useMemo(() => {
-    if (pending) return true;
+    if (pendingText) return true;
     if (!isPending) return false;
     const last = effectiveMessages[effectiveMessages.length - 1];
     if (!last) return true;
@@ -111,7 +125,7 @@ export const MessageList = React.memo(function MessageList({
       last.content ||
       "";
     return text.trim().length === 0;
-  }, [isPending, effectiveMessages, pending]);
+  }, [isPending, effectiveMessages, pendingText]);
 
   // While streaming, surface the actual tool currently in flight (if any),
   // by finding the most recent tool-call part with no matching tool-result yet.
@@ -308,7 +322,7 @@ export const MessageList = React.memo(function MessageList({
                 message={m}
                 idx={idx}
                 isLast={idx === effectiveMessages.length - 1}
-                isPending={(isPending || !!pending) && idx === effectiveMessages.length - 1}
+                isPending={(isPending || !!pendingText) && idx === effectiveMessages.length - 1}
                 isRateLimited={isRateLimited}
                 onReload={onReload}
                 onEditRequest={onEditRequest}
