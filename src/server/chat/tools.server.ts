@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/server/supabase";
 import { sanitizeCurriculum } from "@/shared/utils/tutor-prompt";
 import { setCachedProfile, type CachedProfile } from "./profile-cache.server";
+import { queryCurriculumAndNotes } from "./rag.server";
 
 export function createChatTools({
   userId,
@@ -12,10 +13,46 @@ export function createChatTools({
   cachedProfile?: CachedProfile | null;
 }) {
   return {
-    evaluateCode: tool({
-      description: "Execute code in a secure sandbox to verify if a student's solution works.",
+    searchCurriculumNotes: tool({
+      description:
+        "Search the student's uploaded personal study notes and the official curriculum library for specific syllabus topics, formulas, definitions, or marking scheme guidelines. " +
+        "Call this tool to ground your teaching in the student's curriculum and uploaded materials BEFORE formulating an answer.",
       inputSchema: z.object({
-        code: z.string().describe("The code string to run"),
+        query: z
+          .string()
+          .describe("Specific syllabus topic, formula, question, or concept to look up"),
+      }) as any,
+      execute: (async ({ query }: any) => {
+        console.log(`[API Chat] searchCurriculumNotes invoked. Query: "${query}"`);
+        const result = await queryCurriculumAndNotes({
+          userId,
+          query,
+          count: 5,
+        });
+
+        if (!result) {
+          return {
+            result:
+              "No specific matching notes or curriculum documents found for this query in the library. Proceed with authoritative teaching principles or web search.",
+          };
+        }
+
+        console.log(
+          `[API Chat] searchCurriculumNotes returned matching content for query: "${query}"`,
+        );
+        return { result };
+      }) as any,
+    }) as any,
+
+    evaluateCode: tool({
+      description:
+        "Execute Python or JavaScript code in a secure sandbox. " +
+        "You MUST call this tool PROACTIVELY whenever: " +
+        "(1) a question involves non-trivial mathematical calculations, equation solving, or scientific computation — write a Python script to compute and verify the exact numerical result rather than guessing; " +
+        "(2) verifying student programming solutions or debugging code; " +
+        "(3) validating algorithmic logic or physics/chemistry formulas computationally.",
+      inputSchema: z.object({
+        code: z.string().describe("The code string to run and verify"),
         language: z.enum(["javascript", "python"]),
       }) as any,
       execute: (async ({ code, language }: any) => {
@@ -86,18 +123,22 @@ export function createChatTools({
         }
       }) as any,
     }) as any,
+
     searchWeb: tool({
       description:
-        "Search the live web for current information. Call this tool PROACTIVELY whenever: " +
+        "Search the live web for verified facts, official curriculum documents, past exam questions, mark schemes, real-world data, and citations. " +
+        "You MUST call this tool PROACTIVELY whenever: " +
         "(1) the question involves past papers, exam resources, revision materials, or specific curriculum documents; " +
-        "(2) the question involves current events, recent dates, live statistics, or any fact that could have changed since training; " +
+        "(2) the question involves current events, dates, live statistics, or any factual claim that requires 100% verification; " +
         "(3) the student asks for links, websites, or external resources; " +
-        "(4) you are not 100% confident in a specific fact, formula, or data point. " +
-        "Prefer searching multiple times with different queries to ground your answer comprehensively.",
+        "(4) you are uncertain of any factual nuance, formula, or law. " +
+        "Do NOT rush to answer without verification. Prefer calling searchWeb multiple times with different targeted queries to build a fully grounded answer.",
       inputSchema: z.object({
         query: z
           .string()
-          .describe("A specific, targeted search query — be detailed for best results."),
+          .describe(
+            "A specific, targeted search query — be detailed and precise for best results.",
+          ),
       }) as any,
       execute: (async ({ query }: any) => {
         console.log(`[API Chat] searchWeb tool invoked. Query: ${query}`);

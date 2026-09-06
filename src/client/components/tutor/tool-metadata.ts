@@ -62,6 +62,11 @@ const KNOWN_TOOLS: Record<string, Partial<ToolMetadata>> = {
   },
 
   // Curriculum & preferences
+  searchCurriculumNotes: {
+    displayName: "Curriculum & Notes",
+    inProgressLabel: "Searching curriculum & notes…",
+    icon: BookOpen,
+  },
   setCurriculum: {
     displayName: "Curriculum Settings",
     inProgressLabel: "Updating curriculum preferences…",

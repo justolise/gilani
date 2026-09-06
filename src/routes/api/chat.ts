@@ -204,12 +204,12 @@ export const Route = createFileRoute("/api/chat")({
           console.log(`[API Chat] Streaming with provider: google (gemini)`);
 
           const streamAbortController = new AbortController();
-          const streamTimeoutId = setTimeout(() => {
+          let streamTimeoutId: NodeJS.Timeout | null = setTimeout(() => {
             console.error("[API Chat] Stream timed out waiting for first token — aborting.");
             streamAbortController.abort();
-          }, 25000);
+          }, 60000); // 60s initial buffer to allow deep reasoning & multiple tool executions
 
-          const providerOptions = requestedModel.includes("gemini-2.5-flash")
+          const providerOptions = requestedModel.includes("gemini")
             ? {
                 providerOptions: {
                   google: {
@@ -228,17 +228,25 @@ export const Route = createFileRoute("/api/chat")({
             abortSignal: streamAbortController.signal,
             ...providerOptions,
             tools: createChatTools({ userId, cachedProfile }) as any,
-            stopWhen: isStepCount(5),
+            stopWhen: isStepCount(10), // Generous step runway: permits multi-round search, calculation, and synthesis
+            onStepFinish: () => {
+              // Refresh timeout on every completed tool or reasoning step
+              if (streamTimeoutId) clearTimeout(streamTimeoutId);
+              streamTimeoutId = setTimeout(() => {
+                console.error("[API Chat] Step execution timed out — aborting.");
+                streamAbortController.abort();
+              }, 45000);
+            },
             onError: (errorObj) => {
               const error = (errorObj as any)?.error || errorObj;
-              clearTimeout(streamTimeoutId);
+              if (streamTimeoutId) clearTimeout(streamTimeoutId);
               console.error(
                 `[API Chat] google onError:`,
                 typeof error === "object" ? JSON.stringify(error).slice(0, 300) : String(error),
               );
             },
             onEnd: async ({ text: assistantText, providerMetadata, finishReason, steps }) => {
-              clearTimeout(streamTimeoutId);
+              if (streamTimeoutId) clearTimeout(streamTimeoutId);
               const usage = (providerMetadata as any)?.google?.usageMetadata;
               const cachedTokens = usage?.cachedContentTokenCount ?? 0;
               const totalTokens = usage?.totalTokenCount ?? 0;
