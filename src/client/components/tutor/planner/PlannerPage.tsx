@@ -19,9 +19,39 @@ import { PlannerWeekView } from "@/client/components/tutor/planner/PlannerWeekVi
 import { PlannerItemRow } from "@/client/components/tutor/planner/PlannerItemRow";
 import { PlannerAddModal } from "@/client/components/tutor/planner/PlannerAddModal";
 
+function getPlanItems(plan: any): StudyPlanItem[] {
+  if (!plan) return [];
+  const raw = plan.items;
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+  }
+  return [];
+}
+
+function formatPlanDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr + "T00:00:00");
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 function groupByDate(items: StudyPlanItem[]): Record<string, StudyPlanItem[]> {
+  if (!Array.isArray(items)) return {};
   return items.reduce((acc: Record<string, StudyPlanItem[]>, item) => {
-    (acc[item.date] ??= []).push(item);
+    if (!item || typeof item !== "object") return acc;
+    const key = item.date || "General";
+    (acc[key] ??= []).push(item);
     return acc;
   }, {});
 }
@@ -123,7 +153,7 @@ export function PlannerPage() {
     if (!activeTask) return;
     const { planId, itemId } = activeTask;
     const plan = plans.find((p) => p.id === planId);
-    const item = plan?.items?.find((it: StudyPlanItem) => it.id === itemId);
+    const item = getPlanItems(plan).find((it: StudyPlanItem) => it.id === itemId);
     if (item && !item.completed) {
       await handleToggleItem(planId, itemId);
       toast.success("Focus session complete — task marked done!", {
@@ -138,7 +168,7 @@ export function PlannerPage() {
         p.id === planId
           ? {
               ...p,
-              items: (p.items as StudyPlanItem[]).map((it) =>
+              items: getPlanItems(p).map((it) =>
                 it.id === itemId ? { ...it, completed: !it.completed } : it,
               ),
             }
@@ -226,12 +256,13 @@ export function PlannerPage() {
             </div>
           ) : (
             plans.map((plan) => {
-              const items: StudyPlanItem[] = plan.items || [];
+              const items = getPlanItems(plan);
               const completedCount = items.filter((i) => i.completed).length;
               const progress = items.length > 0 ? (completedCount / items.length) * 100 : 0;
               const isExpanded = expanded === plan.id;
               const grouped = groupByDate(items);
               const sortedDates = Object.keys(grouped).sort();
+              const planTitle = plan.exam_name || plan.title || "Study Plan";
 
               return (
                 <div
@@ -244,7 +275,7 @@ export function PlannerPage() {
                   >
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-foreground truncate">{plan.title}</h4>
+                        <h4 className="font-semibold text-foreground truncate">{planTitle}</h4>
                         {plan.exam_date && (
                           <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
                             Exam: {plan.exam_date}
@@ -334,11 +365,7 @@ export function PlannerPage() {
                             <div key={date} className="space-y-2.5">
                               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                                 <Clock className="h-3 w-3" />
-                                {new Date(date + "T00:00:00").toLocaleDateString(undefined, {
-                                  weekday: "short",
-                                  month: "short",
-                                  day: "numeric",
-                                })}
+                                {formatPlanDate(date)}
                               </h4>
                               <div className="space-y-2">
                                 {grouped[date].map((item) => (
@@ -370,9 +397,9 @@ export function PlannerPage() {
         showTrigger={false}
         initialMinutes={
           activeTask
-            ? plans
-                .find((p) => p.id === activeTask.planId)
-                ?.items?.find((it: StudyPlanItem) => it.id === activeTask.itemId)?.durationMinutes
+            ? getPlanItems(plans.find((p) => p.id === activeTask.planId)).find(
+                (it: StudyPlanItem) => it.id === activeTask.itemId,
+              )?.durationMinutes
             : undefined
         }
         onStudyComplete={handleStudyComplete}

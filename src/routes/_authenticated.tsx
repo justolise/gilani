@@ -16,6 +16,7 @@ import { I18nProvider } from "@/client/i18n/I18nContext";
 import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileForm";
 import { assignUserRole } from "@/fns/auth-actions.server-fns";
 import * as Sentry from "@sentry/react";
+import { isChunkLoadError, triggerChunkReload } from "@/shared/utils/chunk-reload";
 
 const requireAuth = createServerFn({ method: "GET" }).handler(async () => {
   const request = getRequest();
@@ -134,22 +135,55 @@ function AuthedShell() {
           >
             <div className="w-full flex-1 flex flex-col min-h-0">
               <Sentry.ErrorBoundary
-                fallback={
-                  <div className="flex flex-col items-center justify-center p-8 text-center bg-destructive/5 rounded-xl border border-destructive/20 m-4">
-                    <h3 className="text-lg font-medium text-destructive mb-2">
-                      Something went wrong
-                    </h3>
-                    <p className="text-sm text-destructive/80 max-w-md">
-                      We encountered an error loading this section. Please try refreshing the page.
-                    </p>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="mt-4 px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors text-sm font-medium"
-                    >
-                      Reload Page
-                    </button>
-                  </div>
-                }
+                fallback={({ error, resetError }) => {
+                  const isChunk = isChunkLoadError(error);
+                  if (typeof window !== "undefined" && isChunk) {
+                    triggerChunkReload("Route module chunk import failure");
+                  }
+
+                  if (isChunk) {
+                    return (
+                      <div className="flex flex-col items-center justify-center p-8 text-center bg-primary/5 rounded-xl border border-primary/20 m-4">
+                        <GilaniLoader />
+                        <h3 className="text-base font-semibold text-foreground mt-4 mb-1">
+                          Updating to latest version…
+                        </h3>
+                        <p className="text-xs text-muted-foreground max-w-sm mb-4">
+                          A new update was deployed. Refreshing your session with the latest
+                          features.
+                        </p>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="px-4 py-2 bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity text-sm font-medium cursor-pointer"
+                        >
+                          Refresh Now
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex flex-col items-center justify-center p-8 text-center bg-destructive/5 rounded-xl border border-destructive/20 m-4">
+                      <h3 className="text-lg font-medium text-destructive mb-2">
+                        Something went wrong
+                      </h3>
+                      <p className="text-sm text-destructive/80 max-w-md">
+                        {error instanceof Error
+                          ? error.message
+                          : "We encountered an error loading this section. Please try refreshing the page."}
+                      </p>
+                      <button
+                        onClick={() => {
+                          resetError();
+                          window.location.reload();
+                        }}
+                        className="mt-4 px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors text-sm font-medium cursor-pointer"
+                      >
+                        Reload Page
+                      </button>
+                    </div>
+                  );
+                }}
               >
                 <Outlet />
               </Sentry.ErrorBoundary>

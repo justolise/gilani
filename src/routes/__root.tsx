@@ -17,6 +17,7 @@ import * as Sentry from "@sentry/react";
 import appCss from "../styles.css?url";
 import { CookieBanner, COOKIE_CONSENT_EVENT } from "@/client/components/CookieBanner";
 import { getClientCookie } from "@/shared/utils/cookies";
+import { isChunkLoadError, triggerChunkReload } from "@/shared/utils/chunk-reload";
 
 function ConsentGatedAnalytics() {
   const [allowed, setAllowed] = useState(false);
@@ -118,10 +119,37 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   useEffect(() => {
+    if (isChunkLoadError(error)) {
+      triggerChunkReload("ErrorComponent caught chunk load failure");
+      return;
+    }
     if (import.meta.env.VITE_SENTRY_DSN) {
       Sentry.captureException(error);
     }
   }, [error]);
+
+  const isChunk = isChunkLoadError(error);
+
+  if (isChunk) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center space-y-3">
+          <h1 className="font-serif text-2xl text-foreground">Updating GilaniAI…</h1>
+          <p className="text-sm text-muted-foreground">
+            A new version was deployed. Refreshing your application to load the latest updates.
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 cursor-pointer"
+            >
+              Refresh Now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Use a hard navigation instead of reset() for root-level errors
   // reset() tries to reconcile the broken tree; href="/" does a clean remount

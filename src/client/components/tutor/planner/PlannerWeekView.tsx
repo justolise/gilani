@@ -29,15 +29,23 @@ export function PlannerWeekView({ items, onToggleItem, onStartFocus }: PlannerWe
   // Start on the week containing the plan's earliest task, not necessarily "today" —
   // a plan generated for a future exam shouldn't open on an empty current week.
   const initialAnchor = useMemo(() => {
-    if (!items.length) return new Date();
-    const earliest = items.reduce((min, it) => (it.date < min ? it.date : min), items[0].date);
-    return parseISO(earliest);
+    if (!Array.isArray(items) || !items.length) return new Date();
+    const validDates = items.map((it) => it?.date).filter((d): d is string => Boolean(d));
+    if (!validDates.length) return new Date();
+    const earliest = validDates.reduce((min, d) => (d < min ? d : min), validDates[0]);
+    try {
+      const parsed = parseISO(earliest);
+      return isNaN(parsed.getTime()) ? new Date() : parsed;
+    } catch {
+      return new Date();
+    }
   }, [items]);
 
   const [anchor, setAnchor] = useState(initialAnchor);
 
-  const weekStart = startOfWeek(anchor, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(anchor, { weekStartsOn: 1 });
+  const safeAnchor = isNaN(anchor.getTime()) ? new Date() : anchor;
+  const weekStart = startOfWeek(safeAnchor, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(safeAnchor, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const itemsByDate = useMemo(() => {
