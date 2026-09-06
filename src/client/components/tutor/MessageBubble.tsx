@@ -175,8 +175,19 @@ export const MessageBubble = memo(function MessageBubble({
       isDone: data.isDone,
     }));
 
+    const directReasoning = Array.isArray(m.parts)
+      ? (m.parts as any[])
+          .filter((p: any) => p.type === "reasoning" && (p.text?.trim() || p.reasoning?.trim()))
+          .map((p: any) => ({
+            type: "reasoning",
+            text: (p.text || p.reasoning || "").trim(),
+          }))
+      : [];
+    const persistedReasoning = steps.filter((s: any) => s.type === "reasoning" && s.text?.trim());
+    const reasoningSteps = persistedReasoning.length > 0 ? persistedReasoning : directReasoning;
+
     return {
-      reasoningSteps: steps.filter((s: any) => s.type === "reasoning"),
+      reasoningSteps,
       toolSteps: toolStepsList,
     };
   }, [m.parts, m.toolInvocations]);

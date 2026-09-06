@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import * as Sentry from "@sentry/react";
 import { MessageBubble } from "./MessageBubble";
 import { EmptyState } from "./EmptyState";
-import { ThinkingSweep } from "./ThinkingSweep";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { hasPendingMessage, peekPendingMessage } from "@/shared/utils/pending-message";
 import { formatToolInProgressLabel } from "./tool-metadata";

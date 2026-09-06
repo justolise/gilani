@@ -39,24 +39,27 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
   const displayText = phrasesEnabled ? THINKING_PHRASES[phraseIdx] : (label ?? THINKING_PHRASES[0]);
 
+  // Format elapsed time (e.g. "12s" or "1m 14s")
+  const formattedTime =
+    elapsedSeconds >= 60
+      ? `${Math.floor(elapsedSeconds / 60)}m ${elapsedSeconds % 60}s`
+      : `${elapsedSeconds}s`;
+
   return (
     <div
       className="inline-flex items-center py-1.5 select-none"
       role="status"
       aria-live="polite"
-      aria-label={`${displayText} ${elapsedSeconds}s`}
+      aria-label={`${displayText} ${formattedTime}`}
     >
       {/*
         Single outer span — the shimmer gradient + animation live here.
         All children inherit the clip so the sweep runs across
-        the full width (text + dots + timer) as one motion.
+        the full width (text + dots + timer) as one continuous motion.
       */}
       <span
         className="inline-flex items-center gap-0 text-sm font-medium tracking-tight"
         style={{
-          opacity: fade ? 1 : 0,
-          transition: "opacity 0.25s ease",
-          // Shimmer lives on this single element; clips to all descendant text
           backgroundImage:
             "linear-gradient(90deg, " +
             "var(--muted-foreground) 0%, " +
@@ -73,10 +76,18 @@ export function ThinkingSweep({ label }: { label?: string }) {
           animation: "ts-shimmer 2s linear infinite",
         }}
       >
-        {/* Phrase text */}
-        <span>{displayText}</span>
+        {/* Phrase text with smooth crossfade and subtle micro-shift */}
+        <span
+          className="inline-block transition-all duration-200"
+          style={{
+            opacity: fade ? 1 : 0,
+            transform: fade ? "translateY(0)" : "translateY(1.5px)",
+          }}
+        >
+          {displayText}
+        </span>
 
-        {/* Dots — use currentColor so they inherit the gradient clip */}
+        {/* Dots — steady and continuous, never flickering on phrase change */}
         <span
           className="inline-flex items-center gap-[3.5px] mx-[6px]"
           style={{ WebkitTextFillColor: "initial" }}
@@ -97,8 +108,8 @@ export function ThinkingSweep({ label }: { label?: string }) {
           ))}
         </span>
 
-        {/* Elapsed time */}
-        <span className="tabular-nums">{elapsedSeconds}s</span>
+        {/* Elapsed time — steady, tabular figures */}
+        <span className="tabular-nums">{formattedTime}</span>
       </span>
 
       <style>{`
@@ -107,8 +118,8 @@ export function ThinkingSweep({ label }: { label?: string }) {
           100% { background-position: -100% 0; }
         }
         @keyframes ts-dot {
-          0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
-          30%            { transform: translateY(-4px); opacity: 1;   }
+          0%, 60%, 100% { transform: translateY(0);    opacity: 0.35; }
+          30%            { transform: translateY(-3.5px); opacity: 1;    }
         }
       `}</style>
     </div>
