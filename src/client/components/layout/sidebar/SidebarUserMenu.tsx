@@ -1,5 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Settings, Mail, LogOut, Sparkles, ChevronRight, ShieldAlert, Users } from "lucide-react";
+import {
+  Settings,
+  Mail,
+  LogOut,
+  Sparkles,
+  ChevronRight,
+  ShieldAlert,
+  Users,
+  Info,
+  HelpCircle,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -180,6 +190,28 @@ export function SidebarUserMenu({
           >
             <Settings className="h-4 w-4 text-white/50" />
             <span>{t("nav_settings")}</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link
+            to="/about"
+            onClick={onCloseSidebar}
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+          >
+            <Info className="h-4 w-4 text-white/50" />
+            <span>About GilaniAI</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link
+            to="/faq"
+            onClick={onCloseSidebar}
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+          >
+            <HelpCircle className="h-4 w-4 text-white/50" />
+            <span>Help & FAQ</span>
           </Link>
         </DropdownMenuItem>
 

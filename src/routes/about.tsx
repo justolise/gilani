@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Logo } from "@/client/components/ui/logo";
-import { LegalFooter } from "@/client/components/LegalLayout";
+import { LegalHeader, LegalFooter } from "@/client/components/LegalLayout";
+import { useAuth } from "@/client/hooks/use-auth";
 import {
-  ArrowLeft,
   ShieldCheck,
   Users,
   Zap,
@@ -96,29 +95,16 @@ const TEAM_VALUES = [
 ];
 
 function About() {
+  const { user, roles } = useAuth();
+  const dashboardPath = roles?.includes("admin")
+    ? "/admin/users"
+    : roles?.includes("teacher")
+      ? "/teacher/escalations"
+      : "/tutor";
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#e2e4f0] flex flex-col overflow-x-hidden">
-      {/* Header */}
-      <header className="border-b border-white/5 sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-xl z-30">
-        <div className="flex w-full items-center justify-between px-4 sm:px-8 py-3.5 max-w-7xl mx-auto">
-          <Logo to="/" size="md" />
-          <nav className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to home
-            </Link>
-            <Link
-              to="/login"
-              search={{ redirect: undefined, signout: undefined }}
-              className="rounded-lg bg-[#d9531e] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#c44819] transition-all shadow-lg shadow-[#d9531e]/25"
-            >
-              Get started
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <LegalHeader />
 
       <main className="flex-grow">
         {/* Hero */}
@@ -299,20 +285,31 @@ function About() {
               Join thousands of Kenyan students already using GilaniAI to prepare for their exams.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                to="/login"
-                search={{ redirect: undefined, signout: undefined }}
-                className="rounded-xl bg-white px-7 py-3 text-sm font-bold uppercase tracking-wider text-[#d9531e] hover:bg-white/90 transition-all shadow-lg hover:scale-[1.02]"
-              >
-                Start for free
-              </Link>
-              <Link
-                to="/login"
-                search={{ redirect: undefined, signout: undefined }}
-                className="rounded-xl border border-white/20 bg-white/5 px-7 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-white/10 transition-all"
-              >
-                Sign in
-              </Link>
+              {user ? (
+                <Link
+                  to={dashboardPath as any}
+                  className="rounded-xl bg-[#d9531e] px-7 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#c44819] transition-all shadow-lg hover:scale-[1.02]"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    search={{ redirect: undefined, signout: undefined }}
+                    className="rounded-xl bg-white px-7 py-3 text-sm font-bold uppercase tracking-wider text-[#d9531e] hover:bg-white/90 transition-all shadow-lg hover:scale-[1.02]"
+                  >
+                    Start for free
+                  </Link>
+                  <Link
+                    to="/login"
+                    search={{ redirect: undefined, signout: undefined }}
+                    className="rounded-xl border border-white/20 bg-white/5 px-7 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-white/10 transition-all"
+                  >
+                    Sign in
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </section>

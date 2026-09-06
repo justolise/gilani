@@ -33,8 +33,8 @@ export const Route = createFileRoute("/contact")({
 
 const FAQ_ITEMS = [
   {
-    q: "How do I reset my password?",
-    a: "Go to the login page and click 'Forgot password'. A reset link will be sent to your registered email.",
+    q: "Do I need a password to sign in?",
+    a: "No. GilaniAI is completely passwordless. You can sign in instantly with Google or enter your email to receive a secure 6-digit one-time passcode (OTP).",
   },
   {
     q: "Is GilaniAI free to use?",

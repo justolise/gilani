@@ -1,50 +1,68 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Home, LayoutDashboard, Sparkles } from "lucide-react";
+import { ArrowLeft, Home, LayoutDashboard, Sparkles } from "lucide-react";
 import { Logo } from "@/client/components/ui/logo";
 import { useAuth } from "@/client/hooks/use-auth";
-import { supabase } from "@/client/supabase";
-import { toast } from "sonner";
 
 export function LegalHeader({ backTo, backLabel }: { backTo?: any; backLabel?: string }) {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const navigate = useNavigate();
 
-  const handleHome = async (e: React.MouseEvent) => {
-    if (user) {
-      e.preventDefault();
-      await supabase.auth.signOut();
-      toast.success("Signed out successfully");
-      navigate({ to: "/" });
+  const dashboardPath = roles?.includes("admin")
+    ? "/admin/users"
+    : roles?.includes("teacher")
+      ? "/teacher/escalations"
+      : "/tutor";
+
+  const handleBack = () => {
+    if (backTo) {
+      navigate({ to: backTo as any });
+    } else if (typeof window !== "undefined" && window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate({ to: (user ? dashboardPath : "/") as any });
     }
   };
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0f1117]/85 backdrop-blur-xl">
       <div className="flex w-full items-center justify-between px-4 sm:px-8 py-3.5 max-w-7xl mx-auto">
-        <Logo to="/" size="md" />
-        <nav className="flex items-center gap-2">
-          <a
-            href="/"
-            onClick={handleHome}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/4 cursor-pointer"
-          >
-            <Home className="h-3.5 w-3.5" /> Home
-          </a>
-          {user && (
-            <Link
-              to={"/tutor" as any}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
-            >
-              <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
-            </Link>
-          )}
-          {!user && (
-            <Link
-              to={"/login" as any}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
-            >
-              Sign in ›
-            </Link>
+        <Logo to={user ? dashboardPath : "/"} size="md" />
+        <nav className="flex items-center gap-2 sm:gap-3">
+          {user ? (
+            <>
+              <button
+                type="button"
+                onClick={handleBack}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer"
+                title="Go back"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>{backLabel || "Back"}</span>
+              </button>
+              <Link
+                to={dashboardPath as any}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                <span>Dashboard</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
+              >
+                <Home className="h-3.5 w-3.5" />
+                <span>Home</span>
+              </Link>
+              <Link
+                to={"/login" as any}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3.5 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
+              >
+                Sign in ›
+              </Link>
+            </>
           )}
         </nav>
       </div>
@@ -53,12 +71,20 @@ export function LegalHeader({ backTo, backLabel }: { backTo?: any; backLabel?: s
 }
 
 export function LegalFooter() {
+  const { user, roles } = useAuth();
+  const dashboardPath = roles?.includes("admin")
+    ? "/admin/users"
+    : roles?.includes("teacher")
+      ? "/teacher/escalations"
+      : "/tutor";
+
   return (
     <footer className="border-t border-white/6 bg-[#0c0e14] px-4 sm:px-8 py-8">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-        <Logo to="/" size="sm" />
+        <Logo to={user ? dashboardPath : "/"} size="sm" />
         <div className="flex flex-wrap justify-center gap-6 text-xs text-[#9ca3af]">
           {[
+            { label: "About", to: "/about" },
             { label: "Privacy", to: "/privacy" },
             { label: "Terms", to: "/terms" },
             { label: "Cookies", to: "/cookies" },

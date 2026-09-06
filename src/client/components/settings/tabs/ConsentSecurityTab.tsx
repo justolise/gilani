@@ -244,9 +244,11 @@ export function ConsentSecurityTab({ settings, userEmail }: Props) {
           </p>
           <div className="flex flex-col gap-2">
             {[
+              { path: "/about", label: "How GilaniAI Works & AI Ethics" },
               { path: "/terms", label: "Terms of Service Agreement" },
               { path: "/privacy", label: "Privacy Policy Commitments" },
               { path: "/cookies", label: "Full Cookie Policy Details" },
+              { path: "/faq", label: "Frequently Asked Questions & Help" },
             ].map((p) => (
               <Link
                 key={p.path}

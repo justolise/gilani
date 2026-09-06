@@ -92,7 +92,7 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
                 <ul className="list-disc pl-5 space-y-1 text-white/70">
                   <li>
                     <strong>Account information:</strong> Name, email address, school/institution,
-                    and securely hashed passwords (never stored in plain text).
+                    and secure authentication tokens (passwordless OTP & Google authentication).
                   </li>
                   <li>
                     <strong>Academic content:</strong> Uploaded notes, syllabus materials, homework

@@ -33,8 +33,9 @@ function PrivacyPage() {
             <p>We collect the following categories of information:</p>
             <ul>
               <li>
-                <strong>Account information:</strong> Name, email address, and password (stored
-                securely as a hash — never in plain text).
+                <strong>Account information:</strong> Name, email address, and role profile
+                (authenticated securely via passwordless one-time verification codes or Google
+                OAuth).
               </li>
               <li>
                 <strong>Academic content:</strong> Notes you upload, quiz answers, chat messages
@@ -111,7 +112,9 @@ function PrivacyPage() {
               <li>Encrypted storage for sensitive data at rest</li>
               <li>Role-based access controls</li>
               <li>Regular security audits and dependency scanning</li>
-              <li>Passwords hashed — never stored in plain text</li>
+              <li>
+                Passwordless authentication — one-time codes and OAuth tokens securely verified
+              </li>
             </ul>
           </Section>
           <Section title="8. Children's Privacy">

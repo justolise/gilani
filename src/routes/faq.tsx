@@ -37,8 +37,20 @@ const FAQS = [
         a: "Yes — GilaniAI is free to start. Create an account and get immediate access to the AI tutor chat and teacher escalation. Premium plans unlock higher daily message limits and priority escalation.",
       },
       {
-        q: "How do I create an account?",
-        a: "Click 'Get started' on the homepage to create an account with your email and a password, or use 'Continue with Google' to sign in instantly.",
+        q: "How do I create an account and sign in?",
+        a: "Click 'Get started' or 'Sign in'. You can sign in with one click using 'Continue with Google', or enter your email address to receive a secure, 6-digit one-time verification code (OTP). GilaniAI is completely passwordless — no passwords to create or remember!",
+      },
+      {
+        q: "Do I need a password?",
+        a: "No! GilaniAI uses passwordless authentication for maximum speed and security. You never have to create, remember, or reset a password. Just sign in with Google or your email OTP code.",
+      },
+      {
+        q: "Can I view public pages (Terms, Privacy, FAQ, About) without getting logged out?",
+        a: "Yes. When you are signed in, public informational pages automatically display a 'Back' button to return to your previous session or settings, and a 'Dashboard' button to return directly to your app. You remain securely logged in at all times.",
+      },
+      {
+        q: "Where can I learn more about how GilaniAI works?",
+        a: "You can visit our About page anytime from the website footer or directly from your user menu inside the app. It explains our pedagogical agents, curriculum grounding, and safety architecture.",
       },
       {
         q: "Can I use GilaniAI on my phone?",
@@ -84,7 +96,7 @@ const FAQS = [
       },
       {
         q: "Can I delete my account and data?",
-        a: "Yes. Contact us at support@gilaniai.site and we will delete your account and all associated data within 7 business days.",
+        a: "Yes. You have full self-service control. You can permanently delete your account and all associated study data at any time from your account Settings under the Consent & Security tab (Danger Zone). Alternatively, you can contact us at support@gilaniai.site.",
       },
     ],
   },
@@ -117,8 +129,8 @@ const FAQS = [
         a: "GilaniAI requires an internet connection to generate AI responses. However, as a PWA, some parts of the interface may load from cache when offline.",
       },
       {
-        q: "I signed up but haven't received the verification email. What should I do?",
-        a: "You're already signed in and can use GilaniAI right away — the verification email is just a background confirmation of your email address and doesn't block access. If it hasn't arrived, check your spam or junk folder, or contact us at support@gilaniai.site.",
+        q: "I signed up but haven't received my verification code (OTP). What should I do?",
+        a: "Verification codes usually arrive in under a minute. Check your spam or promotions folder. If it hasn't arrived, click 'Resend' on the login screen after the cooldown countdown, or use 'Continue with Google' for instantaneous sign-in.",
       },
       {
         q: "Why is the AI response slow sometimes?",
