@@ -23,11 +23,18 @@ import {
   useRateLimitCountdown,
   formatTime,
   formatDailyResetHours,
+  formatDailyResetShort,
   checkIsRateLimited,
 } from "./UsageBanner";
 
 // Re-export countdown utilities for backwards compatibility
-export { useRateLimitCountdown, formatTime, formatDailyResetHours, checkIsRateLimited };
+export {
+  useRateLimitCountdown,
+  formatTime,
+  formatDailyResetHours,
+  formatDailyResetShort,
+  checkIsRateLimited,
+};
 
 type AttachedFile = {
   name: string;

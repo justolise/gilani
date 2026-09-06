@@ -29,6 +29,20 @@ export function formatDailyResetHours(seconds: number): string {
   return `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
 }
 
+export function formatDailyResetShort(seconds: number): string {
+  const effectiveSecs =
+    seconds > 0
+      ? seconds
+      : (() => {
+          const now = new Date();
+          const midnight = new Date(now);
+          midnight.setHours(24, 0, 0, 0);
+          return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+        })();
+  const hours = Math.max(1, Math.floor(effectiveSecs / 3600));
+  return `${hours}h`;
+}
+
 export function checkIsRateLimited(chatError: string | null | undefined): boolean {
   if (!chatError) return false;
   try {
@@ -194,32 +208,47 @@ export function UsageBanners({
       {/* Approaching-limit soft warning banner */}
       {isApproachingLimit && !dismissedBanners.includes("approaching") && (
         <div className="rounded-2xl border border-orange-200 bg-orange-50/70 dark:bg-orange-950/25 dark:border-orange-900/40 backdrop-blur-sm overflow-hidden shadow-sm animate-in fade-in duration-200">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              <AlertCircle className="h-4 w-4 text-orange-500 dark:text-orange-400 flex-shrink-0" />
-              <p className="text-xs font-semibold text-orange-800 dark:text-orange-300 leading-snug">
-                {remaining <= 1
-                  ? `You've used all ${messagesMax} messages today`
-                  : `You've hit ${Math.round(usagePct * 100)}% of your daily limit`}
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3.5 sm:py-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+              <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+              <p className="text-[11px] sm:text-xs font-semibold text-orange-800 dark:text-orange-300 leading-tight truncate whitespace-nowrap">
+                {remaining <= 1 ? (
+                  <>
+                    <span className="hidden sm:inline">
+                      You've used all {messagesMax} messages today
+                    </span>
+                    <span className="sm:hidden">All {messagesMax} messages used today</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">
+                      You've hit {Math.round(usagePct * 100)}% of your daily limit
+                    </span>
+                    <span className="sm:hidden">
+                      {Math.round(usagePct * 100)}% daily limit reached
+                    </span>
+                  </>
+                )}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-2.5 py-1 text-xs font-bold text-white hover:bg-orange-600 active:scale-95 transition-all duration-200 shadow-sm"
+                  className="flex-shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-orange-500 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-orange-600 active:scale-95 transition-all duration-200 shadow-sm whitespace-nowrap"
                 >
-                  <CreditCard className="h-3.5 w-3.5" /> Upgrade
+                  <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span>Upgrade</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setDismissedBanners((p) => [...p, "approaching"])}
-                className="rounded-lg p-1 text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors"
+                className="rounded-lg p-0.5 sm:p-1 text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors flex-shrink-0"
                 aria-label="Dismiss limit warning"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </div>
           </div>
@@ -236,34 +265,56 @@ export function UsageBanners({
       {/* Rate limit countdown banner */}
       {rateLimited && !dismissedBanners.includes("ratelimit") && (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 backdrop-blur-sm overflow-hidden shadow-sm animate-in fade-in duration-200">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              <Clock className="h-4 w-4 flex-shrink-0 text-destructive dark:text-red-400" />
-              <p className="text-xs font-semibold text-destructive dark:text-red-300 leading-snug">
-                {isDaily
-                  ? `Daily limit reached. Resets in ${formatDailyResetHours(secondsLeft)}`
-                  : secondsLeft > 0
-                    ? `Too many messages — try again in ${formatTime(secondsLeft)}`
-                    : "Too many messages — please wait a moment"}
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3.5 sm:py-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-destructive dark:text-red-400" />
+              <p className="text-[11px] sm:text-xs font-semibold text-destructive dark:text-red-300 leading-tight truncate whitespace-nowrap">
+                {isDaily ? (
+                  <>
+                    <span className="hidden sm:inline">
+                      Daily limit reached. Resets in {formatDailyResetHours(secondsLeft)}
+                    </span>
+                    <span className="sm:hidden">
+                      Daily limit · Resets in {formatDailyResetShort(secondsLeft)}
+                    </span>
+                  </>
+                ) : secondsLeft > 0 ? (
+                  <>
+                    <span className="hidden sm:inline">
+                      Too many messages — try again in {formatTime(secondsLeft)}
+                    </span>
+                    <span className="sm:hidden">
+                      Rate limit · Try again in {formatTime(secondsLeft)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">
+                      Too many messages — please wait a moment
+                    </span>
+                    <span className="sm:hidden">Rate limit · Please wait</span>
+                  </>
+                )}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
                   type="button"
-                  className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-destructive px-2.5 py-1 text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all shadow-sm"
+                  className="flex-shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-destructive px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all shadow-sm whitespace-nowrap"
                 >
-                  <CreditCard className="h-3.5 w-3.5" /> Upgrade
+                  <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span>Upgrade</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setDismissedBanners((p) => [...p, "ratelimit"])}
-                className="rounded-lg p-1 text-destructive/80 hover:bg-destructive/20 hover:text-destructive transition-colors"
+                className="rounded-lg p-0.5 sm:p-1 text-destructive/80 hover:bg-destructive/20 hover:text-destructive transition-colors flex-shrink-0"
                 aria-label="Dismiss rate limit banner"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </div>
           </div>
