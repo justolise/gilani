@@ -402,18 +402,18 @@ export const MessageList = React.memo(function MessageList({
               <AlertCircle className="h-5 w-5 text-destructive dark:text-red-400 mt-0.5 shrink-0" />
               <div className="space-y-1">
                 <h4 className="text-xs font-semibold text-destructive dark:text-red-300">
-                  Connection Outage
+                  Temporary Connection Pause
                 </h4>
-                <p className="text-[11px] text-destructive/80 dark:text-red-400/85 leading-relaxed">
-                  We had trouble receiving the tutor's response. Please check your network
-                  connection or try regenerating the response.
+                <p className="text-xs text-destructive/80 dark:text-red-400/85 leading-relaxed">
+                  Don't worry — your study session is completely safe! We just had a brief hiccup
+                  connecting to the tutor.
                 </p>
                 <button
                   onClick={onReload}
-                  className="mt-3 flex items-center gap-1.5 rounded-lg bg-destructive/10 hover:bg-destructive/25 px-3 py-1.5 text-[10px] font-semibold text-destructive dark:text-red-300 transition-colors cursor-pointer"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-destructive px-3.5 py-2 text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all cursor-pointer shadow-xs min-h-[44px]"
                 >
-                  <RefreshCw className="h-3 w-3" />
-                  Regenerate Response
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  Try Again
                 </button>
               </div>
             </div>

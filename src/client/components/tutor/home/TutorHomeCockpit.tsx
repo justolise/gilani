@@ -3,7 +3,8 @@ import { PedagogicalActions } from "./PedagogicalActions";
 import { CurriculumSubjectBar } from "./CurriculumSubjectBar";
 import { StudyContinuityCard } from "./StudyContinuityCard";
 import { useContinuityData } from "./hooks/useContinuityData";
-import { GraduationCap, Sparkles } from "lucide-react";
+import { GraduationCap, Sparkles, ShieldCheck, HelpCircle } from "lucide-react";
+import { openAppGuide } from "@/client/components/guide/AppGuideModal";
 
 interface TutorHomeCockpitProps {
   onPromptClick: (prompt: string) => void;
@@ -78,17 +79,33 @@ export function TutorHomeCockpit({
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-start overflow-y-auto px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-36 lg:pb-28">
       {/* Academic Header & Curriculum Indicator */}
-      <div className="flex flex-col items-center text-center space-y-2 max-w-xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide">
-          <GraduationCap className="w-3.5 h-3.5" />
-          <span>{curriculum ? `${curriculum} Curriculum` : "Academic AI Tutor"}</span>
+      <div className="flex flex-col items-center text-center space-y-2.5 max-w-xl">
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide shadow-xs">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>{curriculum ? `${curriculum} Curriculum` : "Academic AI Tutor"}</span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold tracking-wide shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Safe & Private · No Ads</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={openAppGuide}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card/80 hover:bg-muted text-foreground/80 hover:text-foreground text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs min-h-[32px]"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-primary" />
+            <span>App Guide</span>
+          </button>
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
           {greeting}
         </h1>
 
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-md">
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed">
           What concept or problem are we mastering today? Select a learning mode or ask directly
           below.
         </p>

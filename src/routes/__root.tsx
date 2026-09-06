@@ -160,7 +160,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => {
     const metaTags = [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
+      },
       { name: "theme-color", content: "#d9531e" },
       { name: "robots", content: "index, follow" },
       { name: "googlebot", content: "index, follow" },

@@ -70,15 +70,19 @@ export function ThreadHeader({
     <>
       <button
         onClick={createNewThread}
-        className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors"
+        className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
         title="New Chat"
+        aria-label="New Chat"
       >
         <SquarePen className="h-5 w-5" />
       </button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors">
+          <button
+            className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+            aria-label="More session options"
+          >
             <MoreVertical className="h-5 w-5" />
           </button>
         </DropdownMenuTrigger>

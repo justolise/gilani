@@ -293,12 +293,12 @@ export function ChatInput({
                     type="button"
                     disabled={isDisabled}
                     aria-label="Add attachment or voice"
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 border border-transparent ${
+                    className={`flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-all duration-200 border border-transparent cursor-pointer ${
                       isDisabled
                         ? "opacity-40 cursor-not-allowed pointer-events-none"
                         : isListening
                           ? "text-red-500 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/30 animate-pulse"
-                          : "cursor-pointer text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:border-border/60 active:scale-90"
+                          : "text-muted-foreground hover:bg-muted/80 hover:text-foreground hover:border-border/60 active:scale-90"
                     }`}
                   >
                     {isProcessingFile ? (
@@ -315,12 +315,15 @@ export function ChatInput({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" sideOffset={8} className="w-48 p-1.5 z-50">
                   {/* 1. Upload Document or pick Image from gallery */}
-                  <DropdownMenuItem asChild className="cursor-pointer gap-2.5 p-2 rounded-lg">
+                  <DropdownMenuItem
+                    asChild
+                    className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                  >
                     <label
                       htmlFor={isDisabled ? undefined : "chat-file-input"}
-                      className="flex w-full items-center"
+                      className="flex w-full items-center cursor-pointer"
                     >
-                      <Paperclip className="h-4 w-4 text-muted-foreground" />
+                      <Paperclip className="h-4 w-4 text-muted-foreground mr-2" />
                       <span className="text-sm font-medium">Document / Image</span>
                     </label>
                   </DropdownMenuItem>
@@ -329,9 +332,9 @@ export function ChatInput({
                   {onScanClick && (
                     <DropdownMenuItem
                       onClick={onScanClick}
-                      className="cursor-pointer gap-2.5 p-2 rounded-lg"
+                      className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
                     >
-                      <Camera className="h-4 w-4 text-muted-foreground" />
+                      <Camera className="h-4 w-4 text-muted-foreground mr-2" />
                       <span className="text-sm font-medium">Scan (Camera)</span>
                     </DropdownMenuItem>
                   )}
@@ -340,10 +343,10 @@ export function ChatInput({
                   {onVoiceClick && (
                     <DropdownMenuItem
                       onClick={onVoiceClick}
-                      className="cursor-pointer gap-2.5 p-2 rounded-lg"
+                      className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
                     >
                       <Mic
-                        className={`h-4 w-4 ${isListening ? "text-red-500" : "text-muted-foreground"}`}
+                        className={`h-4 w-4 mr-2 ${isListening ? "text-red-500" : "text-muted-foreground"}`}
                       />
                       <span className="text-sm font-medium">
                         {isListening ? "Stop Voice" : "Voice"}
@@ -366,12 +369,13 @@ export function ChatInput({
                 }}
                 disabled={!isPending && (isDisabled || (!input.trim() && !attachedFile))}
                 title={isPending ? "Stop generating" : "Send (Enter)"}
-                className={`flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
+                aria-label={isPending ? "Stop generating" : "Send message"}
+                className={`flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-200 min-h-[44px] min-w-[44px] ${
                   isPending
-                    ? "h-10 w-10 bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:scale-95 cursor-pointer"
+                    ? "h-11 w-11 bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:scale-95 cursor-pointer"
                     : isDisabled || (!input.trim() && !attachedFile)
-                      ? "h-10 w-10 bg-muted/60 text-muted-foreground opacity-40 cursor-not-allowed"
-                      : "h-10 w-10 bg-primary text-primary-foreground shadow-xs hover:shadow-md hover:shadow-primary/25 hover:bg-primary/90 hover:scale-[1.04] active:scale-[0.96] cursor-pointer"
+                      ? "h-11 w-11 bg-muted/60 text-muted-foreground opacity-40 cursor-not-allowed"
+                      : "h-11 w-11 bg-primary text-primary-foreground shadow-xs hover:shadow-md hover:shadow-primary/25 hover:bg-primary/90 hover:scale-[1.04] active:scale-[0.96] cursor-pointer"
                 }`}
               >
                 {isPending ? <Square className="h-4 w-4" /> : <Send className="h-4 w-4 ml-0.5" />}
