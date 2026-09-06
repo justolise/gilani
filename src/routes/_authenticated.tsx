@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { authenticateRequest } from "@/server/api-auth.server";
@@ -80,53 +80,63 @@ function AuthedShell() {
   const needsProfileSetup =
     isProfileLoaded && (!shell.onboardingCompleted || !shell.profileName?.trim());
 
+  const layoutValue = useMemo(
+    () => ({
+      sidebarOpen: shell.sidebarOpen,
+      setSidebarOpen: shell.setSidebarOpen,
+      user: shell.user,
+      createNewThread: shell.createNewThread,
+      requestRenameThread: (id: string, title: string) => {
+        shell.setSidebarOpen(true);
+        shell.startRename(id, title);
+      },
+      requestDeleteThread: (id: string) => {
+        shell.setSidebarOpen(true);
+        shell.setDeleteConfirmId(id);
+      },
+    }),
+    [
+      shell.sidebarOpen,
+      shell.setSidebarOpen,
+      shell.user,
+      shell.createNewThread,
+      shell.startRename,
+      shell.setDeleteConfirmId,
+    ],
+  );
+
   return (
     <I18nProvider>
-      <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground">
-        <DisclaimerModal />
-        <AppGuideModal />
-        {needsProfileSetup && (
-          <CompleteProfileForm
-            initialName={shell.user?.user_metadata?.full_name || ""}
-            onSave={async (displayName, role, curriculum) => {
-              await assignUserRole({ data: { role, displayName, curriculum } });
-              window.dispatchEvent(new CustomEvent("custom:profile-updated"));
-            }}
-          />
-        )}
-        {shell.showPlans && (
-          <PlansModal onClose={() => shell.setShowPlans(false)} currentPlan={shell.currentPlan} />
-        )}
-
-        {shell.sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => shell.setSidebarOpen(false)}
-          />
-        )}
-
-        <Sidebar shell={shell} />
-
-        <main
-          className={`flex-1 min-w-0 min-h-0 flex flex-col overflow-x-hidden pb-16 lg:pb-0 ${shell.path.startsWith("/tutor") ? "overflow-hidden h-full" : "overflow-y-auto scroll-smooth"}`}
-        >
-          <div className="w-full flex-1 flex flex-col min-h-0">
-            <LayoutContext.Provider
-              value={{
-                sidebarOpen: shell.sidebarOpen,
-                setSidebarOpen: shell.setSidebarOpen,
-                user: shell.user,
-                createNewThread: shell.createNewThread,
-                requestRenameThread: (id: string, title: string) => {
-                  shell.setSidebarOpen(true);
-                  shell.startRename(id, title);
-                },
-                requestDeleteThread: (id: string) => {
-                  shell.setSidebarOpen(true);
-                  shell.setDeleteConfirmId(id);
-                },
+      <LayoutContext.Provider value={layoutValue}>
+        <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground">
+          <DisclaimerModal />
+          <AppGuideModal />
+          {needsProfileSetup && (
+            <CompleteProfileForm
+              initialName={shell.user?.user_metadata?.full_name || ""}
+              onSave={async (displayName, role, curriculum) => {
+                await assignUserRole({ data: { role, displayName, curriculum } });
+                window.dispatchEvent(new CustomEvent("custom:profile-updated"));
               }}
-            >
+            />
+          )}
+          {shell.showPlans && (
+            <PlansModal onClose={() => shell.setShowPlans(false)} currentPlan={shell.currentPlan} />
+          )}
+
+          {shell.sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+              onClick={() => shell.setSidebarOpen(false)}
+            />
+          )}
+
+          <Sidebar shell={shell} />
+
+          <main
+            className={`flex-1 min-w-0 min-h-0 flex flex-col overflow-x-hidden pb-16 lg:pb-0 ${shell.path.startsWith("/tutor") ? "overflow-hidden h-full" : "overflow-y-auto scroll-smooth"}`}
+          >
+            <div className="w-full flex-1 flex flex-col min-h-0">
               <Sentry.ErrorBoundary
                 fallback={
                   <div className="flex flex-col items-center justify-center p-8 text-center bg-destructive/5 rounded-xl border border-destructive/20 m-4">
@@ -147,23 +157,23 @@ function AuthedShell() {
               >
                 <Outlet />
               </Sentry.ErrorBoundary>
-            </LayoutContext.Provider>
-          </div>
-        </main>
+            </div>
+          </main>
 
-        <MobileBottomNav />
+          <MobileBottomNav />
 
-        {shell.deleteConfirmId && (
-          <DeleteModal
-            onConfirm={() => {
-              const id = shell.deleteConfirmId;
-              shell.setDeleteConfirmId(null);
-              if (id) shell.handleDeleteThread(id);
-            }}
-            onCancel={() => shell.setDeleteConfirmId(null)}
-          />
-        )}
-      </div>
+          {shell.deleteConfirmId && (
+            <DeleteModal
+              onConfirm={() => {
+                const id = shell.deleteConfirmId;
+                shell.setDeleteConfirmId(null);
+                if (id) shell.handleDeleteThread(id);
+              }}
+              onCancel={() => shell.setDeleteConfirmId(null)}
+            />
+          )}
+        </div>
+      </LayoutContext.Provider>
     </I18nProvider>
   );
 }
