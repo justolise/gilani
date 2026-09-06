@@ -16,17 +16,13 @@ export function ThinkingSweep({ label }: { label?: string }) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Live elapsed seconds timer
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setElapsedSeconds((s) => s + 1);
-    }, 1000);
+    timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
-  // Phrase rotation
   useEffect(() => {
     if (!phrasesEnabled) return;
     intervalRef.current = setInterval(() => {
@@ -45,66 +41,73 @@ export function ThinkingSweep({ label }: { label?: string }) {
 
   return (
     <div
-      className="inline-flex items-baseline gap-0 py-1.5 select-none"
+      className="inline-flex items-baseline py-1.5 select-none"
       role="status"
       aria-live="polite"
       aria-label={`${displayText} ${elapsedSeconds}s`}
+      style={{ opacity: fade ? 1 : 0, transition: "opacity 0.25s ease" }}
     >
-      {/* Text + dots + timer all on one inline shimmer span */}
+      {/*
+        Single container — the shimmer gradient animates across the whole row.
+        Bright narrow highlight stripe on a dimmer base creates a clearly
+        visible sweep.
+      */}
       <span
-        className="text-sm font-medium tracking-tight transition-opacity duration-250"
+        className="inline-flex items-baseline gap-0 text-sm font-medium tracking-tight"
         style={{
-          opacity: fade ? 1 : 0,
           background:
-            "linear-gradient(110deg, var(--muted-foreground) 10%, var(--primary) 45%, var(--foreground) 55%, var(--muted-foreground) 90%)",
-          backgroundSize: "300% 100%",
+            "linear-gradient(90deg," +
+            "  hsl(var(--muted-foreground)/0.55) 0%," +
+            "  hsl(var(--muted-foreground)/0.55) 30%," +
+            "  hsl(var(--primary-foreground,255 255 255)/0.0) 42%," +
+            "  hsl(var(--primary)) 48%," +
+            "  hsl(var(--foreground)) 50%," +
+            "  hsl(var(--primary)) 52%," +
+            "  hsl(var(--primary-foreground,255 255 255)/0.0) 58%," +
+            "  hsl(var(--muted-foreground)/0.55) 70%," +
+            "  hsl(var(--muted-foreground)/0.55) 100%" +
+            ")",
+          backgroundSize: "220% 100%",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
-          animation: "ts-shimmer 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+          animation: "ts-shimmer 1.8s linear infinite",
         }}
       >
-        {displayText}
-      </span>
+        {/* Label text */}
+        <span>{displayText}</span>
 
-      {/* Animated dots — inline with text, same shimmer colour via currentColor */}
-      <span className="inline-flex items-end gap-[3px] mx-1.5 mb-[1px]">
-        {[0, 1, 2, 3].map((i) => (
-          <span
-            key={i}
-            className="inline-block w-[3px] h-[3px] rounded-full bg-primary/70"
-            style={{
-              animation: `ts-dot 1.4s ease-in-out ${i * 0.18}s infinite`,
-            }}
-          />
-        ))}
-      </span>
+        {/* Dots */}
+        <span className="inline-flex items-end gap-[3px] mx-[5px] translate-y-[-1px]">
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className="inline-block rounded-full"
+              style={{
+                width: "3px",
+                height: "3px",
+                background: "currentColor",
+                WebkitTextFillColor: "initial",
+                backgroundColor: "var(--color-primary, hsl(var(--primary)))",
+                opacity: 0.6,
+                animation: `ts-dot 1.4s ease-in-out ${i * 0.18}s infinite`,
+              }}
+            />
+          ))}
+        </span>
 
-      {/* Live timer — plain text, no badge box */}
-      <span
-        className="text-sm font-medium tabular-nums transition-opacity duration-250"
-        style={{
-          opacity: fade ? 1 : 0,
-          background:
-            "linear-gradient(110deg, var(--muted-foreground) 10%, var(--primary) 45%, var(--foreground) 55%, var(--muted-foreground) 90%)",
-          backgroundSize: "300% 100%",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          animation: "ts-shimmer 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        }}
-      >
-        {elapsedSeconds}s
+        {/* Timer */}
+        <span className="tabular-nums">{elapsedSeconds}s</span>
       </span>
 
       <style>{`
         @keyframes ts-shimmer {
-          0%   { background-position: 150% 0; }
-          100% { background-position: -150% 0; }
+          0%   { background-position: 120% 0; }
+          100% { background-position: -120% 0; }
         }
         @keyframes ts-dot {
-          0%, 60%, 100% { transform: translateY(0);    opacity: 0.35; }
-          30%            { transform: translateY(-4px); opacity: 1;    }
+          0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
+          30%            { transform: translateY(-4px); opacity: 1;   }
         }
       `}</style>
     </div>
