@@ -458,13 +458,9 @@ export const MessageBubble = memo(function MessageBubble({
 
                   {isLast && (
                     <div className="flex items-center pt-1">
-                      <div
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 border border-primary/25 text-xs font-bold text-primary select-none leading-none shadow-xs"
-                        aria-hidden="true"
-                        title="GilaniAI"
-                      >
-                        G
-                      </div>
+                      <span className="text-xs font-semibold text-primary select-none">
+                        GilaniAI
+                      </span>
                     </div>
                   )}
                 </div>
