@@ -219,7 +219,7 @@ export function ChatInput({
         )}
 
         {/* Main input container with theme-aware borders & elevation */}
-        <div className="relative flex flex-col rounded-3xl border border-border/80 bg-card shadow-sm dark:shadow-none hover:border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 dark:focus-within:border-primary/50 dark:focus-within:ring-primary/20 transition-all duration-200 overflow-hidden">
+        <div className="relative flex flex-col rounded-3xl border border-border/70 bg-card/85 backdrop-blur-xl shadow-sm dark:shadow-none hover:border-border/90 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200 overflow-hidden">
           {/* File input: hidden — accepts documents AND images from gallery */}
           <input
             id="chat-file-input"
@@ -342,10 +342,10 @@ export function ChatInput({
                 title={isPending ? "Stop generating" : "Send (Enter)"}
                 className={`flex flex-shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
                   isPending
-                    ? "h-10 w-10 bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:scale-95"
+                    ? "h-10 w-10 bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:scale-95 cursor-pointer"
                     : isDisabled || (!input.trim() && !attachedFile)
                       ? "h-10 w-10 bg-muted/60 text-muted-foreground opacity-40 cursor-not-allowed"
-                      : "h-10 w-10 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:scale-105 active:scale-95"
+                      : "h-10 w-10 bg-primary text-primary-foreground shadow-xs hover:shadow-md hover:shadow-primary/25 hover:bg-primary/90 hover:scale-[1.04] active:scale-[0.96] cursor-pointer"
                 }`}
               >
                 {isPending ? <Square className="h-4 w-4" /> : <Send className="h-4 w-4 ml-0.5" />}

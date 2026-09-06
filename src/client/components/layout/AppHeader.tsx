@@ -24,7 +24,7 @@ export function AppHeader({
   const userId = session?.user?.id;
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-border bg-background px-4 sticky top-0 z-30 gap-2 flex-shrink-0 min-w-0">
+    <header className="flex h-14 sm:h-16 w-full items-center justify-between border-b border-border/60 bg-background/80 backdrop-blur-md px-4 sticky top-0 z-30 gap-2 flex-shrink-0 min-w-0 transition-colors">
       <div className="flex items-center gap-3 min-w-0 flex-shrink-0">
         <button
           onClick={() => setSidebarOpen(true)}

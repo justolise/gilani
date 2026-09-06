@@ -854,3 +854,59 @@ html[data-font-family="serif"] body {
   --border: rgba(255, 255, 255, 0.4);
   --muted-foreground: rgba(255, 255, 255, 0.9);
 }
+
+/* ── Modern Sleek Custom Scrollbars ─────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* ── Modern Glassmorphic Surfaces & Micro-interactions ───────────── */
+.glass-panel {
+  background: hsl(var(--card) / 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
+.glass-card {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border) / 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: hsl(var(--card) / 0.85);
+  border-color: hsl(var(--primary) / 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -6px hsl(var(--primary) / 0.12);
+}
+
+.interactive-scale {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interactive-scale:active {
+  transform: scale(0.97);
+}

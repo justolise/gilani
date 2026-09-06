@@ -28,9 +28,9 @@ export function StudyContinuityCard({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         {/* Latest Active Session */}
         {latestThread && (
-          <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card/40 hover:bg-card/70 transition-all duration-150">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 shadow-xs hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0">
+              <div className="p-2 rounded-xl bg-primary/10 text-primary flex-shrink-0">
                 <History className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ export function StudyContinuityCard({
             <Link
               to="/tutor/$threadId"
               params={{ threadId: latestThread.id }}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 hover:underline flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90 flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-all duration-150 active:scale-95"
             >
               <span>Resume</span>
               <ArrowRight className="w-3 h-3" />
@@ -56,9 +56,9 @@ export function StudyContinuityCard({
 
         {/* Next Study Plan Task */}
         {todayPlanTask && (
-          <div className="flex items-center justify-between p-3 rounded-xl border border-border/40 bg-card/40 hover:bg-card/70 transition-all duration-150">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-emerald-500/35 shadow-xs hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 flex-shrink-0">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 flex-shrink-0">
                 <CalendarCheck className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">

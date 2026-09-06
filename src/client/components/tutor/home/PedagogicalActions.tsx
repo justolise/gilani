@@ -73,10 +73,10 @@ export function PedagogicalActions({ onSelectAction, className = "" }: Pedagogic
               key={action.id}
               type="button"
               onClick={() => onSelectAction(action.prompt)}
-              className="group relative flex items-start gap-3 p-3 sm:p-3.5 rounded-xl border border-border/50 bg-card/60 hover:bg-card hover:border-primary/30 transition-all duration-200 text-left shadow-xs hover:shadow-md active:scale-[0.99] cursor-pointer"
+              className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-0.5 transition-all duration-200 text-left shadow-xs hover:shadow-md active:scale-[0.99] cursor-pointer"
             >
               <div
-                className={`p-2 rounded-lg border flex-shrink-0 transition-transform duration-200 group-hover:scale-105 ${action.colorClass}`}
+                className={`p-2.5 rounded-xl border flex-shrink-0 transition-transform duration-200 group-hover:scale-105 ${action.colorClass}`}
               >
                 <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
               </div>
