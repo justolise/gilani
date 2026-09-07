@@ -9,7 +9,7 @@ interface HeroProps {
 
 export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
   return (
-    <section className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden px-4 sm:px-8 py-3 xs:py-5 sm:py-6">
+    <section className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-y-auto overflow-x-hidden scrollbar-none px-4 sm:px-8 py-3 xs:py-5 sm:py-6 pl-[max(1rem,var(--safe-left,0px))] pr-[max(1rem,var(--safe-right,0px))]">
       {/* Ambient background glow & grid */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="absolute top-1/4 left-1/4 w-[360px] sm:w-[600px] h-[360px] sm:h-[600px] bg-[#C96A3D]/20 blur-[100px] sm:blur-[160px] rounded-full mix-blend-screen opacity-75 motion-safe:animate-pulse [animation-duration:9s]"></div>

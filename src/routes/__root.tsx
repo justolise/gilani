@@ -337,7 +337,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning style={{ background: "hsl(var(--background, 24 15% 8%))" }}>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var d=document.documentElement;var t=localStorage.getItem("theme")||"system";var dark=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme:dark)").matches);d.classList.toggle("dark",dark);document.body.style.background=dark?"#0f1117":"#ffffff"})()`,
+            __html: `(function(){var d=document.documentElement;var t=localStorage.getItem("theme")||"system";var dark=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme:dark)").matches);d.classList.toggle("dark",dark);document.body.style.background=dark?"#0f1117":"#ffffff";if(window.Capacitor||navigator.userAgent.indexOf("Capacitor")!==-1||navigator.userAgent.indexOf("wv")!==-1){d.classList.add("capacitor-native");if(/android/i.test(navigator.userAgent)){d.classList.add("capacitor-android");}}})()`,
           }}
         />
         {children}

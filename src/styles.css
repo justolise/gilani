@@ -144,9 +144,18 @@
 }
 
 /* Fallback for Capacitor Android when running without native insets padding */
-html.capacitor-android:not(.native-insets-applied) {
-  --safe-top: max(env(safe-area-inset-top, 0px), 32px);
+html.capacitor-android:not(.native-insets-applied),
+html.capacitor-native:not(.native-insets-applied) {
+  --safe-top: max(env(safe-area-inset-top, 0px), 38px);
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 48px);
+}
+
+/* Also support standalone PWA / WebApp mode on mobile */
+@media all and (display-mode: standalone) {
+  html:not(.native-insets-applied) {
+    --safe-top: max(env(safe-area-inset-top, 0px), 36px);
+    --safe-bottom: max(env(safe-area-inset-bottom, 0px), 40px);
+  }
 }
 
 /* ─── Study Accent Palettes (Light Mode) ────────────────────────────────── */

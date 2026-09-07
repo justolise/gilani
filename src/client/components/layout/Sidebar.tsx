@@ -164,6 +164,9 @@ export function Sidebar({ shell }: Props) {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           ${collapsed ? "lg:w-14" : "lg:w-[270px]"}
           w-[84vw] max-w-[315px] sm:max-w-[320px]
+          pt-[var(--safe-top,0px)] lg:pt-0
+          pb-[var(--safe-bottom,0px)] lg:pb-0
+          pl-[var(--safe-left,0px)]
         `}
       >
         {/* ── Collapsed Desktop Rail View (w-14) ── */}

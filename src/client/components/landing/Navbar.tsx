@@ -5,8 +5,8 @@ import { ArrowRight } from "lucide-react";
 
 export default function Navbar() {
   return (
-    <header className="relative z-40 h-14 sm:h-16 w-full flex-none border-b border-white/[0.08] bg-[#121212]/80 backdrop-blur-xl transition-all">
-      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-8">
+    <header className="relative z-40 w-full flex-none border-b border-white/[0.08] bg-[#121212]/80 backdrop-blur-xl transition-all pt-[var(--safe-top,0px)] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)]">
+      <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-4 sm:px-8">
         {/* Brand Logo */}
         <Logo to="/" size="md" />
 

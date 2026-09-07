@@ -62,7 +62,7 @@ export default function Footer({
   };
 
   return (
-    <footer className="relative z-40 w-full flex-none border-t border-white/[0.08] bg-[#101010]/90 backdrop-blur-xl py-2.5 sm:py-3.5">
+    <footer className="relative z-40 w-full flex-none border-t border-white/[0.08] bg-[#101010]/90 backdrop-blur-xl pt-2.5 sm:pt-3.5 pb-[calc(0.625rem+var(--safe-bottom,0px))] sm:pb-3.5 pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
       <div className="mx-auto flex flex-col items-center justify-center max-w-7xl px-4 sm:px-8 gap-2">
         {/* Top Row: Navigation Links & Social Icons */}
         <div className="flex w-full items-center justify-between gap-4">
