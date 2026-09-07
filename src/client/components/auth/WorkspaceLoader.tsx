@@ -21,7 +21,7 @@ export function WorkspaceLoader() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#0d0f18] gap-8">
+    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#0f1117] gap-8">
       {/* Background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#C96A3D]/5 via-transparent to-[#C96A3D]/3 pointer-events-none" />
 

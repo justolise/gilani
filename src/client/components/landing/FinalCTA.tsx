@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 export default function FinalCTA() {
   return (
-    <section className="w-full bg-[#0a0a0a] py-28 relative overflow-hidden border-t border-white/5">
+    <section className="w-full bg-[#0f1117] py-28 relative overflow-hidden border-t border-white/[0.08]">
       {/* Dual glowing spots */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#C96A3D]/5 blur-[130px] rounded-full mix-blend-screen opacity-60"></div>
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-[#E28743]/5 blur-[130px] rounded-full mix-blend-screen opacity-40"></div>
@@ -17,7 +17,7 @@ export default function FinalCTA() {
         <h2 className="mb-6 font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl max-w-3xl leading-[1.15]">
           Your next question deserves a Socratic guide.
         </h2>
-        <p className="mb-10 text-base font-light text-[#a1a1aa] sm:text-lg max-w-xl leading-relaxed">
+        <p className="mb-10 text-base font-light text-[#9ca3af] sm:text-lg max-w-xl leading-relaxed">
           Free to start. No credit card required. Grounded in your curriculum from day one.
         </p>
         <Link

@@ -60,7 +60,7 @@ export function SidebarUserMenu({
           }`}
         >
           {/* Avatar with subtle ring */}
-          <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg overflow-hidden border border-white/[0.12] bg-[#1a1c29] shadow-xs">
+          <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg overflow-hidden border border-white/[0.08] bg-[#0f1117] shadow-xs">
             {avatarUrl ? (
               avatarUrl.startsWith("preset:") ? (
                 <PresetAvatarSVG preset={avatarUrl.substring(7)} />
@@ -105,11 +105,11 @@ export function SidebarUserMenu({
       <DropdownMenuContent
         side={isCompact ? "right" : "top"}
         align={isCompact ? "end" : "start"}
-        className="w-64 p-1.5 shadow-2xl rounded-2xl border border-white/[0.12] bg-[#13151f]/98 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
+        className="w-64 p-1.5 shadow-2xl rounded-2xl border border-white/[0.08] bg-[#131722]/98 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
       >
         <DropdownMenuLabel className="px-3 py-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg overflow-hidden border border-white/[0.12] bg-[#1a1c29] flex items-center justify-center flex-shrink-0">
+            <div className="h-8 w-8 rounded-lg overflow-hidden border border-white/[0.08] bg-[#0f1117] flex items-center justify-center flex-shrink-0">
               {avatarUrl ? (
                 avatarUrl.startsWith("preset:") ? (
                   <PresetAvatarSVG preset={avatarUrl.substring(7)} />

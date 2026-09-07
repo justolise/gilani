@@ -85,7 +85,7 @@ function LandingPage() {
   }
 
   return (
-    <main className="h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-[#121212] text-white selection:bg-[#C96A3D] selection:text-white font-sans relative">
+    <main className="h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-[#0f1117] text-white selection:bg-[#C96A3D] selection:text-white font-sans relative">
       {/* Clean Navbar without duplicate menu */}
       <Navbar />
 

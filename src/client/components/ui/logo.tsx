@@ -37,7 +37,7 @@ export function Logo({
 
   const logoContent = (
     <div className={`flex items-center justify-center ${currentSize.container} ${innerClass}`}>
-      <span className={`font-bold italic text-[#E2725B] ${currentSize.text}`}>
+      <span className={`font-bold italic text-[#C96A3D] ${currentSize.text}`}>
         {iconOnly ? "G" : "GilaniAI"}
       </span>
     </div>

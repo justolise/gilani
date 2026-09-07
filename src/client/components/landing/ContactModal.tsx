@@ -54,8 +54,8 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
-        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/10">
+      <DialogContent className="max-w-2xl max-h-[85dvh] overflow-hidden flex flex-col border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center justify-between gap-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
               <MessageCircle className="h-3.5 w-3.5" />
@@ -73,7 +73,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
             Contact GilaniAI Support
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-white/60">
+          <DialogDescription className="text-xs sm:text-sm text-[#9ca3af]">
             Have questions, feedback, or need institutional partnerships? We're here to help.
           </DialogDescription>
         </DialogHeader>
@@ -85,40 +85,40 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
               href="https://wa.me/254102880577"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-white hover:bg-white/[0.08] hover:border-emerald-500/40 transition-all"
+              className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-3 text-xs text-white hover:bg-[#0f1117] hover:border-emerald-500/40 transition-all"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
                 <MessageCircle className="h-4 w-4" />
               </div>
               <div className="truncate">
                 <div className="font-semibold text-white">WhatsApp</div>
-                <div className="text-[10px] text-white/50">Instant chat</div>
+                <div className="text-[10px] text-[#9ca3af]">Instant chat</div>
               </div>
             </a>
 
             <a
               href="tel:+254710297603"
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-white hover:bg-white/[0.08] hover:border-[#C96A3D]/40 transition-all"
+              className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-3 text-xs text-white hover:bg-[#0f1117] hover:border-[#C96A3D]/40 transition-all"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C96A3D]/20 text-[#E28743] shrink-0">
                 <Phone className="h-4 w-4" />
               </div>
               <div className="truncate">
                 <div className="font-semibold text-white">Call Us</div>
-                <div className="text-[10px] text-white/50">0710 297 603</div>
+                <div className="text-[10px] text-[#9ca3af]">0710 297 603</div>
               </div>
             </a>
 
             <a
               href="mailto:support@gilaniai.site"
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-white hover:bg-white/[0.08] hover:border-blue-500/40 transition-all"
+              className="flex items-center gap-2.5 rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-3 text-xs text-white hover:bg-[#0f1117] hover:border-blue-500/40 transition-all"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
                 <Mail className="h-4 w-4" />
               </div>
               <div className="truncate">
                 <div className="font-semibold text-white">Email</div>
-                <div className="text-[10px] text-white/50">support@gilaniai.site</div>
+                <div className="text-[10px] text-[#9ca3af]">support@gilaniai.site</div>
               </div>
             </a>
           </div>
@@ -133,7 +133,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Achieng Omondi"
-                  className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C96A3D]/50"
+                  className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-3.5 py-2 text-xs text-white placeholder:text-[#6b7280] focus:outline-none focus:border-[#C96A3D]/50"
                 />
               </div>
               <div>
@@ -146,7 +146,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C96A3D]/50"
+                  className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-3.5 py-2 text-xs text-white placeholder:text-[#6b7280] focus:outline-none focus:border-[#C96A3D]/50"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="How can we help your studies or curriculum today?"
-                className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C96A3D]/50 resize-none"
+                className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-3.5 py-2 text-xs text-white placeholder:text-[#6b7280] focus:outline-none focus:border-[#C96A3D]/50 resize-none"
               />
             </div>
 
@@ -175,7 +175,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
         </div>
 
         {/* Modal Footer Link */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+        <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-[#9ca3af]">
           <span>Office location: Nairobi, Kenya 🇰🇪</span>
           <Link
             to="/contact"

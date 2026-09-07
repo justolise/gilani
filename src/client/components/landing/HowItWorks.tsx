@@ -23,7 +23,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="w-full bg-[#0a0a0a] py-24 relative overflow-hidden">
+    <section id="how-it-works" className="w-full bg-[#0f1117] py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] opacity-50"></div>
 
       <div className="mx-auto max-w-7xl px-6 relative z-10">
@@ -50,7 +50,7 @@ export default function HowItWorks() {
                 {step.n}
               </div>
               <h3 className="relative z-10 text-lg font-bold text-white mb-2">{step.title}</h3>
-              <p className="relative z-10 text-sm text-[#a1a1aa] leading-relaxed max-w-xs md:max-w-none">
+              <p className="relative z-10 text-sm text-[#9ca3af] leading-relaxed max-w-xs md:max-w-none">
                 {step.desc}
               </p>
             </div>

@@ -192,7 +192,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
       },
-      { name: "theme-color", content: "#d9531e" },
+      { name: "theme-color", content: "#C96A3D" },
       { name: "robots", content: "index, follow" },
       { name: "googlebot", content: "index, follow" },
       { name: "author", content: "GilaniAI" },

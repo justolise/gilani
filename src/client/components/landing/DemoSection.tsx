@@ -4,13 +4,13 @@ export default function DemoSection() {
   const [activeChat, setActiveChat] = useState<"math" | "essay">("math");
 
   return (
-    <section id="demo" className="w-full bg-[#050505] py-24 relative overflow-hidden">
+    <section id="demo" className="w-full bg-[#0f1117] py-24 relative overflow-hidden">
       {/* Background glowing orb */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#C96A3D]/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="mx-auto max-w-6xl px-6 relative z-10">
         <div className="mb-16 text-center max-w-3xl mx-auto space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#a1a1aa] backdrop-blur-md">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-1.5 text-xs font-semibold text-[#E28743] backdrop-blur-md shadow-[0_0_15px_rgba(201,106,61,0.15)]">
             Interactive Demo
           </span>
           <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
@@ -21,11 +21,11 @@ export default function DemoSection() {
           </h2>
         </div>
 
-        <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#0a0a0a] shadow-[0_30px_100px_-20px_rgba(201,106,61,0.25)] relative">
+        <div className="overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#0f1117] shadow-[0_30px_100px_-20px_rgba(201,106,61,0.25)] relative">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
 
           {/* Browser window top bar */}
-          <div className="flex items-center h-12 px-6 border-b border-white/5 bg-[#121212]/90 gap-2 relative z-20">
+          <div className="flex items-center h-12 px-6 border-b border-white/[0.08] bg-[#131722]/90 gap-2 relative z-20">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-[#ff5f56] opacity-80"></div>
               <div className="w-3 h-3 rounded-full bg-[#ffbd2e] opacity-80"></div>
@@ -38,7 +38,7 @@ export default function DemoSection() {
 
           <div className="flex flex-col md:flex-row h-auto md:h-[600px] w-full relative z-10">
             {/* Sidebar Mockup */}
-            <div className="flex w-full md:w-64 flex-col border-b md:border-b-0 md:border-r border-white/5 bg-[#121212]/80 backdrop-blur-xl p-4">
+            <div className="flex w-full md:w-64 flex-col border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#131722]/80 backdrop-blur-xl p-4">
               <div className="mb-8 flex items-center justify-between px-2">
                 <span className="font-bold text-white text-lg">GilaniAI</span>
                 <svg
@@ -55,15 +55,13 @@ export default function DemoSection() {
                   />
                 </svg>
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-[#71717a] mb-4 px-2">
-                Today
-              </div>
+              <div className="text-xs font-semibold text-[#6b7280] mb-4 px-2">Today</div>
               <div
                 onClick={() => setActiveChat("math")}
                 className={`mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium border cursor-pointer transition-colors ${
                   activeChat === "math"
                     ? "bg-white/10 text-white border-white/5 shadow-inner"
-                    : "border-transparent text-[#a1a1aa] hover:bg-white/5 hover:text-white"
+                    : "border-transparent text-[#9ca3af] hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <svg
@@ -86,7 +84,7 @@ export default function DemoSection() {
                 className={`mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium border cursor-pointer transition-colors ${
                   activeChat === "essay"
                     ? "bg-white/10 text-white border-white/5 shadow-inner"
-                    : "border-transparent text-[#a1a1aa] hover:bg-white/5 hover:text-white"
+                    : "border-transparent text-[#9ca3af] hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <svg
@@ -107,8 +105,8 @@ export default function DemoSection() {
             </div>
 
             {/* Main Chat Mockup */}
-            <div className="flex flex-1 flex-col bg-[#0a0a0a]">
-              <div className="flex h-16 items-center border-b border-white/5 px-8 bg-[#121212]/50 backdrop-blur-md">
+            <div className="flex flex-1 flex-col bg-[#0f1117]">
+              <div className="flex h-16 items-center border-b border-white/[0.08] px-8 bg-[#131722]/50 backdrop-blur-md">
                 <span className="font-semibold text-white">
                   {activeChat === "math" ? "Balancing Equations" : "History Essay Help"}
                 </span>
@@ -130,7 +128,7 @@ export default function DemoSection() {
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
                         AI
                       </div>
-                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#131722] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/[0.08] shadow-md leading-relaxed space-y-2">
                         <p>
                           Let's work through this step-by-step! Methane (CH₄) reacts with oxygen
                           (O₂) to produce carbon dioxide (CO₂) and water (H₂O).
@@ -160,11 +158,11 @@ export default function DemoSection() {
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
                         AI
                       </div>
-                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#131722] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/[0.08] shadow-md leading-relaxed space-y-2">
                         <p>
                           Spot on! That gives us 4 hydrogens on the right side, matching the left:
                         </p>
-                        <div className="font-mono text-xs bg-[#050505] p-3 rounded-xl border border-white/5 text-[#E28743] font-bold">
+                        <div className="font-mono text-xs bg-[#0f1117] p-3 rounded-xl border border-white/[0.08] text-[#E28743] font-bold">
                           CH₄ + O₂ → CO₂ + 2H₂O
                         </div>
                         <p>
@@ -189,7 +187,7 @@ export default function DemoSection() {
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
                         AI
                       </div>
-                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#131722] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/[0.08] shadow-md leading-relaxed space-y-2">
                         <p>
                           Of course! Let's build an outline. A strong structure is essential for
                           high-scoring essays.
@@ -214,13 +212,13 @@ export default function DemoSection() {
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 text-xs font-black text-[#E28743] shadow-md">
                         AI
                       </div>
-                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#121212] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/5 shadow-md leading-relaxed space-y-2">
+                      <div className="max-w-[85%] md:max-w-[80%] rounded-[20px] bg-[#131722] px-4 md:px-5 py-3.5 text-[14px] text-[#e4e4e7] rounded-tl-sm border border-white/[0.08] shadow-md leading-relaxed space-y-2">
                         <p>
                           Exactly! The web of mutual defense treaties (like the Triple Entente and
                           Triple Alliance) that dragged multiple nations into conflict.
                         </p>
                         <p>The full acronym is:</p>
-                        <ul className="list-disc pl-5 space-y-1 text-[#a1a1aa] text-sm">
+                        <ul className="list-disc pl-5 space-y-1 text-[#9ca3af] text-sm">
                           <li>
                             <strong>Militarism:</strong> The arms race.
                           </li>
@@ -244,10 +242,10 @@ export default function DemoSection() {
                 )}
               </div>
 
-              <div className="p-6 bg-gradient-to-t from-[#0a0a0a] to-transparent">
-                <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-[#121212]/80 backdrop-blur-xl px-5 py-3.5 shadow-lg focus-within:border-[#C96A3D]/50 focus-within:shadow-[0_0_20px_rgba(201,106,61,0.15)] transition-all">
+              <div className="p-6 bg-gradient-to-t from-[#0f1117] to-transparent">
+                <div className="flex items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#131722]/80 backdrop-blur-xl px-5 py-3.5 shadow-lg focus-within:border-[#C96A3D]/50 focus-within:shadow-[0_0_20px_rgba(201,106,61,0.15)] transition-all">
                   <svg
-                    className="w-5 h-5 text-[#a1a1aa]"
+                    className="w-5 h-5 text-[#9ca3af]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -259,7 +257,7 @@ export default function DemoSection() {
                       d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                     />
                   </svg>
-                  <div className="flex-1 text-[15px] text-[#71717a] select-none">
+                  <div className="flex-1 text-[15px] text-[#6b7280] select-none">
                     Message GilaniAI...
                   </div>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C96A3D] cursor-pointer hover:bg-[#E28743] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#C96A3D]/30">

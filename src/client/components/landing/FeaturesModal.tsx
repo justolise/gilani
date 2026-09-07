@@ -61,7 +61,7 @@ interface FeaturesModalProps {
 export function FeaturesModal({ open, onOpenChange }: FeaturesModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-y-auto border-white/10 bg-[#141414]/95 backdrop-blur-2xl p-6 sm:p-8 text-white rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-y-auto border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-6 sm:p-8 text-white rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
         <DialogHeader className="text-left space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
             Built for Academic Excellence
@@ -72,7 +72,7 @@ export function FeaturesModal({ open, onOpenChange }: FeaturesModalProps) {
               study smarter
             </span>
           </DialogTitle>
-          <DialogDescription className="text-sm text-white/60">
+          <DialogDescription className="text-sm text-[#9ca3af]">
             Tailored for KCSE, CBC, TVET, College diploma, and University students with zero
             hallucination and real teacher escalation.
           </DialogDescription>
@@ -82,13 +82,13 @@ export function FeaturesModal({ open, onOpenChange }: FeaturesModalProps) {
           {FEATURES.map((feat) => (
             <div
               key={feat.title}
-              className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 hover:border-white/20 hover:bg-white/[0.06] transition-all duration-200 flex flex-col justify-between"
+              className="group relative rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-4 hover:border-white/20 hover:bg-[#0f1117] transition-all duration-200 flex flex-col justify-between"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-xl group-hover:scale-110 transition-transform">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-xl group-hover:scale-110 transition-transform">
                   {feat.icon}
                 </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af] bg-white/[0.04] px-2 py-0.5 rounded-full">
                   {feat.badge}
                 </span>
               </div>
@@ -96,14 +96,14 @@ export function FeaturesModal({ open, onOpenChange }: FeaturesModalProps) {
                 <h3 className="text-sm font-semibold text-white group-hover:text-[#E28743] transition-colors">
                   {feat.title}
                 </h3>
-                <p className="mt-1 text-xs text-white/60 leading-relaxed">{feat.desc}</p>
+                <p className="mt-1 text-xs text-[#9ca3af] leading-relaxed">{feat.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-4">
-          <p className="text-xs text-white/50 text-center sm:text-left">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/[0.08] pt-4">
+          <p className="text-xs text-[#9ca3af] text-center sm:text-left">
             Free forever to start · No credit card required
           </p>
           <Button

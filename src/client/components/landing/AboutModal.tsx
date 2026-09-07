@@ -70,8 +70,8 @@ const VALUES = [
 export function AboutModal({ open, onOpenChange }: AboutModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
-        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/10">
+      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center justify-between gap-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
               <Sparkles className="h-3.5 w-3.5" />
@@ -89,13 +89,13 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
             A Learning Companion, <span className="text-[#E28743] italic">Not a Replacement.</span>
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-white/60">
+          <DialogDescription className="text-xs sm:text-sm text-[#9ca3af]">
             Founded in Nairobi, Kenya to provide research-backed, ethical AI tutoring across all
             academic levels.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto mt-4 space-y-5 pr-2 text-xs sm:text-sm text-white/80 leading-relaxed">
+        <div className="flex-1 overflow-y-auto mt-4 space-y-5 pr-2 text-xs sm:text-sm text-[#9ca3af] leading-relaxed">
           <p>
             GilaniAI combines curriculum-grounded artificial intelligence, Socratic questioning, and
             human teacher oversight to help students across any curriculum study more effectively
@@ -103,7 +103,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
           </p>
 
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#9ca3af] mb-2">
               Three-Tier Intelligent System
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -112,7 +112,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
                 return (
                   <div
                     key={agent.name}
-                    className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 flex flex-col justify-between"
+                    className="rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-3.5 flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -124,7 +124,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
                       <span className="text-[10px] font-semibold text-[#E28743] uppercase tracking-wider block mb-1.5">
                         {agent.role}
                       </span>
-                      <p className="text-xs text-white/65 leading-relaxed">{agent.description}</p>
+                      <p className="text-xs text-[#9ca3af] leading-relaxed">{agent.description}</p>
                     </div>
                   </div>
                 );
@@ -133,7 +133,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
           </div>
 
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#9ca3af] mb-2">
               Core Principles
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -142,13 +142,13 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
                 return (
                   <div
                     key={val.title}
-                    className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-1"
+                    className="rounded-xl border border-white/[0.08] bg-[#0f1117]/60 p-3 space-y-1"
                   >
                     <div className="flex items-center gap-2 font-semibold text-white text-xs">
                       <Icon className="h-3.5 w-3.5 text-[#E28743]" />
                       <span>{val.title}</span>
                     </div>
-                    <p className="text-[11px] text-white/60 leading-relaxed">{val.desc}</p>
+                    <p className="text-[11px] text-[#9ca3af] leading-relaxed">{val.desc}</p>
                   </div>
                 );
               })}
@@ -157,7 +157,7 @@ export function AboutModal({ open, onOpenChange }: AboutModalProps) {
         </div>
 
         {/* Modal Footer Link */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+        <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-[#9ca3af]">
           <span>Read our full pedagogical whitepaper and founder story.</span>
           <Link
             to="/about"

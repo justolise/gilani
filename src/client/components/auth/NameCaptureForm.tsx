@@ -21,7 +21,7 @@ export function NameCaptureForm({
         {/* Outer glow */}
         <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[#C96A3D]/20 via-transparent to-transparent blur-sm pointer-events-none" />
 
-        <div className="relative rounded-3xl border border-white/[0.08] bg-[#13151f]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="relative rounded-3xl border border-white/[0.08] bg-[#131722]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
           {/* Top accent bar */}
           <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70" />
 
@@ -57,7 +57,7 @@ export function NameCaptureForm({
               <button
                 type="submit"
                 disabled={saving || !displayName.trim()}
-                className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#D9784A] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20"
+                className="group w-full flex items-center justify-center gap-2 rounded-2xl bg-[#C96A3D] py-3.5 text-sm font-bold text-white hover:bg-[#E28743] active:scale-[0.98] disabled:opacity-50 transition-all duration-200 shadow-lg shadow-[#C96A3D]/20 cursor-pointer"
               >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

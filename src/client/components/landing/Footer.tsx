@@ -62,7 +62,7 @@ export default function Footer({
   };
 
   return (
-    <footer className="relative z-40 w-full flex-none border-t border-white/[0.08] bg-[#101010]/90 backdrop-blur-xl pt-2.5 sm:pt-3.5 pb-[calc(0.625rem+var(--safe-bottom,0px))] sm:pb-3.5 pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
+    <footer className="relative z-40 w-full flex-none border-t border-white/[0.08] bg-[#0f1117]/95 backdrop-blur-xl pt-2.5 sm:pt-3.5 pb-[calc(0.625rem+var(--safe-bottom,0px))] sm:pb-3.5 pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
       <div className="mx-auto flex flex-col items-center justify-center max-w-7xl px-4 sm:px-8 gap-2">
         {/* Top Row: Navigation Links & Social Icons */}
         <div className="flex w-full items-center justify-between gap-4">
@@ -149,11 +149,11 @@ export default function Footer({
               <PopoverContent
                 align="center"
                 side="top"
-                className="w-80 border-white/15 bg-[#161413]/98 backdrop-blur-xl p-4 text-white rounded-2xl shadow-2xl z-50"
+                className="w-80 border border-white/[0.08] bg-[#131722]/98 backdrop-blur-xl p-4 text-white rounded-2xl shadow-2xl z-50"
               >
                 <div className="space-y-2">
                   <div className="font-semibold text-sm text-white">Stay in the Loop</div>
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-[#9ca3af]">
                     Get exam tips, new curriculum additions, and study updates.
                   </p>
                   {subscribed ? (
@@ -168,7 +168,7 @@ export default function Footer({
                         placeholder="Your email address..."
                         value={subEmail}
                         onChange={(e) => setSubEmail(e.target.value)}
-                        className="flex-1 min-w-0 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#C96A3D]/50"
+                        className="flex-1 min-w-0 rounded-xl border border-white/[0.08] bg-[#0f1117] px-3 py-2 text-xs text-white placeholder:text-[#6b7280] focus:outline-none focus:border-[#C96A3D]/50"
                       />
                       <button
                         type="submit"
@@ -236,9 +236,9 @@ export default function Footer({
               <PopoverContent
                 align="end"
                 side="top"
-                className="w-64 border-white/15 bg-[#161413]/98 backdrop-blur-2xl p-2.5 text-white rounded-2xl shadow-2xl flex flex-col gap-1 z-50 animate-in fade-in zoom-in-95"
+                className="w-64 border border-white/[0.08] bg-[#131722]/98 backdrop-blur-2xl p-2.5 text-white rounded-2xl shadow-2xl flex flex-col gap-1 z-50 animate-in fade-in zoom-in-95"
               >
-                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white/40 border-b border-white/10 mb-1">
+                <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#9ca3af] border-b border-white/[0.08] mb-1">
                   Explore & Resources
                 </div>
 

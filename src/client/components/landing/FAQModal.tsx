@@ -46,8 +46,8 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
-        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/10">
+      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="text-left space-y-1.5 shrink-0 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center justify-between gap-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#E28743] w-fit">
               <HelpCircle className="h-3.5 w-3.5" />
@@ -65,7 +65,7 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
           <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold text-white">
             Frequently Asked Questions
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-white/60">
+          <DialogDescription className="text-xs sm:text-sm text-[#9ca3af]">
             Everything you need to know about how GilaniAI works and supports your studies.
           </DialogDescription>
         </DialogHeader>
@@ -76,7 +76,7 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
             return (
               <div
                 key={idx}
-                className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden transition-all duration-200"
+                className="rounded-xl border border-white/[0.08] bg-[#0f1117]/60 overflow-hidden transition-all duration-200"
               >
                 <button
                   type="button"
@@ -85,13 +85,13 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
                 >
                   <span className="pr-3">{faq.q}</span>
                   <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-white/50 transition-transform duration-200 ${
+                    className={`h-4 w-4 shrink-0 text-[#9ca3af] transition-transform duration-200 ${
                       isOpen ? "rotate-180 text-[#E28743]" : ""
                     }`}
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-4 pb-4 text-xs sm:text-sm text-white/75 leading-relaxed border-t border-white/5 pt-3">
+                  <div className="px-4 pb-4 text-xs sm:text-sm text-[#9ca3af] leading-relaxed border-t border-white/[0.08] pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -101,7 +101,7 @@ export function FAQModal({ open, onOpenChange }: FAQModalProps) {
         </div>
 
         {/* Modal Footer Link */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+        <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-[#9ca3af]">
           <span>Need further help? Our team is available 24/7.</span>
           <Link
             to="/faq"

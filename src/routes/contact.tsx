@@ -113,7 +113,7 @@ function ContactPage() {
             Got a question, bug report, or partnership inquiry? We're a small team and we read every
             message.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#1a1d27]/50 px-4 py-2 text-xs text-[#9ca3af]">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#131722]/50 px-4 py-2 text-xs text-[#9ca3af]">
             <Clock className="h-3.5 w-3.5 text-[#E28743]" />
             Typical reply within 24 hours (Mon–Fri)
           </div>
@@ -194,7 +194,7 @@ function ContactPage() {
 
         {/* Form */}
         <div className="lg:col-span-2">
-          <div className="rounded-2xl border border-white/8 bg-[#1a1d27] p-6 sm:p-8 space-y-6">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#131722] p-6 sm:p-8 space-y-6">
             <div>
               <h2 className="font-serif text-xl font-bold text-white mb-1.5">Send a message</h2>
               <p className="text-xs text-[#9ca3af]">
@@ -215,7 +215,7 @@ function ContactPage() {
                 </div>
                 <button
                   onClick={() => setStatus("idle")}
-                  className="mt-2 text-xs text-[#d9531e] font-semibold hover:underline"
+                  className="mt-2 text-xs text-[#C96A3D] font-semibold hover:underline"
                 >
                   Send another message
                 </button>
@@ -331,7 +331,7 @@ function ContactPage() {
       </div>
 
       {/* FAQ Accordions on Contact Page */}
-      <section className="border-t border-white/5 bg-[#12151e] px-4 sm:px-8 py-12 sm:py-16">
+      <section className="border-t border-white/[0.08] bg-[#0f1117] px-4 sm:px-8 py-12 sm:py-16">
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-2">
             <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">

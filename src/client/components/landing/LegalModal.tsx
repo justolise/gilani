@@ -26,8 +26,8 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border-white/10 bg-[#121214]/98 backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
-        <DialogHeader className="text-left space-y-2 shrink-0 pb-3 border-b border-white/10">
+      <DialogContent className="max-w-3xl max-h-[85dvh] overflow-hidden flex flex-col border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-5 sm:p-7 text-white rounded-2xl shadow-2xl">
+        <DialogHeader className="text-left space-y-2 shrink-0 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <button
@@ -36,7 +36,7 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
                 className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   tab === "privacy"
                     ? "bg-[#C96A3D] text-white shadow-sm"
-                    : "bg-white/5 text-white/60 hover:text-white"
+                    : "bg-white/[0.04] text-[#9ca3af] hover:text-white"
                 }`}
               >
                 <ShieldCheck className="h-4 w-4" />
@@ -48,7 +48,7 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
                 className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   tab === "terms"
                     ? "bg-[#C96A3D] text-white shadow-sm"
-                    : "bg-white/5 text-white/60 hover:text-white"
+                    : "bg-white/[0.04] text-[#9ca3af] hover:text-white"
                 }`}
               >
                 <FileText className="h-4 w-4" />
@@ -229,7 +229,7 @@ export function LegalModal({ open, onOpenChange, initialTab = "privacy" }: Legal
         </div>
 
         {/* Modal Footer with Full Page Link */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+        <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-[#9ca3af]">
           <span>Official legal documentation</span>
           <Link
             to={tab === "privacy" ? "/privacy" : "/terms"}

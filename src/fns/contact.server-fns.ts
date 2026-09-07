@@ -151,7 +151,7 @@ export const submitContactFn = createServerFn({ method: "POST" })
                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
                   <tr>
                     <td style="width:36px;vertical-align:top;padding-top:2px">
-                      <div style="width:28px;height:28px;background:linear-gradient(135deg,#d9531e,#f97316);border-radius:7px;text-align:center;line-height:28px;font-size:14px">🧠</div>
+                      <div style="width:28px;height:28px;background:linear-gradient(135deg,#C96A3D,#f97316);border-radius:7px;text-align:center;line-height:28px;font-size:14px">🧠</div>
                     </td>
                     <td style="padding-left:12px;vertical-align:top">
                       <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#111111">Socratic AI Tutor</p>
@@ -239,10 +239,10 @@ export const submitContactFn = createServerFn({ method: "POST" })
             Need immediate help? Reach us directly:
           </p>
           <p style="margin:0 0 4px;font-size:13px;color:#6b7280">
-            📧 <a href="mailto:support@gilaniai.site" style="color:#d9531e">support@gilaniai.site</a> — Technical support &amp; billing
+            📧 <a href="mailto:support@gilaniai.site" style="color:#C96A3D">support@gilaniai.site</a> — Technical support &amp; billing
           </p>
           <p style="margin:0;font-size:13px;color:#6b7280">
-            📧 <a href="mailto:contact@gilaniai.site" style="color:#d9531e">contact@gilaniai.site</a> — General enquiries &amp; partnerships
+            📧 <a href="mailto:contact@gilaniai.site" style="color:#C96A3D">contact@gilaniai.site</a> — General enquiries &amp; partnerships
           </p>
         `,
         buttonText: "Open GilaniAI",

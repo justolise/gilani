@@ -3,7 +3,7 @@ const FEATURES = [
     icon: "📄",
     title: "Upload Notes",
     desc: "Upload PDFs of your class notes or textbooks and get instant, curriculum-matched explanations.",
-    glow: "group-hover:shadow-[0_0_30px_rgba(217,83,30,0.4)]",
+    glow: "group-hover:shadow-[0_0_30px_rgba(201,106,61,0.4)]",
   },
   {
     icon: "🧮",
@@ -39,18 +39,18 @@ const FEATURES = [
 
 export default function Features() {
   return (
-    <section id="features" className="w-full bg-[#050505] py-16 relative overflow-hidden">
+    <section id="features" className="w-full bg-[#0f1117] py-16 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
       <div className="mx-auto max-w-7xl px-6 relative z-10">
         <div className="mb-12 lg:mb-20 text-center max-w-3xl mx-auto space-y-4">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[#a1a1aa] backdrop-blur-md">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-1.5 text-xs font-semibold text-[#E28743] backdrop-blur-md shadow-[0_0_15px_rgba(201,106,61,0.15)]">
             Features
           </span>
           <h2 className="font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Everything you need to
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#a1a1aa]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-[#9ca3af]">
               study smarter
             </span>
           </h2>
@@ -60,7 +60,7 @@ export default function Features() {
           {FEATURES.map((feat, idx) => (
             <div
               key={idx}
-              className={`group relative flex flex-col items-center text-center md:items-start md:text-left gap-5 rounded-[28px] border border-white/[0.06] bg-white/[0.02] backdrop-blur-md p-6 md:p-8 transition-all duration-500 hover:-translate-y-2 hover:border-[#C96A3D]/40 hover:bg-white/[0.04] overflow-hidden ${feat.glow}`}
+              className={`group relative flex flex-col items-center text-center md:items-start md:text-left gap-5 rounded-[28px] border border-white/[0.08] bg-[#131722]/80 backdrop-blur-md p-6 md:p-8 transition-all duration-500 hover:-translate-y-2 hover:border-[#C96A3D]/40 hover:bg-[#131722] overflow-hidden ${feat.glow}`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#C96A3D]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
@@ -70,7 +70,7 @@ export default function Features() {
 
               <div className="relative z-10 space-y-2">
                 <h3 className="text-xl font-bold text-white tracking-tight">{feat.title}</h3>
-                <p className="text-[#a1a1aa] leading-relaxed font-light text-sm max-w-[280px] md:max-w-none mx-auto md:mx-0">
+                <p className="text-[#9ca3af] leading-relaxed font-light text-sm max-w-[280px] md:max-w-none mx-auto md:mx-0">
                   {feat.desc}
                 </p>
               </div>

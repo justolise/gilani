@@ -100,7 +100,7 @@ export function CompleteProfileForm({
         {/* Outer glow */}
         <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/30 via-primary/10 to-transparent blur-md pointer-events-none" />
 
-        <div className="relative rounded-3xl border border-white/[0.12] bg-[#13151f]/98 dark:bg-[#13151f]/98 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
+        <div className="relative rounded-3xl border border-white/[0.08] bg-[#131722]/98 dark:bg-[#131722]/98 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
           {/* Top accent bar */}
           <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 flex-shrink-0" />
 
@@ -207,7 +207,7 @@ export function CompleteProfileForm({
                   </label>
                   <select
                     {...register("curriculum")}
-                    className="w-full appearance-none rounded-xl border border-white/[0.12] bg-[#1a1c29] px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all cursor-pointer"
                   >
                     <optgroup label="Secondary School (Kenya)">
                       <option value="KCSE">8-4-4 / KCSE (Kenya)</option>

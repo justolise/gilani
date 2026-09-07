@@ -88,7 +88,7 @@ function CookiesPage() {
           </Section>
           <Section title="3. Cookie Details">
             <p>The table below lists the specific cookies GilaniAI currently sets:</p>
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mt-3 rounded-2xl border border-white/8 bg-[#1a1d27]">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mt-3 rounded-2xl border border-white/[0.08] bg-[#131722]">
               <table className="w-full min-w-[500px] border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-white/6 bg-[#0c0e14]/50">

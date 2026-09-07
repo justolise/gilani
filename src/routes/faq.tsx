@@ -251,7 +251,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         )}
       </button>
       {open && (
-        <div className="px-5 pb-5 pt-3 text-sm text-[#9ca3af] leading-relaxed border-t border-white/6 bg-[#0a0a0a]/50">
+        <div className="px-5 pb-5 pt-3 text-sm text-[#9ca3af] leading-relaxed border-t border-white/[0.08] bg-[#0f1117]/50">
           {a}
         </div>
       )}

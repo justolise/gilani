@@ -55,9 +55,9 @@ const FEATURES = [
 
 function LoginPage() {
   return (
-    <main className="min-h-dvh w-full flex bg-[#0d0f18] selection:bg-[#C96A3D]/60 selection:text-white relative overflow-x-hidden">
+    <main className="min-h-dvh w-full flex bg-[#0f1117] selection:bg-[#C96A3D]/60 selection:text-white relative overflow-x-hidden">
       {/* ── Global ambient background gradients ── */}
-      <div className="fixed inset-0 bg-[#0d0f18] pointer-events-none" />
+      <div className="fixed inset-0 bg-[#0f1117] pointer-events-none" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_25%,rgba(201,106,61,0.15),transparent)] pointer-events-none" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_80%,rgba(201,106,61,0.08),transparent)] pointer-events-none" />
 
@@ -86,7 +86,7 @@ function LoginPage() {
         <div className="flex flex-col h-full justify-between">
           {/* Logo */}
           <Link to="/" className="block w-fit hover:opacity-85 transition-opacity">
-            <span className="font-bold italic text-[#E2725B] text-4xl xl:text-5xl tracking-tight">
+            <span className="font-bold italic text-[#C96A3D] text-4xl xl:text-5xl tracking-tight">
               GilaniAI
             </span>
           </Link>
@@ -101,7 +101,7 @@ function LoginPage() {
               <h1 className="font-serif text-4xl xl:text-5xl font-black text-white leading-tight tracking-tight">
                 Learn smarter,
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E2725B] to-[#E8A87C]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] to-[#E28743]">
                   not harder.
                 </span>
               </h1>
@@ -139,7 +139,7 @@ function LoginPage() {
         </div>
 
         {/* Right edge fade into form panel */}
-        <div className="absolute right-0 inset-y-0 w-24 bg-gradient-to-l from-[#0d0f18] to-transparent pointer-events-none" />
+        <div className="absolute right-0 inset-y-0 w-24 bg-gradient-to-l from-[#0f1117] to-transparent pointer-events-none" />
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 pt-[calc(1.5rem+var(--safe-top,0px))] pb-[calc(1.5rem+var(--safe-bottom,0px))] sm:pt-[calc(3rem+var(--safe-top,0px))] sm:pb-[calc(3rem+var(--safe-bottom,0px))] pl-[max(1rem,var(--safe-left,0px))] pr-[max(1rem,var(--safe-right,0px))] relative z-10 min-h-dvh">
@@ -164,7 +164,7 @@ function LoginPage() {
         <div className="lg:hidden text-center max-w-[360px] mx-auto mb-5 space-y-1 px-2 animate-in fade-in duration-300">
           <h1 className="font-serif text-2xl sm:text-3xl font-black text-white tracking-tight">
             Learn smarter,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E2725B] to-[#E8A87C]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C96A3D] to-[#E28743]">
               not harder.
             </span>
           </h1>

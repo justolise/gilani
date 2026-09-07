@@ -19,8 +19,8 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col border-white/10 bg-[#0f0f10]/95 backdrop-blur-2xl p-4 sm:p-6 text-white rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
-        <DialogHeader className="text-left space-y-1 shrink-0 pb-3 border-b border-white/10">
+      <DialogContent className="max-w-4xl max-h-[90dvh] overflow-hidden flex flex-col border border-white/[0.08] bg-[#131722] backdrop-blur-2xl p-4 sm:p-6 text-white rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.8)]">
+        <DialogHeader className="text-left space-y-1 shrink-0 pb-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C96A3D]/30 bg-[#C96A3D]/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#E28743]">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E28743] animate-pulse"></span>
@@ -30,15 +30,15 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
           <DialogTitle className="font-serif text-xl sm:text-2xl font-bold text-white">
             See Socratic Tutoring in Action
           </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-white/60">
+          <DialogDescription className="text-xs sm:text-sm text-[#9ca3af]">
             GilaniAI guides you step-by-step rather than just spitting out solutions.
           </DialogDescription>
         </DialogHeader>
 
         {/* Browser window mockup container */}
-        <div className="flex-1 min-h-0 mt-3 rounded-xl border border-white/10 bg-[#0a0a0a] flex flex-col md:flex-row overflow-hidden">
+        <div className="flex-1 min-h-0 mt-3 rounded-xl border border-white/[0.08] bg-[#0f1117] flex flex-col md:flex-row overflow-hidden">
           {/* Sidebar Tabs */}
-          <div className="flex flex-row md:flex-col shrink-0 border-b md:border-b-0 md:border-r border-white/10 bg-[#121212]/80 p-2 md:p-3 gap-2 md:w-56 overflow-x-auto">
+          <div className="flex flex-row md:flex-col shrink-0 border-b md:border-b-0 md:border-r border-white/[0.08] bg-[#131722]/80 p-2 md:p-3 gap-2 md:w-56 overflow-x-auto">
             <button
               type="button"
               onClick={() => setActiveChat("math")}
@@ -73,7 +73,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 min-h-0 flex flex-col bg-[#080808]">
+          <div className="flex-1 min-h-0 flex flex-col bg-[#0f1117]">
             <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs sm:text-sm">
               {activeChat === "math" ? (
                 <>
@@ -87,7 +87,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/40 text-xs font-bold text-[#E28743]">
                       G
                     </div>
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#141414] border border-white/10 px-4 py-3 text-white/90 space-y-2">
+                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#131722] border border-white/[0.08] px-4 py-3 text-white/90 space-y-2">
                       <p>
                         Let's work through this together from first principles! Methane reacts with
                         oxygen:
@@ -115,7 +115,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/40 text-xs font-bold text-[#E28743]">
                       G
                     </div>
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#141414] border border-white/10 px-4 py-3 text-white/90 space-y-2">
+                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#131722] border border-white/[0.08] px-4 py-3 text-white/90 space-y-2">
                       <p>Spot on! Now we have 4 hydrogens on both sides:</p>
                       <div className="font-mono text-xs bg-black/50 p-2.5 rounded-lg border border-white/5 text-[#E28743]">
                         CH₄ + O₂ → CO₂ + 2H₂O
@@ -138,7 +138,7 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/40 text-xs font-bold text-[#E28743]">
                       G
                     </div>
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#141414] border border-white/10 px-4 py-3 text-white/90 space-y-2">
+                    <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[#131722] border border-white/[0.08] px-4 py-3 text-white/90 space-y-2">
                       <p>
                         Let's build a rock-solid academic outline using the standard analytical
                         framework:
@@ -168,12 +168,12 @@ export function DemoModal({ open, onOpenChange }: DemoModalProps) {
             </div>
 
             {/* Simulated Input Bar */}
-            <div className="p-3 border-t border-white/10 bg-[#121212]/90 flex items-center gap-2">
+            <div className="p-3 border-t border-white/[0.08] bg-[#131722] flex items-center gap-2">
               <input
                 type="text"
                 disabled
                 placeholder="Ask GilaniAI anything..."
-                className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-white/50 cursor-not-allowed"
+                className="flex-1 rounded-xl border border-white/[0.08] bg-[#0f1117] px-3 py-2 text-xs text-[#9ca3af] placeholder:text-[#6b7280] cursor-not-allowed"
               />
               <Button
                 asChild

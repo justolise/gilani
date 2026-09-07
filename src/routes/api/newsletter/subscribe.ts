@@ -88,7 +88,7 @@ export const Route = createFileRoute("/api/newsletter/subscribe")({
             fromName: "GilaniAI",
             html: `
               <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;">
-                <h1 style="color:#d9531e;">Welcome to GilaniAI! 🎓</h1>
+                <h1 style="color:#C96A3D;">Welcome to GilaniAI! 🎓</h1>
                 <p>Hi ${safeName || "there"},</p>
                 <p>You're now subscribed to the GilaniAI newsletter. You'll receive:</p>
                 <ul>

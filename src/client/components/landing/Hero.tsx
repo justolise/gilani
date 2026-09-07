@@ -101,7 +101,7 @@ export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
 
         {/* Right Column: Socratic Tutor Preview Showcase (Desktop & Tablet) */}
         <div className="hidden lg:flex flex-1 items-center justify-center max-w-lg xl:max-w-xl">
-          <div className="relative w-full rounded-2xl border border-white/[0.12] bg-[#141414]/85 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(201,106,61,0.25)] p-6 overflow-hidden group hover:border-[#C96A3D]/30 transition-colors duration-300">
+          <div className="relative w-full rounded-2xl border border-white/[0.08] bg-[#131722]/85 backdrop-blur-2xl shadow-[0_20px_60px_-15px_rgba(201,106,61,0.25)] p-6 overflow-hidden group hover:border-[#C96A3D]/30 transition-colors duration-300">
             {/* Header bar */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export default function Hero({ onOpenDemo, onOpenFeatures }: HeroProps) {
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#C96A3D]/20 border border-[#C96A3D]/30 text-xs font-bold text-[#E28743]">
                   G
                 </div>
-                <div className="rounded-2xl rounded-tl-sm bg-white/[0.04] border border-white/[0.08] p-3.5 text-white/85 space-y-2 max-w-[90%]">
+                <div className="rounded-2xl rounded-tl-sm bg-[#0f1117] border border-white/[0.08] p-3.5 text-white/85 space-y-2 max-w-[90%]">
                   <p>
                     In a parallel circuit, remember the fundamental rule:{" "}
                     <span className="text-white font-semibold">

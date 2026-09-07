@@ -85,9 +85,9 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-export const BRAND_ORANGE = "#d9531e";
+export const BRAND_ORANGE = "#C96A3D";
 export const BG_PAGE = "#0f1117";
-export const BG_CARD = "#1a1d27";
+export const BG_CARD = "#131722";
 export const BORDER = "#2a2d3a";
 export const TEXT_BODY = "#9ca3af";
 export const TEXT_HEADING = "#f9fafb";

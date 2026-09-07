@@ -172,7 +172,7 @@ function About() {
               {TEAM_VALUES.map(({ icon: Icon, title, description }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/8 bg-[#1a1d27] p-5 space-y-3 hover:border-white/14 transition-colors"
+                  className="rounded-2xl border border-white/[0.08] bg-[#131722] p-5 space-y-3 hover:border-[#C96A3D]/20 transition-colors"
                 >
                   <Icon className="h-5 w-5 text-[#E28743]" />
                   <p className="font-serif text-sm font-bold text-white">{title}</p>
@@ -184,7 +184,7 @@ function About() {
         </section>
 
         {/* The Three Agents */}
-        <section className="bg-[#050505] border-y border-white/6 px-4 sm:px-8 py-16 sm:py-24">
+        <section className="bg-[#0f1117] border-y border-white/[0.08] px-4 sm:px-8 py-16 sm:py-24">
           <div className="max-w-7xl mx-auto space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
@@ -255,7 +255,7 @@ function About() {
               ].map(({ title, desc, badge }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/8 bg-[#1a1d27] p-6 hover:border-white/14 transition-colors flex flex-col justify-between h-full"
+                  className="rounded-2xl border border-white/[0.08] bg-[#131722] p-6 hover:border-[#C96A3D]/20 transition-colors flex flex-col justify-between h-full"
                 >
                   <div className="space-y-3">
                     <span className="rounded-full bg-white/4 border border-white/8 px-2 py-0.5 font-mono text-[9px] text-[#9ca3af]">

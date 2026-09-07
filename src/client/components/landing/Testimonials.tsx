@@ -15,18 +15,16 @@ const REVIEWS = [
 
 export default function Testimonials() {
   return (
-    <section className="w-full bg-[#121212] py-16">
+    <section className="w-full bg-[#131722] py-16">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-12 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#a1a1aa]">
-            Early feedback from real users
-          </p>
+          <p className="text-xs font-semibold text-[#9ca3af]">Early feedback from real users</p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
           {REVIEWS.map((review, idx) => (
             <div
               key={idx}
-              className="flex flex-col gap-6 rounded-2xl border border-white/5 bg-[#1C1C1C] p-8 md:p-10"
+              className="flex flex-col gap-6 rounded-2xl border border-white/[0.08] bg-[#0f1117] p-8 md:p-10"
             >
               <div className="flex text-amber-500">
                 {[...Array(review.rating)].map((_, i) => (
