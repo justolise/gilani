@@ -115,10 +115,13 @@ export function NotificationBell({ userId }: { userId: string }) {
   };
 
   const typeColors: Record<string, string> = {
-    escalation: "bg-amber-50 border-amber-200 text-amber-700",
-    success: "bg-green-50 border-green-200 text-green-700",
-    info: "bg-blue-50 border-blue-200 text-blue-700",
-    warning: "bg-red-50 border-red-200 text-red-700",
+    escalation:
+      "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800/60 dark:text-amber-300",
+    success:
+      "bg-green-50 border-green-200 text-green-700 dark:bg-green-950/30 dark:border-green-800/60 dark:text-green-300",
+    info: "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950/30 dark:border-blue-800/60 dark:text-blue-300",
+    warning:
+      "bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800/60 dark:text-red-300",
   };
 
   return (

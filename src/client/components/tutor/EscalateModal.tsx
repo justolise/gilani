@@ -62,7 +62,7 @@ export function EscalateModal({
               onChange={(e) => onEmailChange(e.target.value)}
               placeholder="teacher@school.ac.ke"
               autoFocus
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 transition-colors"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition-colors"
               required
             />
             {error && (
