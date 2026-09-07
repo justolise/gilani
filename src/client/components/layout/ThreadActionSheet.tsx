@@ -50,10 +50,10 @@ export function ThreadActionSheet({
             {thread.title || "Untitled Chat"}
           </DialogTitle>
         </DialogHeader>
-        <div className="mt-2 flex flex-col">
+        <div className="mt-2 flex flex-col space-y-1">
           <button
             onClick={onEscalate}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-foreground hover:bg-muted/40 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-foreground hover:bg-muted/60 transition-colors min-h-[44px] cursor-pointer"
           >
             <EscalateIcon
               className={`h-4 w-4 ${escalationStatus === "resolved" ? "text-green-500" : "text-amber-500"} ${escalationStatus === "in_review" || escalationStatus === "open" ? "animate-pulse" : ""}`}
@@ -62,25 +62,25 @@ export function ThreadActionSheet({
           </button>
           <button
             onClick={onRename}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-foreground hover:bg-muted/40 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-foreground hover:bg-muted/60 transition-colors min-h-[44px] cursor-pointer"
           >
-            <Pencil className="h-4 w-4" /> Rename
+            <Pencil className="h-4 w-4 text-muted-foreground" /> Rename
           </button>
           <button
             onClick={onExport}
             disabled={isExporting}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-foreground hover:bg-muted/40 transition-colors disabled:opacity-50"
+            className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-foreground hover:bg-muted/60 transition-colors disabled:opacity-50 min-h-[44px] cursor-pointer"
           >
             {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
             ) : (
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 text-muted-foreground" />
             )}
             {isExporting ? "Exporting..." : "Export as PDF"}
           </button>
           <button
             onClick={onDelete}
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+            className="flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] cursor-pointer"
           >
             <Trash2 className="h-4 w-4" /> Delete
           </button>

@@ -18,14 +18,14 @@ export function DeleteModal({ onConfirm, onCancel, isDeleting }: Props) {
         <div className="flex gap-2 justify-end pt-1">
           <button
             onClick={onCancel}
-            className="rounded-lg border border-border bg-background px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-accent transition-colors"
+            className="rounded-xl border border-border bg-background px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-colors min-h-[44px] cursor-pointer flex items-center justify-center"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex items-center gap-1.5 rounded-lg bg-destructive px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-destructive-foreground hover:bg-destructive/90 disabled:opacity-60 transition-colors"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-destructive px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-destructive-foreground hover:bg-destructive/90 disabled:opacity-60 transition-colors min-h-[44px] cursor-pointer"
           >
             {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Delete

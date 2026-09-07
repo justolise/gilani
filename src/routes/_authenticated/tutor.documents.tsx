@@ -137,7 +137,7 @@ function DocumentsRoute() {
         actions={
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
           >
             <UploadCloud className="h-4 w-4" /> Upload Notes
           </button>
@@ -174,7 +174,7 @@ function DocumentsRoute() {
               {!search && (
                 <button
                   onClick={() => setUploadOpen(true)}
-                  className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
                 >
                   <UploadCloud className="h-4 w-4" /> Upload Notes
                 </button>
@@ -199,7 +199,7 @@ function DocumentsRoute() {
                   <button
                     onClick={onLoadMore}
                     disabled={loadingMore}
-                    className="px-5 py-2.5 rounded-xl text-sm font-medium border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors disabled:opacity-40"
+                    className="px-5 py-2.5 rounded-xl text-sm font-medium border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors disabled:opacity-40 min-h-[44px] cursor-pointer"
                   >
                     <span className="inline-flex items-center gap-2">
                       {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -324,7 +324,7 @@ export function FunctionGraphBlock({ spec }: { spec: string }) {
   }
   if (!parsed || !Array.isArray(parsed.functions) || parsed.functions.length === 0) {
     return (
-      <code className="block bg-[#1e1e2e] text-green-300 font-mono text-[11px] leading-relaxed p-3 rounded-xl overflow-x-auto">
+      <code className="block bg-[#131722] text-emerald-400 font-mono text-[11px] leading-relaxed p-3 rounded-xl overflow-x-auto border border-white/[0.08]">
         {spec}
       </code>
     );

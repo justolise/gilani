@@ -41,7 +41,7 @@ export function PlannerAddModal({
   };
 
   return (
-    <div className="border border-border bg-card rounded-2xl shadow-sm p-6 space-y-4">
+    <div className="border border-border bg-card rounded-2xl shadow-sm p-4 sm:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -54,7 +54,11 @@ export function PlannerAddModal({
             </p>
           )}
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+        <button
+          onClick={onClose}
+          className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+          aria-label="Close"
+        >
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -160,7 +164,7 @@ export function PlannerAddModal({
       <button
         onClick={handleSubmit}
         disabled={generating}
-        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-3 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 cursor-pointer"
+        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-3 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 cursor-pointer min-h-[44px]"
       >
         {generating ? (
           <>

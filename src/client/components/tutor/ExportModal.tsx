@@ -28,16 +28,10 @@ export function ExportMenu({ onExportPDF }: Props) {
                 onExportPDF();
                 setOpen(false);
               }}
-              className="flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-accent transition-colors"
+              className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs text-foreground hover:bg-accent hover:text-primary transition-colors cursor-pointer"
             >
-              <Download className="h-3.5 w-3.5" /> Export as PDF
+              <Download className="h-4 w-4 text-primary" /> Export as PDF
             </button>
-            <button
-              onClick={() => {
-                setOpen(false);
-              }}
-              className="flex items-center gap-2 px-3 py-2.5 text-xs hover:bg-accent transition-colors"
-            ></button>
           </div>
         </>
       )}

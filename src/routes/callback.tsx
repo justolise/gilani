@@ -234,68 +234,23 @@ function AuthCallback() {
 
   if (isError) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          gap: "1rem",
-          background: "#0a0f1e",
-          color: "#e8eaf6",
-          padding: "2rem",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            background: "rgba(239,68,68,0.15)",
-            border: "1px solid rgba(239,68,68,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 22,
-          }}
-        >
-          ⚠️
-        </div>
-        <div>
-          <p style={{ color: "#f1f5f9", fontWeight: 600, fontSize: "1rem", margin: "0 0 0.5rem" }}>
-            Link Expired or Invalid
-          </p>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", maxWidth: 320, margin: "0 auto" }}>
-            {errorMessage}
-          </p>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-            width: "100%",
-            maxWidth: 280,
-          }}
-        >
-          <a
-            href="/"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#94a3b8",
-              textDecoration: "none",
-              padding: "0.7rem 1.5rem",
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              textAlign: "center",
-            }}
-          >
-            Back to home
-          </a>
+      <div className="min-h-dvh flex items-center justify-center p-4 bg-[#0f1117] text-[#e2e4f0] text-center">
+        <div className="max-w-sm w-full p-6 sm:p-8 rounded-3xl border border-white/[0.08] bg-[#131722] shadow-2xl space-y-5">
+          <div className="w-12 h-12 rounded-2xl bg-destructive/15 border border-destructive/30 flex items-center justify-center mx-auto text-xl">
+            ⚠️
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-base sm:text-lg font-bold text-white">Link Expired or Invalid</h2>
+            <p className="text-xs sm:text-sm text-[#9ca3af] leading-relaxed">{errorMessage}</p>
+          </div>
+          <div className="pt-2">
+            <a
+              href="/"
+              className="inline-flex items-center justify-center w-full rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-white text-xs font-semibold py-3 transition-colors min-h-[44px]"
+            >
+              Back to home
+            </a>
+          </div>
         </div>
       </div>
     );

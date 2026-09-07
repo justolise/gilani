@@ -154,7 +154,7 @@ function QuizTakeRoute() {
           <div className="max-w-md w-full space-y-4">
             <button
               onClick={() => setMode("practice")}
-              className="w-full flex items-start gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/50 transition-colors text-left"
+              className="w-full flex items-start gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/50 transition-colors text-left cursor-pointer"
             >
               <BookOpen className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
@@ -166,7 +166,7 @@ function QuizTakeRoute() {
             </button>
             <button
               onClick={() => setMode("test")}
-              className="w-full flex items-start gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/50 transition-colors text-left"
+              className="w-full flex items-start gap-3 p-5 rounded-2xl border-2 border-border bg-card hover:border-primary/50 transition-colors text-left cursor-pointer"
             >
               <TimerIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
@@ -216,7 +216,7 @@ function QuizTakeRoute() {
               {hasAnsweredCurrent && (
                 <button
                   onClick={handleNext}
-                  className="mt-6 w-full bg-primary text-primary-foreground px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+                  className="mt-6 w-full bg-primary text-primary-foreground px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
                 >
                   {currentIndex + 1 < activeQuestions.length ? "Next Question" : "See Results"}
                 </button>

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/client/supabase";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
@@ -92,9 +92,9 @@ function SavedRoute() {
               {savedMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className="p-6 border border-border bg-card rounded-2xl shadow-sm flex flex-col overflow-hidden hover:border-primary/40 transition-colors"
+                  className="p-4 sm:p-6 border border-border bg-card rounded-2xl shadow-sm flex flex-col overflow-hidden hover:border-primary/40 transition-colors"
                 >
-                  <div className="flex items-center gap-2 mb-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <div className="flex items-center gap-2 mb-3 sm:mb-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400 shrink-0" />
                     <span className="truncate">
                       From: {(msg.conversations as any)?.title || "Unknown Chat"}
@@ -107,13 +107,13 @@ function SavedRoute() {
                     <span className="text-xs text-muted-foreground">
                       {new Date(msg.created_at).toLocaleDateString()}
                     </span>
-                    <a
-                      href={`/tutor/${msg.conversation_id}`}
-                      className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 text-sm font-medium"
+                    <Link
+                      to={`/tutor/${msg.conversation_id}` as any}
+                      className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1.5 text-sm font-medium min-h-[44px] px-2 py-1 cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
                       View Chat
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}

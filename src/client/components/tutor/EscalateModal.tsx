@@ -37,8 +37,9 @@ export function EscalateModal({
           </div>
           <button
             onClick={onCancel}
-            className="rounded-md p-1 text-muted-foreground hover:bg-black/5 transition-colors"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
             title="Cancel"
+            aria-label="Cancel"
           >
             <X className="h-4 w-4" />
           </button>
@@ -81,14 +82,14 @@ export function EscalateModal({
         <div className="flex gap-2 px-5 py-3 border-t border-border bg-muted/20">
           <button
             onClick={onCancel}
-            className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-accent transition-colors"
+            className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground transition-colors min-h-[44px] cursor-pointer flex items-center justify-center"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={isEscalating || !teacherEmail.trim()}
-            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60 transition-colors min-h-[44px] cursor-pointer"
           >
             {isEscalating ? (
               <>

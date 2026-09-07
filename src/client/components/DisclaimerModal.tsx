@@ -147,8 +147,9 @@ export function DisclaimerModal() {
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
+              className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               title="Close"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -294,7 +295,7 @@ export function DisclaimerModal() {
           <button
             onClick={handleAccept}
             disabled={!aiDisclaimerAccepted}
-            className="w-full inline-flex items-center justify-center rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md active:scale-[0.98]"
+            className="w-full inline-flex items-center justify-center rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md active:scale-[0.98] min-h-[44px] cursor-pointer"
           >
             Accept Preferences & Let's Learn!
           </button>

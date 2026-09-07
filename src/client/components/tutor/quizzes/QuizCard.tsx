@@ -48,10 +48,11 @@ export function QuizCard({
               onDeleteRequest(quiz.id);
             }}
             disabled={isDeleting}
-            className="text-muted-foreground/40 hover:text-destructive transition-colors p-1 rounded-lg hover:bg-destructive/10 cursor-pointer"
+            className="text-muted-foreground/40 hover:text-destructive transition-colors p-2 rounded-lg hover:bg-destructive/10 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Delete quiz"
+            aria-label="Delete quiz"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
 

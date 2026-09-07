@@ -159,6 +159,15 @@ html.capacitor-native:not(.native-insets-applied) {
 }
 
 /* ─── Study Accent Palettes (Light Mode) ────────────────────────────────── */
+[data-theme-accent="terracotta"] {
+  --primary: hsl(22, 96%, 35%);
+  --primary-foreground: hsl(38 30% 98%);
+  --ring: hsl(22 75% 48% / 0.4);
+  --sidebar-primary: hsl(22 75% 48%);
+  --sidebar-primary-foreground: hsl(38 30% 98%);
+  --sidebar-ring: hsl(22 75% 48% / 0.4);
+}
+
 [data-theme-accent="emerald"] {
   --primary: hsl(158 64% 32%);
   --primary-foreground: hsl(158 30% 98%);
@@ -196,6 +205,16 @@ html.capacitor-native:not(.native-insets-applied) {
 }
 
 /* ─── Study Accent Palettes (Dark Mode) ─────────────────────────────────── */
+.dark[data-theme-accent="terracotta"],
+.dark [data-theme-accent="terracotta"] {
+  --primary: #c96a3d;
+  --primary-foreground: #1e1c1a;
+  --ring: #c96a3d;
+  --sidebar-primary: #c96a3d;
+  --sidebar-primary-foreground: #1e1c1a;
+  --sidebar-ring: #c96a3d;
+}
+
 .dark[data-theme-accent="emerald"],
 .dark [data-theme-accent="emerald"] {
   --primary: #2ea071;
@@ -706,7 +725,8 @@ html[data-font-family="serif"] body {
   padding: 0.75rem !important;
   padding-top: 1.5rem !important;
   border-radius: 0.75rem !important;
-  background: #1e1e2e !important;
+  background: #131722 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   font-size: 11px !important;
   line-height: 1.5 !important;
   overflow: hidden !important;
@@ -724,7 +744,8 @@ html[data-font-family="serif"] body {
 
 /* Dark mode adjustments for Prism */
 .dark .prose-ai pre[class*="language-"] {
-  background: #1e1e2e !important;
+  background: #131722 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ─── Global Scrollbar Hiding ───────────────────────────────────────────────── */

@@ -164,7 +164,7 @@ export function QuizzesPage() {
         actions={
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
           >
             <Plus className="h-4 w-4" />
             New Quiz
@@ -209,7 +209,7 @@ export function QuizzesPage() {
               </p>
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
               >
                 <Plus className="h-4 w-4" />
                 Generate your first quiz
@@ -233,7 +233,7 @@ export function QuizzesPage() {
                   <button
                     onClick={onLoadMore}
                     disabled={loadingMore}
-                    className="px-5 py-2.5 rounded-xl border border-border bg-card text-xs font-semibold hover:bg-muted transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl border border-border bg-card text-xs font-semibold hover:bg-muted transition-colors disabled:opacity-50 cursor-pointer min-h-[44px]"
                   >
                     {loadingMore ? "Loading more…" : "Load more quizzes"}
                   </button>

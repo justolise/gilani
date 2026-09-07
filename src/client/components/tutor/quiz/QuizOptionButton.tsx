@@ -28,7 +28,7 @@ export function QuizOptionButton({ label, index, state, onClick }: QuizOptionBut
       onClick={onClick}
       disabled={!isInteractive}
       className={cn(
-        "w-full flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all",
+        "w-full flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all min-h-[52px]",
         state === "default" &&
           "border-border bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
         state === "selected-correct" && "border-emerald-500 bg-emerald-500/10",

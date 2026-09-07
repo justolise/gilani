@@ -219,7 +219,7 @@ export function PlannerPage() {
         actions={
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
           >
             <Plus className="h-4 w-4" />
             New Plan
@@ -248,7 +248,7 @@ export function PlannerPage() {
               </p>
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
               >
                 <Plus className="h-4 w-4" />
                 Create your first plan
@@ -303,8 +303,9 @@ export function PlannerPage() {
                           setConfirmDeleteId(plan.id);
                         }}
                         disabled={deletingId === plan.id}
-                        className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                         title="Delete plan"
+                        aria-label="Delete plan"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
