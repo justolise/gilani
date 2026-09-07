@@ -19,7 +19,7 @@ export default function KinematicsEquation({ block }: Props) {
       <EquationToolbar title="Kinematics Equation" />
       <MathBlock block={customBlock} />
       {block.metadata?.subject && (
-        <div className="border-t border-zinc-800 bg-[#161a22] p-4 text-xs text-zinc-400">
+        <div className="border-t border-white/[0.08] bg-[#131722] p-4 text-xs text-[#9ca3af]">
           {block.metadata.subject}
         </div>
       )}

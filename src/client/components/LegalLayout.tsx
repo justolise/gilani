@@ -17,7 +17,7 @@ export function LegalFooter() {
       : "/tutor";
 
   return (
-    <footer className="border-t border-white/[0.08] bg-[#0c0e14] px-4 sm:px-8 pt-8 pb-[calc(2rem+var(--safe-bottom,0px))] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
+    <footer className="border-t border-white/[0.08] bg-[#0f1117] px-4 sm:px-8 pt-8 pb-[calc(2rem+var(--safe-bottom,0px))] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         <Logo to={user ? dashboardPath : "/"} size="sm" />
         <div className="flex flex-wrap justify-center gap-6 text-xs text-[#9ca3af]">

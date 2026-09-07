@@ -156,7 +156,7 @@ export function Sidebar({ shell }: Props) {
           fixed inset-y-0 left-0 z-50
           flex flex-col
           border-r border-sidebar-border/80
-          bg-sidebar/98 dark:bg-[#0e1017]/98 backdrop-blur-2xl
+          bg-sidebar/98 dark:bg-[#0f1117]/98 backdrop-blur-2xl
           shadow-2xl lg:shadow-[2px_0_16px_rgba(0,0,0,0.08)]
           overflow-hidden
           transition-[transform,width] duration-250 ease-out
@@ -669,7 +669,7 @@ export function Sidebar({ shell }: Props) {
             </div>
 
             {/* ── 4. Vercel Footer: User Profile Bar & Upgrade Chip ── */}
-            <div className="flex-shrink-0 border-t border-border/30 p-2.5 bg-sidebar/95 dark:bg-[#0e1017]/95 flex flex-col gap-2">
+            <div className="flex-shrink-0 border-t border-border/30 p-2.5 bg-sidebar/95 dark:bg-[#0f1117]/95 flex flex-col gap-2">
               {/* Upgrade Banner for Free tier */}
               {currentPlan.toLowerCase() !== "pro" && (
                 <button
