@@ -236,7 +236,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
       ref={itemRef}
       id={slug}
       className={`border rounded-2xl overflow-hidden transition-all duration-200 scroll-mt-24 ${
-        open ? "border-[#d9531e]/30 bg-[#1a1d27]" : "border-white/8 bg-[#1a1d27]"
+        open ? "border-[#C96A3D]/30 bg-[#131722]" : "border-white/[0.08] bg-[#131722]"
       }`}
     >
       <button
@@ -245,7 +245,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
       >
         <span className="font-semibold text-sm text-white">{q}</span>
         {open ? (
-          <ChevronUp className="h-4 w-4 text-[#d9531e] flex-shrink-0" />
+          <ChevronUp className="h-4 w-4 text-[#E28743] flex-shrink-0" />
         ) : (
           <ChevronDown className="h-4 w-4 text-[#6b7280] flex-shrink-0" />
         )}
@@ -276,17 +276,17 @@ function FAQPage() {
   const filtered = activeCategory ? FAQS.filter((f) => f.category === activeCategory) : FAQS;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: FAQ_JSON_LD }} />
       <LegalHeader backTo={"/" as any} backLabel="Back to home" />
 
       {/* Hero */}
-      <div className="relative overflow-hidden border-b border-white/5 py-12 sm:py-20 text-center">
+      <div className="relative overflow-hidden border-b border-white/[0.08] py-12 sm:py-20 text-center">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(217,83,30,0.08),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.08),transparent_60%)]" />
         </div>
         <div className="relative max-w-xl mx-auto px-4 sm:px-6 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#d9531e]/30 bg-[#d9531e]/8 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#d9531e] mb-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-2 text-xs font-semibold text-[#E28743] mb-1">
             <Sparkles className="h-3.5 w-3.5" />
             Support Center
           </div>
@@ -295,7 +295,7 @@ function FAQPage() {
           </h1>
           <p className="text-sm text-[#9ca3af] leading-relaxed">
             Everything you need to know about GilaniAI. Can't find your answer?{" "}
-            <Link to={"/contact" as any} className="text-[#d9531e] font-semibold hover:underline">
+            <Link to={"/contact" as any} className="text-[#E28743] font-semibold hover:underline">
               Contact us.
             </Link>
           </p>
@@ -309,8 +309,8 @@ function FAQPage() {
             onClick={() => setActiveCategory(null)}
             className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
               !activeCategory
-                ? "bg-[#d9531e] text-white shadow-md shadow-[#d9531e]/20"
-                : "border border-white/8 text-[#9ca3af] hover:text-white hover:bg-white/4"
+                ? "bg-[#C96A3D] text-white shadow-md shadow-[#C96A3D]/25"
+                : "border border-white/[0.08] text-[#9ca3af] hover:text-white hover:bg-white/4"
             }`}
           >
             All Questions
@@ -321,8 +321,8 @@ function FAQPage() {
               onClick={() => setActiveCategory(category === activeCategory ? null : category)}
               className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
                 activeCategory === category
-                  ? "bg-[#d9531e] text-white shadow-md shadow-[#d9531e]/20"
-                  : "border border-white/8 text-[#9ca3af] hover:text-white hover:bg-white/4"
+                  ? "bg-[#C96A3D] text-white shadow-md shadow-[#C96A3D]/25"
+                  : "border border-white/[0.08] text-[#9ca3af] hover:text-white hover:bg-white/4"
               }`}
             >
               {category}
@@ -333,7 +333,7 @@ function FAQPage() {
         <div className="space-y-8">
           {filtered.map(({ category, items }) => (
             <div key={category} className="space-y-4">
-              <h2 className="font-mono text-[10px] uppercase tracking-widest text-[#d9531e] font-bold">
+              <h2 className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
                 {category}
               </h2>
               <div className="space-y-3">
@@ -345,7 +345,7 @@ function FAQPage() {
           ))}
         </div>
 
-        <div className="rounded-2xl border border-white/8 bg-[#1a1d27] p-8 text-center space-y-4">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#131722] p-8 text-center space-y-4">
           <h3 className="font-serif text-xl font-bold text-white">Still have questions?</h3>
           <p className="text-sm text-[#9ca3af] max-w-md mx-auto">
             Our support team is happy to help. Reach out and we will get back to you within 24
@@ -353,7 +353,7 @@ function FAQPage() {
           </p>
           <Link
             to={"/contact" as any}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#d9531e] px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#c44819] transition-all shadow-lg shadow-[#d9531e]/25"
+            className="inline-flex items-center gap-2 rounded-full bg-[#C96A3D] px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#E28743] transition-all shadow-[0_0_20px_rgba(201,106,61,0.3)]"
           >
             Contact support
           </Link>

@@ -108,7 +108,7 @@ function CookiesPage() {
                       key={row.name}
                       className="border-b border-white/4 last:border-0 hover:bg-white/2 transition-colors"
                     >
-                      <td className="p-4 font-mono text-[#d9531e] font-semibold">{row.name}</td>
+                      <td className="p-4 font-mono text-[#E28743] font-semibold">{row.name}</td>
                       <td className="p-4">
                         <span
                           className={`rounded-full px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold ${

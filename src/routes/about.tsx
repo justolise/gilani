@@ -103,24 +103,24 @@ function About() {
       : "/tutor";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
       <LegalHeader />
 
       <main className="flex-grow">
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 sm:py-28 border-b border-white/5">
+        <section className="relative overflow-hidden py-16 sm:py-28 border-b border-white/[0.08]">
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(217,83,30,0.1),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.1),transparent_60%)]" />
           </div>
           <div className="relative max-w-3xl mx-auto px-4 sm:px-8 text-center space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d9531e]/30 bg-[#d9531e]/8 px-4 py-2 text-[11px] font-bold uppercase tracking-widest text-[#d9531e] mb-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-2 text-xs font-semibold text-[#E28743] mb-2">
               <Sparkles className="h-3.5 w-3.5" />
               About GilaniAI
             </div>
             <h1 className="font-serif text-4xl sm:text-6xl font-black leading-tight text-white">
               A learning companion,
               <br />
-              <span className="text-[#d9531e] italic">not a replacement.</span>
+              <span className="text-[#E28743] italic">not a replacement.</span>
             </h1>
             <p className="text-base sm:text-lg leading-relaxed text-[#9ca3af] max-w-2xl mx-auto">
               GilaniAI is an AI-powered study assistant built for students on any curriculum. We
@@ -134,7 +134,7 @@ function About() {
         <section className="px-4 sm:px-8 py-16 sm:py-24 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="space-y-6">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#d9531e] font-bold">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
                 Our Mission
               </p>
               <h2 className="font-serif text-3xl sm:text-5xl font-black text-white">
@@ -174,7 +174,7 @@ function About() {
                   key={title}
                   className="rounded-2xl border border-white/8 bg-[#1a1d27] p-5 space-y-3 hover:border-white/14 transition-colors"
                 >
-                  <Icon className="h-5 w-5 text-[#d9531e]" />
+                  <Icon className="h-5 w-5 text-[#E28743]" />
                   <p className="font-serif text-sm font-bold text-white">{title}</p>
                   <p className="text-xs text-[#9ca3af] leading-relaxed">{description}</p>
                 </div>
@@ -187,7 +187,7 @@ function About() {
         <section className="bg-[#050505] border-y border-white/6 px-4 sm:px-8 py-16 sm:py-24">
           <div className="max-w-7xl mx-auto space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#d9531e] font-bold">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
                 Under the Hood
               </p>
               <h2 className="font-serif text-3xl sm:text-5xl font-black text-white">
@@ -228,7 +228,7 @@ function About() {
         <section className="px-4 sm:px-8 py-16 sm:py-24">
           <div className="max-w-5xl mx-auto text-center space-y-10">
             <div className="space-y-3">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#d9531e] font-bold">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
                 Who It's For
               </p>
               <h2 className="font-serif text-3xl sm:text-5xl font-black text-white">
@@ -275,7 +275,7 @@ function About() {
           <div
             className="rounded-3xl p-10 sm:p-14"
             style={{
-              background: "linear-gradient(135deg, #d9531e 0%, #c44819 40%, #1a1d27 100%)",
+              background: "linear-gradient(135deg, #C96A3D 0%, #B8582B 40%, #131722 100%)",
             }}
           >
             <h2 className="font-serif text-3xl sm:text-4xl font-black text-white">
@@ -288,7 +288,7 @@ function About() {
               {user ? (
                 <Link
                   to={dashboardPath as any}
-                  className="rounded-xl bg-[#d9531e] px-7 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#c44819] transition-all shadow-lg hover:scale-[1.02]"
+                  className="rounded-full bg-[#C96A3D] px-7 py-3 text-sm font-bold text-white hover:bg-[#E28743] transition-all shadow-[0_0_20px_rgba(201,106,61,0.3)] hover:scale-[1.02]"
                 >
                   Go to Dashboard
                 </Link>
@@ -297,14 +297,14 @@ function About() {
                   <Link
                     to="/login"
                     search={{ redirect: undefined, signout: undefined }}
-                    className="rounded-xl bg-white px-7 py-3 text-sm font-bold uppercase tracking-wider text-[#d9531e] hover:bg-white/90 transition-all shadow-lg hover:scale-[1.02]"
+                    className="rounded-full bg-white px-7 py-3 text-sm font-bold text-[#C96A3D] hover:bg-white/90 transition-all shadow-lg hover:scale-[1.02]"
                   >
                     Start for free
                   </Link>
                   <Link
                     to="/login"
                     search={{ redirect: undefined, signout: undefined }}
-                    className="rounded-xl border border-white/20 bg-white/5 px-7 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-white/10 transition-all"
+                    className="rounded-full border border-white/20 bg-white/5 px-7 py-3 text-sm font-bold text-white hover:bg-white/10 transition-all"
                   >
                     Sign in
                   </Link>

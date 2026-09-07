@@ -142,8 +142,7 @@ function LoginPage() {
         <div className="absolute right-0 inset-y-0 w-24 bg-gradient-to-l from-[#0d0f18] to-transparent pointer-events-none" />
       </div>
 
-      {/* ── Right panel — auth form + mobile showcase ── */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 py-12 sm:py-16 relative z-10 min-h-dvh">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 pt-[calc(1.5rem+var(--safe-top,0px))] pb-[calc(1.5rem+var(--safe-bottom,0px))] sm:pt-[calc(3rem+var(--safe-top,0px))] sm:pb-[calc(3rem+var(--safe-bottom,0px))] pl-[max(1rem,var(--safe-left,0px))] pr-[max(1rem,var(--safe-right,0px))] relative z-10 min-h-dvh">
         {/* Top bar on mobile: Back button + Curriculum pill */}
         <div className="w-full max-w-[420px] flex items-center justify-between mb-4 sm:mb-6">
           <Link

@@ -1,73 +1,11 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Home, LayoutDashboard, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Sparkles } from "lucide-react";
 import { Logo } from "@/client/components/ui/logo";
 import { useAuth } from "@/client/hooks/use-auth";
+import { PublicHeader, type PublicHeaderProps } from "@/client/components/PublicHeader";
 
-export function LegalHeader({ backTo, backLabel }: { backTo?: any; backLabel?: string }) {
-  const { user, roles } = useAuth();
-  const navigate = useNavigate();
-
-  const dashboardPath = roles?.includes("admin")
-    ? "/admin/users"
-    : roles?.includes("teacher")
-      ? "/teacher/escalations"
-      : "/tutor";
-
-  const handleBack = () => {
-    if (backTo) {
-      navigate({ to: backTo as any });
-    } else if (typeof window !== "undefined" && window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigate({ to: (user ? dashboardPath : "/") as any });
-    }
-  };
-
-  return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-[#0f1117]/85 backdrop-blur-xl">
-      <div className="flex w-full items-center justify-between px-4 sm:px-8 py-3.5 max-w-7xl mx-auto">
-        <Logo to={user ? dashboardPath : "/"} size="md" />
-        <nav className="flex items-center gap-2 sm:gap-3">
-          {user ? (
-            <>
-              <button
-                type="button"
-                onClick={handleBack}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer"
-                title="Go back"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                <span>{backLabel || "Back"}</span>
-              </button>
-              <Link
-                to={dashboardPath as any}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                <span>Dashboard</span>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#9ca3af] hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5"
-              >
-                <Home className="h-3.5 w-3.5" />
-                <span>Home</span>
-              </Link>
-              <Link
-                to={"/login" as any}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d9531e] hover:text-[#c44819] transition-colors px-3.5 py-2 rounded-lg bg-[#d9531e]/10 hover:bg-[#d9531e]/15"
-              >
-                Sign in ›
-              </Link>
-            </>
-          )}
-        </nav>
-      </div>
-    </header>
-  );
+export function LegalHeader(props: PublicHeaderProps) {
+  return <PublicHeader {...props} />;
 }
 
 export function LegalFooter() {
@@ -79,7 +17,7 @@ export function LegalFooter() {
       : "/tutor";
 
   return (
-    <footer className="border-t border-white/6 bg-[#0c0e14] px-4 sm:px-8 py-8">
+    <footer className="border-t border-white/[0.08] bg-[#0c0e14] px-4 sm:px-8 pt-8 pb-[calc(2rem+var(--safe-bottom,0px))] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         <Logo to={user ? dashboardPath : "/"} size="sm" />
         <div className="flex flex-wrap justify-center gap-6 text-xs text-[#9ca3af]">
@@ -91,7 +29,7 @@ export function LegalFooter() {
             { label: "FAQ", to: "/faq" },
             { label: "Contact", to: "/contact" },
           ].map(({ label, to }) => (
-            <Link key={label} to={to as any} className="hover:text-[#d9531e] transition-colors">
+            <Link key={label} to={to as any} className="hover:text-[#E28743] transition-colors">
               {label}
             </Link>
           ))}
@@ -114,12 +52,12 @@ export function LegalHero({
   subtitle?: string;
 }) {
   return (
-    <div className="relative overflow-hidden border-b border-white/5 py-12 sm:py-16 text-center">
+    <div className="relative overflow-hidden border-b border-white/[0.08] py-12 sm:py-16 text-center">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_-10%,rgba(217,83,30,0.06),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_-10%,rgba(201,106,61,0.08),transparent_60%)]" />
       </div>
       <div className="relative max-w-xl mx-auto px-4 sm:px-6 space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#d9531e]/30 bg-[#d9531e]/8 px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-widest text-[#d9531e] mb-1">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#E28743] mb-1">
           <Sparkles className="h-3 w-3" />
           {label}
         </div>
@@ -135,10 +73,10 @@ export function LegalHero({
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2 border-b border-white/6 pb-2">
+      <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2 border-b border-white/[0.08] pb-2">
         {title}
       </h2>
-      <div className="space-y-3.5 text-sm text-[#9ca3af] [&_ul]:pl-5 [&_ul]:space-y-2 [&_ul]:list-disc [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:text-white [&_a]:text-[#d9531e] [&_a]:font-semibold [&_a]:hover:underline [&_a]:transition-colors">
+      <div className="space-y-3.5 text-sm text-[#9ca3af] [&_ul]:pl-5 [&_ul]:space-y-2 [&_ul]:list-disc [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:text-white [&_a]:text-[#E28743] [&_a]:font-semibold [&_a]:hover:underline [&_a]:transition-colors">
         {children}
       </div>
     </div>

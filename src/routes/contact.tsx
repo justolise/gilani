@@ -99,12 +99,12 @@ function ContactPage() {
       <LegalHeader />
 
       {/* Hero */}
-      <div className="relative overflow-hidden border-b border-white/5 py-12 sm:py-20 text-center">
+      <div className="relative overflow-hidden border-b border-white/[0.08] py-12 sm:py-20 text-center">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(217,83,30,0.08),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.08),transparent_60%)]" />
         </div>
         <div className="relative max-w-xl mx-auto px-4 sm:px-6 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#d9531e]/30 bg-[#d9531e]/8 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#d9531e] mb-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-2 text-xs font-semibold text-[#E28743] mb-1">
             <Sparkles className="h-3.5 w-3.5" />
             Support Center
           </div>
@@ -113,8 +113,8 @@ function ContactPage() {
             Got a question, bug report, or partnership inquiry? We're a small team and we read every
             message.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/6 bg-[#1a1d27]/50 px-4 py-2 text-xs text-[#9ca3af]">
-            <Clock className="h-3.5 w-3.5 text-[#d9531e]" />
+          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/[0.08] bg-[#1a1d27]/50 px-4 py-2 text-xs text-[#9ca3af]">
+            <Clock className="h-3.5 w-3.5 text-[#E28743]" />
             Typical reply within 24 hours (Mon–Fri)
           </div>
         </div>
@@ -130,7 +130,7 @@ function ContactPage() {
               body: (
                 <a
                   href="mailto:support@gilaniai.site"
-                  className="text-xs font-semibold text-[#d9531e] hover:underline break-all"
+                  className="text-xs font-semibold text-[#E28743] hover:underline break-all"
                 >
                   support@gilaniai.site
                 </a>
@@ -140,7 +140,7 @@ function ContactPage() {
             {
               icon: Phone,
               title: "Phone Support",
-              body: <p className="text-xs font-semibold text-[#d9531e]">0710 297 603</p>,
+              body: <p className="text-xs font-semibold text-[#E28743]">0710 297 603</p>,
               sub: "Call or text us directly for immediate assistance.",
             },
             {
@@ -178,11 +178,11 @@ function ContactPage() {
           ].map(({ icon: Icon, title, body, sub }) => (
             <div
               key={title}
-              className="rounded-2xl border border-white/8 bg-[#1a1d27] p-5 hover:border-white/12 transition-colors"
+              className="rounded-2xl border border-white/[0.08] bg-[#131722] p-5 hover:border-white/12 transition-colors"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/4 border border-white/8">
-                  <Icon className="h-4 w-4 text-[#d9531e]" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/4 border border-white/[0.08]">
+                  <Icon className="h-4 w-4 text-[#E28743]" />
                 </div>
                 <p className="text-sm font-bold text-white">{title}</p>
               </div>
@@ -225,19 +225,19 @@ function ContactPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-xs font-semibold text-[#9ca3af] mb-1.5">
-                      Full name <span className="text-[#d9531e]">*</span>
+                      Full name <span className="text-[#E28743]">*</span>
                     </label>
                     <input
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       placeholder="e.g. Amina Wanjiku"
-                      className="w-full rounded-xl border border-white/8 bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#d9531e]/50 focus:outline-none focus:ring-1 focus:ring-[#d9531e]/50 transition-colors"
+                      className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#C96A3D]/60 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/40 transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#9ca3af] mb-1.5">
-                      Email address <span className="text-[#d9531e]">*</span>
+                      Email address <span className="text-[#E28743]">*</span>
                     </label>
                     <input
                       name="email"
@@ -245,7 +245,7 @@ function ContactPage() {
                       value={form.email}
                       onChange={handleChange}
                       placeholder="you@example.com"
-                      className="w-full rounded-xl border border-white/8 bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#d9531e]/50 focus:outline-none focus:ring-1 focus:ring-[#d9531e]/50 transition-colors"
+                      className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#C96A3D]/60 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/40 transition-colors"
                     />
                   </div>
                 </div>
@@ -259,7 +259,7 @@ function ContactPage() {
                       name="category"
                       value={form.category}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-white/8 bg-[#0f1117] px-4 py-3 text-sm text-[#9ca3af] focus:border-[#d9531e]/50 focus:outline-none focus:ring-1 focus:ring-[#d9531e]/50 transition-colors"
+                      className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-sm text-[#9ca3af] focus:border-[#C96A3D]/60 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/40 transition-colors"
                     >
                       <option value="general">General enquiry</option>
                       <option value="bug">Bug report</option>
@@ -279,14 +279,14 @@ function ContactPage() {
                       value={form.subject}
                       onChange={handleChange}
                       placeholder="Brief summary"
-                      className="w-full rounded-xl border border-white/8 bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#d9531e]/50 focus:outline-none focus:ring-1 focus:ring-[#d9531e]/50 transition-colors"
+                      className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#C96A3D]/60 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/40 transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#9ca3af] mb-1.5">
-                    Message <span className="text-[#d9531e]">*</span>
+                    Message <span className="text-[#E28743]">*</span>
                   </label>
                   <textarea
                     name="message"
@@ -294,7 +294,7 @@ function ContactPage() {
                     onChange={handleChange}
                     rows={5}
                     placeholder="Describe your question or issue in as much detail as possible…"
-                    className="w-full rounded-xl border border-white/8 bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#d9531e]/50 focus:outline-none focus:ring-1 focus:ring-[#d9531e]/50 transition-colors resize-none"
+                    className="w-full rounded-xl border border-white/[0.08] bg-[#0f1117] px-4 py-3 text-sm text-white placeholder-[#6b7280] focus:border-[#C96A3D]/60 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/40 transition-colors resize-none"
                   />
                   <p className="mt-1.5 text-right text-[10px] font-mono text-[#6b7280]">
                     {form.message.length} chars
@@ -311,7 +311,7 @@ function ContactPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={!canSubmit}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#d9531e] px-4 py-3.5 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#c44819] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#d9531e]/25"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#C96A3D] px-6 py-3.5 text-sm font-bold text-white hover:bg-[#E28743] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(201,106,61,0.3)]"
                 >
                   {status === "sending" ? (
                     <>
@@ -334,7 +334,7 @@ function ContactPage() {
       <section className="border-t border-white/5 bg-[#12151e] px-4 sm:px-8 py-12 sm:py-16">
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-2">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[#d9531e] font-bold">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
               FAQ
             </p>
             <h2 className="font-serif text-2xl font-bold text-white">Common questions</h2>
@@ -343,19 +343,19 @@ function ContactPage() {
             {FAQ_ITEMS.map((item, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-white/8 bg-[#1a1d27] overflow-hidden"
+                className="rounded-2xl border border-white/[0.08] bg-[#131722] overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-white hover:bg-white/2 transition-colors text-left gap-4"
                 >
                   {item.q}
-                  <span className="text-[#d9531e] text-lg leading-none shrink-0">
+                  <span className="text-[#E28743] text-lg leading-none shrink-0">
                     {openFaq === i ? "−" : "+"}
                   </span>
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 pb-5 pt-3 text-sm text-[#9ca3af] leading-relaxed border-t border-white/6 bg-[#0f1117]/30">
+                  <div className="px-5 pb-5 pt-3 text-sm text-[#9ca3af] leading-relaxed border-t border-white/[0.08] bg-[#0f1117]/30">
                     {item.a}
                   </div>
                 )}

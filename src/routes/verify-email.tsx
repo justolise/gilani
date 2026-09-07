@@ -50,8 +50,8 @@ function VerifyEmailPage() {
   const { success, role } = Route.useLoaderData() as { success: boolean; role?: string };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f1117] text-[#e2e4f0] px-4 py-12">
-      <div className="w-full max-w-md rounded-3xl border border-white/8 bg-[#1a1d27] shadow-2xl p-8 sm:p-10 space-y-6 text-center">
+    <div className="min-h-dvh flex items-center justify-center bg-[#0f1117] text-[#e2e4f0] px-4 pt-[calc(2rem+var(--safe-top,0px))] pb-[calc(2rem+var(--safe-bottom,0px))] pl-[max(1rem,var(--safe-left,0px))] pr-[max(1rem,var(--safe-right,0px))]">
+      <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-[#131722] shadow-2xl p-8 sm:p-10 space-y-6 text-center">
         <Logo to="/" size="md" className="mx-auto" />
         {success ? (
           <>
@@ -64,7 +64,7 @@ function VerifyEmailPage() {
           </>
         ) : (
           <>
-            <XCircle className="h-12 w-12 text-[#d9531e] mx-auto" />
+            <XCircle className="h-12 w-12 text-red-400 mx-auto" />
             <h1 className="font-serif text-2xl font-black text-white">Link expired or invalid</h1>
             <p className="text-sm text-[#9ca3af]">
               This verification link is no longer valid. Your account still works normally.
@@ -79,7 +79,7 @@ function VerifyEmailPage() {
                 ? "/teacher/escalations"
                 : "/tutor"
           }
-          className="inline-block w-full rounded-xl bg-[#d9531e] py-3.5 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#c44819] transition-all"
+          className="inline-block w-full rounded-full bg-[#C96A3D] py-3 text-sm font-bold text-white hover:bg-[#E28743] shadow-[0_0_20px_rgba(201,106,61,0.3)] transition-all"
         >
           Go to GilaniAI
         </Link>
