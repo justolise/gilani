@@ -97,7 +97,17 @@ export const Route = createFileRoute("/api/chat")({
 
           // ─── Use ai-gateway, with automatic multi-provider fallback ──────
           const gateway = createGoogleAiProvider();
-          const requestedModel = request.headers.get("x-model-id") || "gemini-2.5-flash";
+
+          // Whitelist allowed model identifiers to prevent arbitrary provider requests
+          const ALLOWED_MODELS = new Set([
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+            "gpt-4.1-mini",
+          ]);
+          const rawModel = request.headers.get("x-model-id") || "";
+          const requestedModel = ALLOWED_MODELS.has(rawModel) ? rawModel : "gemini-2.5-flash";
           const chatModel = gateway.chatModel(requestedModel);
 
           if (!chatModel) {

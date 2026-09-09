@@ -1,5 +1,15 @@
 import React, { useEffect, useRef, useState, useMemo, memo } from "react";
-import { Copy, RefreshCw, Check, ThumbsUp, ThumbsDown, Pencil, Trash2 } from "lucide-react";
+import {
+  Copy,
+  RefreshCw,
+  Check,
+  ThumbsUp,
+  ThumbsDown,
+  Pencil,
+  Trash2,
+  GraduationCap,
+  FileDown,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/client/supabase";
 import { SmoothMarkdownRenderer } from "@/client/components/tutor/SmoothMarkdownRenderer";
@@ -41,6 +51,10 @@ export const MessageBubble = memo(function MessageBubble({
   onVote,
   pauseLabel,
   onDelete,
+  onExportPDF,
+  onEscalate,
+  escalationStatus,
+  escalating,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const [vote, setVote] = useState<1 | -1 | null>(initialVote ?? null);
@@ -454,6 +468,55 @@ export const MessageBubble = memo(function MessageBubble({
                     >
                       <ThumbsDown className="h-3.5 w-3.5" />
                     </button>
+
+                    {onEscalate && (
+                      <>
+                        <span className="w-px h-3 bg-border/60 mx-0.5" />
+                        <button
+                          onClick={onEscalate}
+                          disabled={
+                            escalating ||
+                            escalationStatus === "open" ||
+                            escalationStatus === "in_review"
+                          }
+                          className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md cursor-pointer ${
+                            escalationStatus === "resolved"
+                              ? "text-emerald-500 hover:bg-emerald-500/10"
+                              : escalationStatus === "in_review" || escalationStatus === "open"
+                                ? "text-amber-500 hover:bg-amber-500/10"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          }`}
+                          title={
+                            escalationStatus === "resolved"
+                              ? "Teacher answered"
+                              : escalationStatus === "in_review" || escalationStatus === "open"
+                                ? "Under teacher review"
+                                : "Ask a teacher to review this explanation"
+                          }
+                          aria-label="Escalate to Teacher"
+                        >
+                          <GraduationCap className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">
+                            {escalationStatus === "resolved"
+                              ? "Teacher Answered"
+                              : escalationStatus === "in_review" || escalationStatus === "open"
+                                ? "Under Review"
+                                : "Ask Teacher"}
+                          </span>
+                        </button>
+                      </>
+                    )}
+
+                    {onExportPDF && (
+                      <button
+                        onClick={onExportPDF}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
+                        title="Export thread as PDF"
+                        aria-label="Export as PDF"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
 
                   {isLast && (

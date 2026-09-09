@@ -31,15 +31,16 @@ export const assignUserRole = createServerFn({ method: "POST" })
     const { role, displayName, curriculum } = data;
 
     // SECURITY: Prevent privilege escalation -- only existing admins may
-    // (re)assign themselves the "admin" role via this self-service endpoint.
-    if (role === "admin") {
+    // assign "teacher" or "admin" roles. Self-service onboarding is only permitted
+    // to assign the "student" role.
+    if (role === "admin" || role === "teacher") {
       const { data: existingRole } = await supabaseAdmin
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
       if (existingRole?.role !== "admin") {
-        throw new Error("Unauthorized: insufficient privileges to assign admin role");
+        throw new Error(`Unauthorized: insufficient privileges to assign ${role} role`);
       }
     }
 
@@ -125,105 +126,6 @@ export const checkEmailStatus = createServerFn({ method: "POST" })
       // Profile row exists but registration was never finished — force OTP re-verification
       return { status: "incomplete" as const };
     }
-    // Fully registered returning user — safe for instant login
+    // Fully registered returning user
     return { status: "registered" as const };
-  });
-
-/**
- * Passwordless instant login: creates or resolves a user by email, mints a
- * real Supabase session server-side with zero user-visible steps (no OTP
- * screen, no magic link click), and — for brand new signups only — fires a
- * non-blocking verification email. Verification is informational only and
- * never gates access.
- */
-export const instantLogin = createServerFn({ method: "POST" })
-  .validator(
-    z.object({
-      email: z.string().email(),
-    }),
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { sendTransactionalEmail, emailTemplate, welcomeEmail, verifyEmailTemplate } =
-      await import("@/server/email.server");
-    const email = data.email.toLowerCase().trim();
-
-    const { data: existingProfile } = await supabaseAdmin
-      .from("profiles")
-      .select("id, onboarding_completed")
-      .eq("email", email)
-      .maybeSingle();
-    // Used only to decide whether to send the one-time verification email —
-    // a stub profile can exist (e.g. an abandoned earlier sign-up) without a
-    // role ever having been assigned.
-    const isBrandNewProfile = !existingProfile;
-
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email,
-    });
-    if (linkError || !linkData?.properties?.hashed_token) {
-      throw new Error(linkError?.message || "Failed to create session");
-    }
-
-    const SUPABASE_URL = process.env.SUPABASE_URL!;
-    const SUPABASE_ANON_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
-    if (!SUPABASE_ANON_KEY) {
-      throw new Error(
-        "Missing SUPABASE_PUBLISHABLE_KEY (or SUPABASE_ANON_KEY) environment variable",
-      );
-    }
-    const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const { data: verifyData, error: verifyError } = await anonClient.auth.verifyOtp({
-      token_hash: linkData.properties.hashed_token,
-      type: "email",
-    });
-    if (verifyError || !verifyData.session || !verifyData.user) {
-      throw new Error(verifyError?.message || "Failed to verify session");
-    }
-
-    const userId = verifyData.user.id;
-
-    // Whether this user still needs the name/role setup step — based on
-    // whether a role has ever been assigned, not on profile row existence.
-    // A profile row can exist from an abandoned earlier sign-up attempt
-    // (e.g. verification email sent, but the name form was never submitted)
-    // without a role ever having been set — that user must still see the
-    // setup form, mirroring callback.tsx's OAuth-path logic.
-    const needsProfileSetup = !existingProfile?.onboarding_completed;
-
-    // Role, profile display_name, and welcome email are handled later by
-    // assignUserRole once the user picks a display name (see NameCaptureForm).
-    // Here we only track email-ownership verification, which isn't tied to role.
-    if (isBrandNewProfile) {
-      const verifyToken = randomUUID();
-      await supabaseAdmin.from("profiles").upsert(
-        {
-          id: userId,
-          email,
-          email_verified: false,
-          email_verify_token: verifyToken,
-          email_verify_sent_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" },
-      );
-
-      const appUrl = process.env.APP_URL || "https://gilaniai.site";
-      const verifyUrl = `${appUrl}/verify-email?token=${verifyToken}`;
-
-      sendTransactionalEmail({
-        to: email,
-        subject: "Verify your email — GilaniAI",
-        html: verifyEmailTemplate({ userName: email.split("@")[0], verifyUrl }),
-      }).catch((err) => console.error("[Verify Email] Failed:", err));
-    }
-
-    return {
-      access_token: verifyData.session.access_token,
-      refresh_token: verifyData.session.refresh_token,
-      needsProfileSetup,
-    };
   });

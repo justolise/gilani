@@ -6,6 +6,8 @@ import { z } from "zod";
 import { sendTransactionalEmail, mpesaReceiptEmail } from "@/server/email.server";
 import { sendSMS } from "@/server/sms.server";
 
+import crypto from "node:crypto";
+
 export const Route = createFileRoute("/api/mpesa/callback")({
   server: {
     handlers: {
@@ -13,26 +15,30 @@ export const Route = createFileRoute("/api/mpesa/callback")({
         try {
           const request = getRequest();
 
-          // CS-AUTHZ-001: Verify the shared callback secret embedded in the URL
-          // MPESA_CALLBACK_SECRET must be set in environment variables.
-          // The secret is appended to CallBackURL in mpesa.server.ts, so only
-          // Safaricom (who received it) can produce a valid callback.
+          // CS-AUTHZ-001: Verify the shared callback secret using constant-time comparison
           const url = new URL(request.url);
-          const providedToken = url.searchParams.get("token");
-          const expectedToken = process.env.MPESA_CALLBACK_SECRET;
-          if (!expectedToken || providedToken !== expectedToken) {
+          const providedToken = url.searchParams.get("token") || "";
+          const expectedToken = process.env.MPESA_CALLBACK_SECRET || "";
+
+          if (
+            !expectedToken ||
+            providedToken.length !== expectedToken.length ||
+            !crypto.timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))
+          ) {
             console.error("[M-Pesa Callback] Rejected request with invalid or missing token");
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
 
           // Verify Safaricom IP for production deployments (Defense-in-depth)
           const clientIp =
-            request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "";
+            request.headers.get("cf-connecting-ip") ||
+            request.headers.get("x-real-ip") ||
+            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+            "";
           if (process.env.NODE_ENV === "production" && clientIp) {
-            const cleanIp = clientIp.split(",")[0].trim();
-            const isMpesaIp = /^196\.201\.(212|213|214)\.(20[0-7])$/.test(cleanIp);
+            const isMpesaIp = /^196\.201\.(212|213|214)\.\d{1,3}$/.test(clientIp);
             if (!isMpesaIp) {
-              console.error(`[M-Pesa Callback] Rejected request from unauthorized IP: ${cleanIp}`);
+              console.error(`[M-Pesa Callback] Rejected request from unauthorized IP: ${clientIp}`);
               return new Response(JSON.stringify({ ResultCode: 1 }), { status: 403 });
             }
           }

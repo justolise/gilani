@@ -17,6 +17,16 @@ export const Route = createFileRoute("/_authenticated/teacher/escalations")({
           to: "/login",
           search: { redirect: "/teacher/escalations", signout: undefined },
         });
+
+      const { data: roleRow } = await supabaseClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.session.user.id)
+        .maybeSingle();
+
+      if (roleRow?.role !== "teacher" && roleRow?.role !== "admin") {
+        throw redirect({ to: "/tutor" });
+      }
     }
   },
   loader: () => ({

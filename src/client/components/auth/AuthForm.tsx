@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, type FormEvent } from "react"
 import { useNavigate, Link } from "@tanstack/react-router";
 import { Logo } from "@/client/components/ui/logo";
 import { supabase } from "@/client/supabase";
-import { instantLogin, assignUserRole, checkEmailStatus } from "@/fns/auth-actions.server-fns";
+import { assignUserRole, checkEmailStatus } from "@/fns/auth-actions.server-fns";
 import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileForm";
 import { WorkspaceLoader } from "@/client/components/auth/WorkspaceLoader";
 import { FcGoogle } from "react-icons/fc";
@@ -197,43 +197,13 @@ export function AuthForm() {
       const { status } = await checkEmailStatus({ data: { email: cleanEmail } });
       setEmailStatus(status);
 
-      if (status === "registered") {
-        // Fully onboarded returning user — skip OTP, instant session
-        const result = await instantLogin({ data: { email: cleanEmail } });
-        const { error } = await supabase.auth.setSession({
-          access_token: result.access_token,
-          refresh_token: result.refresh_token,
-        });
-        if (error) throw error;
-
-        // Final safety check — show profile form if somehow incomplete
-        const { data: sessionData } = await supabase.auth.getSession();
-        const userId = sessionData.session?.user?.id;
-        if (userId) {
-          const { data: profileRow } = await supabase
-            .from("profiles")
-            .select("display_name, onboarding_completed")
-            .eq("id", userId)
-            .maybeSingle();
-
-          if (!profileRow?.display_name?.trim() || !profileRow?.onboarding_completed) {
-            setLoadingProvider(null);
-            setShowProfileForm(true);
-            return;
-          }
-        }
-
-        setShowLoader(true);
-        await routeToDestination();
-      } else {
-        // 'new' or 'incomplete' — always require OTP verification first
-        await sendOtp(cleanEmail);
-        setStep("otp");
-        setResendCooldown(60);
-        setLoadingProvider(null);
-        // Focus first OTP box after render
-        setTimeout(() => otpRefs.current[0]?.focus(), 80);
-      }
+      // Always require OTP verification for all users to ensure account ownership
+      await sendOtp(cleanEmail);
+      setStep("otp");
+      setResendCooldown(60);
+      setLoadingProvider(null);
+      // Focus first OTP box after render
+      setTimeout(() => otpRefs.current[0]?.focus(), 80);
     } catch (err) {
       setLoadingProvider(null);
       toast.error(

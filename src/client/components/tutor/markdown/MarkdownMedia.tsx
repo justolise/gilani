@@ -13,13 +13,19 @@ export function MarkdownP({ children }: any) {
 }
 
 export function MarkdownA({ href, children }: any) {
+  const isSafe =
+    typeof href === "string" &&
+    /^(https?:\/\/|mailto:|\/|#)/i.test(href.trim()) &&
+    !/^(javascript|vbscript|data):/i.test(href.trim());
+  const safeHref = isSafe ? href : "#";
+
   return (
     <a
-      href={href}
+      href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex items-center gap-1 text-sky-500 hover:text-sky-400 dark:text-sky-400 dark:hover:text-sky-300 underline decoration-sky-500/50 hover:decoration-sky-400 underline-offset-2 decoration-2 transition-colors font-medium cursor-pointer break-words"
-      title={href}
+      title={safeHref}
     >
       {children}
       <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 opacity-80" />

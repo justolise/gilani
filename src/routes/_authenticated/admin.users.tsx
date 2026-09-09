@@ -23,6 +23,16 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
       const { data } = await supabase.auth.getSession();
       if (!data.session)
         throw redirect({ to: "/login", search: { redirect: "/admin/users", signout: undefined } });
+
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.session.user.id)
+        .maybeSingle();
+
+      if (roleRow?.role !== "admin") {
+        throw redirect({ to: "/tutor" });
+      }
     }
   },
   loader: () => ({

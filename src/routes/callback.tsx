@@ -34,8 +34,8 @@ function AuthCallback() {
   const [showLoader, setShowLoader] = useState(false);
   const processedRef = useRef(false);
 
-  // Sanitize next — prevent open redirect attacks
-  const safePath = next.startsWith("/") ? next : "/tutor";
+  // Sanitize next — prevent open redirect attacks (reject protocol-relative URLs like //evil.com)
+  const safePath = next && next.startsWith("/") && !next.startsWith("//") ? next : "/tutor";
 
   // Fresh sign-ins should land on the true empty-state home, not wherever
   // tutor.tsx's own logic would otherwise auto-jump a returning visitor to

@@ -50,6 +50,10 @@ const deleteAccount = createServerFn({ method: "POST" })
       });
     }
     const { userId, user } = authResult;
+    const cleanOtp = data.otp?.trim();
+    if (!cleanOtp || cleanOtp.length < 4) {
+      throw new Error("A valid verification code is required to delete your account.");
+    }
     const { data: roleRow } = await supabaseAdmin
       .from("user_roles")
       .select("role")

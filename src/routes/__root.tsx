@@ -315,16 +315,20 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* Theme init — must run before paint to avoid flash */}
+        {/* Theme & Platform init — runs before paint to avoid flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const storedTheme = localStorage.getItem("theme");
-                if (storedTheme === "dark" || (!storedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-                  document.documentElement.classList.add("dark");
-                } else {
-                  document.documentElement.classList.remove("dark");
+                var d = document.documentElement;
+                var t = localStorage.getItem("theme") || "system";
+                var dark = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+                d.classList.toggle("dark", dark);
+                if (window.Capacitor || navigator.userAgent.indexOf("Capacitor") !== -1 || navigator.userAgent.indexOf("wv") !== -1) {
+                  d.classList.add("capacitor-native");
+                  if (/android/i.test(navigator.userAgent)) {
+                    d.classList.add("capacitor-android");
+                  }
                 }
               } catch (_) {}
             `,
@@ -335,11 +339,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ORG_JSON_LD }} />
       </head>
       <body suppressHydrationWarning style={{ background: "hsl(var(--background, 24 15% 8%))" }}>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var d=document.documentElement;var t=localStorage.getItem("theme")||"system";var dark=t==="dark"||(t==="system"&&window.matchMedia("(prefers-color-scheme:dark)").matches);d.classList.toggle("dark",dark);document.body.style.background=dark?"#0f1117":"#ffffff";if(window.Capacitor||navigator.userAgent.indexOf("Capacitor")!==-1||navigator.userAgent.indexOf("wv")!==-1){d.classList.add("capacitor-native");if(/android/i.test(navigator.userAgent)){d.classList.add("capacitor-android");}}})()`,
-          }}
-        />
         {children}
         <Scripts />
       </body>

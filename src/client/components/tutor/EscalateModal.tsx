@@ -88,7 +88,7 @@ export function EscalateModal({
           </button>
           <button
             onClick={onConfirm}
-            disabled={isEscalating || !teacherEmail.trim()}
+            disabled={isEscalating || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teacherEmail.trim())}
             className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-60 transition-colors min-h-[44px] cursor-pointer"
           >
             {isEscalating ? (

@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { supabaseAdmin } from "@/server/supabase";
-import { sanitizeCurriculum } from "@/shared/utils/tutor-prompt";
+import { sanitizeCurriculum, sanitizeUntrustedInput } from "@/shared/utils/tutor-prompt";
 import { setCachedProfile, type CachedProfile } from "./profile-cache.server";
 import { queryCurriculumAndNotes } from "./rag.server";
 
@@ -105,11 +105,12 @@ export function createChatTools({
           const stderr = (result?.stderr || "").trim();
           const compileOutput = (result?.compile_output || "").trim();
 
-          let output = `Status: ${statusDescription}`;
+          let output = `<code_execution_result>\nStatus: ${statusDescription}`;
           if (compileOutput) output += `\nCompile output:\n${compileOutput.slice(0, 1500)}`;
           if (stdout) output += `\nOutput:\n${stdout.slice(0, 1500)}`;
           if (stderr) output += `\nErrors:\n${stderr.slice(0, 1500)}`;
           if (!compileOutput && !stdout && !stderr) output += "\n(No output produced.)";
+          output += "\n</code_execution_result>";
 
           console.log(`[API Chat] evaluateCode result: ${statusDescription}`);
           return { output };
@@ -187,11 +188,12 @@ export function createChatTools({
             )
             .join("\n\n");
 
-          let result = "";
-          if (answer) result += `AI Summary: ${answer}\n\n`;
+          let result = "<external_search_results>\n";
+          if (answer) result += `AI Summary: ${sanitizeUntrustedInput(answer)}\n\n`;
           result += formattedResults
-            ? `Web Results:\n${formattedResults}`
+            ? `Web Results:\n${sanitizeUntrustedInput(formattedResults)}`
             : "No relevant results found.";
+          result += "\n</external_search_results>";
 
           console.log(
             `[API Chat] searchWeb: ${results.length} results returned for query: "${query}"`,

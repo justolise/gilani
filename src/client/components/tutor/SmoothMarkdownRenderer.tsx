@@ -93,6 +93,18 @@ export function SmoothMarkdownRenderer({
     }
   }, [isStreaming, content, animationDone]);
 
+  // Safety fallback: if streaming ended, ensure animation finishes even on network drop
+  useEffect(() => {
+    if (!isStreaming && !animationDone) {
+      const timer = setTimeout(() => {
+        setDisplayedLength(content.length);
+        setAnimationDone(true);
+        onAnimationCompleteRef.current?.();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isStreaming, animationDone, content.length]);
+
   // Once animation finishes and streaming is done, switch to static render
   if (animationDone && !isStreaming) {
     return <MarkdownRenderer content={content} isStreaming={false} className={className} />;

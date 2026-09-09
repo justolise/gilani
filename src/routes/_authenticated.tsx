@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { authenticateRequest } from "@/server/api-auth.server";
+import { supabase } from "@/client/supabase";
 import { LayoutContext } from "@/client/contexts/layout-context";
 import { DisclaimerModal } from "@/client/components/DisclaimerModal";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
@@ -82,14 +83,27 @@ function AuthedShell() {
 
   if (timedOut) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
-        <p className="text-sm text-muted-foreground">Taking longer than expected…</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Refresh
-        </button>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4">
+        <p className="text-sm text-muted-foreground text-center">
+          Authentication is taking longer than expected…
+        </p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
+          >
+            Refresh
+          </button>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/login";
+            }}
+            className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
+          >
+            Sign In Again
+          </button>
+        </div>
       </div>
     );
   }
