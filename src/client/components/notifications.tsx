@@ -13,7 +13,13 @@ type Notification = {
   created_at: string;
 };
 
-export function NotificationBell({ userId }: { userId: string }) {
+export function NotificationBell({
+  userId,
+  placement = "bottom",
+}: {
+  userId: string;
+  placement?: "top" | "bottom";
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -142,7 +148,11 @@ export function NotificationBell({ userId }: { userId: string }) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-2xl border border-border bg-card shadow-xl overflow-hidden">
+          <div
+            className={`absolute z-50 w-80 rounded-2xl border border-border bg-card shadow-xl overflow-hidden ${
+              placement === "top" ? "left-0 bottom-full mb-2" : "right-0 top-full mt-2"
+            }`}
+          >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h3 className="font-semibold text-sm">Notifications</h3>

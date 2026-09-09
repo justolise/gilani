@@ -30,6 +30,7 @@ import { ThreadActionSheet } from "@/client/components/layout/ThreadActionSheet"
 import { EscalateModal } from "@/client/components/tutor/EscalateModal";
 import type { useAuthedShell } from "@/client/components/layout/hooks/useAuthedShell";
 import { SidebarUserMenu } from "./sidebar/SidebarUserMenu";
+import { NotificationBell } from "@/client/components/notifications";
 import { useI18n } from "@/client/i18n/I18nContext";
 
 type Props = {
@@ -714,8 +715,15 @@ export function Sidebar({ shell }: Props) {
                 </button>
               )}
 
-              {/* User profile menu */}
-              <div className="w-full">{renderUserMenu(false)}</div>
+              {/* User profile menu with Notification Bell stacked horizontally */}
+              <div className="w-full flex items-center gap-2">
+                <div className="flex-1 min-w-0">{renderUserMenu(false)}</div>
+                {user?.id && (
+                  <div className="flex-shrink-0 flex items-center justify-center p-1 rounded-xl border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
+                    <NotificationBell userId={user.id} placement="top" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

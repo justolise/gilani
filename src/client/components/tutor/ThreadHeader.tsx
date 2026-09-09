@@ -55,112 +55,106 @@ export function ThreadHeader({
 }: Props) {
   const currentTitle = threadId ? threads.find((th) => th.id === threadId)?.title : "";
 
-  const timerContent = timerState ? (
-    <div
-      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold uppercase tracking-wider flex-shrink-0 transition-all duration-300 ${
-        timerState.running
-          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/20"
-          : "border-border bg-muted/40 text-muted-foreground"
-      }`}
-    >
-      <Timer className={`h-3.5 w-3.5 ${timerState.running ? "animate-pulse" : ""}`} />
-      <span className="font-mono">
-        {String(timerState.minutes).padStart(2, "0")}:{String(timerState.seconds).padStart(2, "0")}
-      </span>
-    </div>
-  ) : null;
-
-  const combinedLeftContent = <div className="flex items-center gap-2">{timerContent}</div>;
-
   const actionsContent = (
-    <>
-      <button
-        onClick={createNewThread}
-        className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
-        title="New Chat"
-        aria-label="New Chat"
-      >
-        <SquarePen className="h-5 w-5" />
-      </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="relative p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+          aria-label="More session options"
+          title="More options"
+        >
+          <MoreVertical className="h-5 w-5" />
+          {timerState?.running && (
+            <span className="absolute top-2 right-2 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem onClick={createNewThread}>
+          <SquarePen className="h-4 w-4 mr-2 text-primary" />
+          <span>New Chat</span>
+        </DropdownMenuItem>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted/60 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
-            aria-label="More session options"
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={() => setTimerOpen(true)}>
+          <Timer className="h-4 w-4 mr-2" />
+          <span className="flex-1">Study Timer</span>
+          {timerState && (
+            <span className="font-mono text-xs font-semibold text-primary ml-2">
+              {String(timerState.minutes).padStart(2, "0")}:
+              {String(timerState.seconds).padStart(2, "0")}
+            </span>
+          )}
+        </DropdownMenuItem>
+
+        {threadId && (
+          <DropdownMenuItem
+            onClick={() => requestRenameThread(threadId, currentTitle || "Untitled Chat")}
           >
-            <MoreVertical className="h-5 w-5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          {threadId && (
-            <DropdownMenuItem
-              onClick={() => requestRenameThread(threadId, currentTitle || "Untitled Chat")}
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Rename
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={() => setTimerOpen(true)}>
-            <Timer className="h-4 w-4 mr-2" />
-            Study Timer
+            <Pencil className="h-4 w-4 mr-2" />
+            <span>Rename</span>
           </DropdownMenuItem>
-          {threadId && (
-            <DropdownMenuItem onClick={() => handleExportPDF()}>
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </DropdownMenuItem>
-          )}
-          {threadId && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setEscalateModalOpen(true)}>
-                {escalationStatus === "resolved" ? (
-                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
-                ) : escalationStatus === "in_review" || escalationStatus === "open" ? (
-                  <Clock className="h-4 w-4 mr-2 text-amber-500 animate-pulse" />
-                ) : (
-                  <ShieldAlert className="h-4 w-4 mr-2 text-amber-500" />
-                )}
+        )}
+
+        {threadId && (
+          <DropdownMenuItem onClick={() => handleExportPDF()}>
+            <Download className="h-4 w-4 mr-2" />
+            <span>Export PDF</span>
+          </DropdownMenuItem>
+        )}
+
+        {threadId && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setEscalateModalOpen(true)}>
+              {escalationStatus === "resolved" ? (
+                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+              ) : escalationStatus === "in_review" || escalationStatus === "open" ? (
+                <Clock className="h-4 w-4 mr-2 text-amber-500 animate-pulse" />
+              ) : (
+                <ShieldAlert className="h-4 w-4 mr-2 text-amber-500" />
+              )}
+              <span>
                 {escalationStatus === "resolved"
                   ? "Teacher Reviewed"
                   : escalationStatus === "in_review" || escalationStatus === "open"
                     ? "Review Pending"
                     : "Escalate to Teacher"}
-              </DropdownMenuItem>
-            </>
-          )}
-          {threadId && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => requestDeleteThread(threadId)}
-                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Chat
-              </DropdownMenuItem>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </>
+              </span>
+            </DropdownMenuItem>
+          </>
+        )}
+
+        {threadId && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => requestDeleteThread(threadId)}
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              <span>Delete Chat</span>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 
-  const titleContent = currentTitle ? (
-    <span
-      className="hidden sm:block text-sm font-semibold text-foreground truncate max-w-[200px] lg:max-w-xs"
-      title={currentTitle}
-    >
-      {currentTitle}
-    </span>
-  ) : null;
-
-  return (
-    <AppHeader
-      leftContent={combinedLeftContent}
-      centerContent={titleContent}
-      actions={actionsContent}
-    />
+  const titleContent = (
+    <div className="w-full flex items-center justify-center px-1">
+      <h1
+        className="text-base sm:text-lg font-semibold text-foreground truncate max-w-full text-center tracking-tight"
+        title={currentTitle || "New Conversation"}
+      >
+        {currentTitle || "New Conversation"}
+      </h1>
+    </div>
   );
+
+  return <AppHeader centerContent={titleContent} actions={actionsContent} />;
 }
