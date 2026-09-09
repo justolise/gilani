@@ -419,7 +419,12 @@ export const MessageBubble = memo(function MessageBubble({
                       aria-label="Copy message"
                     >
                       {copied ? (
-                        <Check className="h-3.5 w-3.5 text-green-500" />
+                        <>
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                          <span className="text-green-500 animate-in fade-in duration-150">
+                            Copied!
+                          </span>
+                        </>
                       ) : (
                         <Copy className="h-3.5 w-3.5" />
                       )}
@@ -441,37 +446,37 @@ export const MessageBubble = memo(function MessageBubble({
                       </button>
                     )}
 
-                    <span className="w-px h-3 bg-border/60 mx-0.5" />
+                    <span className="w-px h-4 bg-border/70 mx-1" />
 
                     <button
                       onClick={() => handleVote(1)}
                       disabled={voting}
-                      className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer ${
+                      className={`inline-flex items-center gap-1 text-xs font-medium transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted cursor-pointer active:scale-110 ${
                         vote === 1 ? "text-green-500" : "text-muted-foreground hover:text-green-500"
                       }`}
-                      title="Good response"
-                      aria-label="Vote up"
+                      title="Helpful response"
+                      aria-label="Mark as helpful"
                     >
-                      <ThumbsUp className="h-3.5 w-3.5" />
+                      <ThumbsUp className={`h-3.5 w-3.5 ${vote === 1 ? "fill-current" : ""}`} />
                     </button>
 
                     <button
                       onClick={() => handleVote(-1)}
                       disabled={voting}
-                      className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer ${
+                      className={`inline-flex items-center gap-1 text-xs font-medium transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted cursor-pointer active:scale-110 ${
                         vote === -1
                           ? "text-destructive"
                           : "text-muted-foreground hover:text-destructive"
                       }`}
-                      title="Bad response"
-                      aria-label="Vote down"
+                      title="Not helpful — we'll improve"
+                      aria-label="Mark as not helpful"
                     >
-                      <ThumbsDown className="h-3.5 w-3.5" />
+                      <ThumbsDown className={`h-3.5 w-3.5 ${vote === -1 ? "fill-current" : ""}`} />
                     </button>
 
                     {onEscalate && (
                       <>
-                        <span className="w-px h-3 bg-border/60 mx-0.5" />
+                        <span className="w-px h-4 bg-border/70 mx-1" />
                         <button
                           onClick={onEscalate}
                           disabled={
@@ -510,11 +515,12 @@ export const MessageBubble = memo(function MessageBubble({
                     {onExportPDF && (
                       <button
                         onClick={onExportPDF}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
-                        title="Export thread as PDF"
-                        aria-label="Export as PDF"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
+                        title="Export this conversation as PDF"
+                        aria-label="Export conversation as PDF"
                       >
                         <FileDown className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Export PDF</span>
                       </button>
                     )}
                   </div>

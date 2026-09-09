@@ -9,6 +9,7 @@ interface AppHeaderProps {
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   leftContent?: React.ReactNode;
+  centerContent?: React.ReactNode;
   actions?: React.ReactNode;
   hideNotifications?: boolean;
 }
@@ -17,6 +18,7 @@ export function AppHeader({
   title,
   subtitle,
   leftContent,
+  centerContent,
   actions,
   hideNotifications,
 }: AppHeaderProps) {
@@ -38,9 +40,14 @@ export function AppHeader({
         {leftContent}
       </div>
 
-      <div className="flex-1 flex flex-col justify-center min-w-0 px-2 lg:text-center text-left">
-        {title && <h2 className="text-sm font-semibold text-foreground truncate">{title}</h2>}
-        {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
+      <div className="flex-1 flex flex-col justify-center items-center min-w-0 px-2 text-center">
+        {centerContent}
+        {!centerContent && title && (
+          <h2 className="text-sm font-semibold text-foreground truncate">{title}</h2>
+        )}
+        {!centerContent && subtitle && (
+          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">

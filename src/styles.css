@@ -505,6 +505,20 @@ html[data-font-family="serif"] body {
   animation: thinking-shimmer 2.5s ease-in-out infinite;
 }
 
+/* ── Tool step pill shimmer sweep (translate-based) ─────────────── */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
 /* ── Premium loader progress fill ───────────────────────────────── */
 @keyframes progress-fill {
   0% {

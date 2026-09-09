@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Home,
@@ -91,6 +91,7 @@ export function Sidebar({ shell }: Props) {
 
   const { t } = useI18n();
   const [threadSearch, setThreadSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const isStudent = !isTeacher && !isAdmin;
 
   // ── Keyboard shortcuts: ⌘N (New Chat), ⌘B (Toggle Sidebar) ──────────────────
@@ -111,6 +112,23 @@ export function Sidebar({ shell }: Props) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [createNewThread, setSidebarOpen, toggleCollapsed]);
+
+  // '/' shortcut: focus thread search when sidebar is open
+  useEffect(() => {
+    const handleSlash = (e: KeyboardEvent) => {
+      if (!sidebarOpen && window.innerWidth >= 1024) return; // desktop always visible
+      // Don't hijack when typing in an input/textarea
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable)
+        return;
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleSlash);
+    return () => window.removeEventListener("keydown", handleSlash);
+  }, [sidebarOpen]);
 
   // Filtered threads for search
   const filteredGroupedThreads = threadSearch.trim()
@@ -524,19 +542,24 @@ export function Sidebar({ shell }: Props) {
                     <div className="relative">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40 pointer-events-none" />
                       <input
+                        ref={searchInputRef}
                         type="text"
-                        placeholder="Search chats..."
+                        placeholder="Search chats…"
                         value={threadSearch}
                         onChange={(e) => setThreadSearch(e.target.value)}
-                        className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] pl-8 pr-7 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/[0.06] transition-all"
+                        className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] pl-8 pr-14 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/[0.06] transition-all"
                       />
-                      {threadSearch && (
+                      {threadSearch ? (
                         <button
                           onClick={() => setThreadSearch("")}
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-0.5"
                         >
                           <X className="h-3 w-3" />
                         </button>
+                      ) : (
+                        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] font-mono text-muted-foreground/30 bg-white/[0.04] border border-white/[0.06] px-1 py-0.5 rounded">
+                          /
+                        </kbd>
                       )}
                     </div>
                   </div>
@@ -584,8 +607,8 @@ export function Sidebar({ shell }: Props) {
                                     onContextMenu={(e) => e.preventDefault()}
                                     className={`group flex items-center justify-between rounded-xl px-2.5 py-2 text-xs transition-all relative select-none ${
                                       isCurrent
-                                        ? "bg-muted/70 text-foreground font-semibold shadow-xs"
-                                        : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                                        ? "bg-muted/70 text-foreground font-semibold shadow-xs border-l-2 border-primary pl-2"
+                                        : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border-l-2 border-transparent"
                                     }`}
                                   >
                                     {renamingId === tItem.id ? (

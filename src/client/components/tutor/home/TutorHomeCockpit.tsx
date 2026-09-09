@@ -80,7 +80,7 @@ export function TutorHomeCockpit({
     <div className="w-full flex flex-col items-center justify-start px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-[calc(13rem+env(safe-area-inset-bottom,0px))] lg:pb-28">
       {/* Academic Header & Curriculum Indicator */}
       <div className="flex flex-col items-center text-center space-y-2.5 max-w-xl">
-        <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-300">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold tracking-wide shadow-xs">
             <GraduationCap className="w-3.5 h-3.5" />
             <span>{curriculum ? `${curriculum} Curriculum` : "Academic AI Tutor"}</span>
@@ -101,13 +101,14 @@ export function TutorHomeCockpit({
           </button>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground animate-in fade-in slide-in-from-bottom-4 duration-400 delay-100">
           {greeting}
         </h1>
 
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed">
-          What concept or problem are we mastering today? Select a learning mode or ask directly
-          below.
+        <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-400 delay-150">
+          {firstName
+            ? `What are we mastering today, ${firstName}? Pick a learning mode or ask directly below.`
+            : "What concept or problem are we mastering today? Select a learning mode or ask directly below."}
         </p>
       </div>
 

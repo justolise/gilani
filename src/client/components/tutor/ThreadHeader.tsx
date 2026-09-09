@@ -56,8 +56,14 @@ export function ThreadHeader({
   const currentTitle = threadId ? threads.find((th) => th.id === threadId)?.title : "";
 
   const timerContent = timerState ? (
-    <div className="flex items-center gap-1.5 rounded-lg border border-primary bg-primary/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-primary flex-shrink-0">
-      <Timer className="h-3 w-3 animate-pulse" />
+    <div
+      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider flex-shrink-0 transition-all duration-300 ${
+        timerState.running
+          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/20"
+          : "border-border bg-muted/40 text-muted-foreground"
+      }`}
+    >
+      <Timer className={`h-3 w-3 ${timerState.running ? "animate-pulse" : ""}`} />
       <span className="font-mono">
         {String(timerState.minutes).padStart(2, "0")}:{String(timerState.seconds).padStart(2, "0")}
       </span>
@@ -141,5 +147,20 @@ export function ThreadHeader({
     </>
   );
 
-  return <AppHeader leftContent={combinedLeftContent} actions={actionsContent} />;
+  const titleContent = currentTitle ? (
+    <span
+      className="hidden sm:block text-sm font-semibold text-foreground truncate max-w-[200px] lg:max-w-xs"
+      title={currentTitle}
+    >
+      {currentTitle}
+    </span>
+  ) : null;
+
+  return (
+    <AppHeader
+      leftContent={combinedLeftContent}
+      centerContent={titleContent}
+      actions={actionsContent}
+    />
+  );
 }

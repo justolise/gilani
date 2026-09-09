@@ -243,7 +243,13 @@ export function ChatInput({
         )}
 
         {/* ── Main input pill: [+ actions] [textarea] [send] ── */}
-        <div className="flex items-end gap-2 rounded-3xl border border-border/70 bg-card/85 backdrop-blur-xl shadow-sm dark:shadow-none hover:border-border/90 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-200 px-2 py-2">
+        <div
+          className={`flex items-end gap-2 rounded-3xl border bg-card/85 backdrop-blur-xl shadow-sm dark:shadow-none transition-all duration-200 px-2 py-2 ${
+            isListening
+              ? "border-red-500/60 ring-2 ring-red-500/20 animate-pulse"
+              : "border-border/70 hover:border-border/90 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20"
+          }`}
+        >
           {/* Hidden file input */}
           <input
             id="chat-file-input"
@@ -393,9 +399,15 @@ export function ChatInput({
         {input.length > 0 && (
           <div className="mt-1 flex justify-end px-1 animate-in fade-in duration-200">
             <span
-              className={`font-mono text-xs font-medium tabular-nums ${input.length > 3000 ? "text-amber-500" : "text-muted-foreground/70"}`}
+              className={`font-mono text-xs font-medium tabular-nums transition-colors duration-200 ${
+                4000 - input.length < 200
+                  ? "text-red-500 animate-pulse"
+                  : input.length > 3000
+                    ? "text-amber-500"
+                    : "text-muted-foreground/70"
+              }`}
             >
-              {input.length.toLocaleString()} chars
+              {(4000 - input.length).toLocaleString()} left
             </span>
           </div>
         )}

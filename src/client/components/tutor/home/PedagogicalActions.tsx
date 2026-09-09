@@ -71,7 +71,7 @@ export function PedagogicalActions({
   return (
     <div className={`w-full max-w-3xl ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-        {PEDAGOGICAL_ACTIONS.map((action) => {
+        {PEDAGOGICAL_ACTIONS.map((action, i) => {
           const Icon = action.icon;
           return (
             <button
@@ -79,15 +79,16 @@ export function PedagogicalActions({
               type="button"
               disabled={disabled}
               onClick={() => !disabled && onSelectAction(action.prompt)}
-              className={`group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 text-left ${
+              style={{ animationDelay: `${i * 60}ms` }}
+              className={`group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 text-left animate-in fade-in slide-in-from-bottom-2 duration-300 ${
                 disabled
                   ? "border-border/40 bg-card/40 opacity-50 cursor-not-allowed shadow-none"
-                  : "border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-0.5 shadow-xs hover:shadow-md active:scale-[0.99] cursor-pointer"
+                  : "border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-1 shadow-xs hover:shadow-lg active:scale-[0.99] cursor-pointer"
               }`}
             >
               <div
                 className={`p-2.5 rounded-xl border flex-shrink-0 transition-transform duration-200 ${
-                  disabled ? "grayscale opacity-60" : "group-hover:scale-105"
+                  disabled ? "grayscale opacity-60" : "group-hover:scale-110"
                 } ${action.colorClass}`}
               >
                 <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
@@ -105,6 +106,16 @@ export function PedagogicalActions({
                     {action.title}
                   </span>
                 </div>
+                {/* Badge chip */}
+                <span
+                  className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-md mb-1 ${
+                    disabled
+                      ? "opacity-40 bg-muted text-muted-foreground"
+                      : `${action.colorClass} opacity-80`
+                  }`}
+                >
+                  {action.badge}
+                </span>
                 <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug line-clamp-2">
                   {action.subtitle}
                 </p>
