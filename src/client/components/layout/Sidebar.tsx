@@ -390,13 +390,13 @@ export function Sidebar({ shell }: Props) {
                     createNewThread();
                     setSidebarOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-foreground text-background dark:bg-white dark:text-black hover:opacity-90 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold shadow-xs cursor-pointer group min-h-[44px] sm:min-h-0"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-transparent text-primary hover:bg-primary/10 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold cursor-pointer group min-h-[44px] sm:min-h-0"
                 >
                   <span className="flex items-center gap-2">
                     <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5 group-hover:rotate-90 transition-transform duration-200" />
                     New Chat
                   </span>
-                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono rounded bg-background/20 dark:bg-black/15 text-background dark:text-black">
+                  <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono rounded bg-primary/10 text-primary border border-primary/20">
                     ⌘N
                   </kbd>
                 </button>
