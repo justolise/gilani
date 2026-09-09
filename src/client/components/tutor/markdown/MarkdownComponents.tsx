@@ -10,24 +10,24 @@ export { MarkdownPre, MarkdownCode };
 export function getMarkdownComponents(isStreaming: boolean) {
   return {
     h1: ({ children }: any) => (
-      <h1 className="text-2xl font-bold mt-8 mb-4 text-foreground pb-2 leading-tight tracking-tight border-b border-border/50">
+      <h1 className="text-2xl font-bold mt-7 mb-3.5 text-foreground pb-2 leading-tight tracking-tight border-b border-border/50">
         {children}
       </h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-xl font-bold mt-8 mb-4 text-foreground leading-snug">{children}</h2>
+      <h2 className="text-xl font-bold mt-7 mb-3 text-foreground leading-snug">{children}</h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-lg font-semibold mt-6 mb-3 text-foreground leading-snug">{children}</h3>
+      <h3 className="text-lg font-semibold mt-5 mb-2.5 text-foreground leading-snug">{children}</h3>
     ),
     h4: ({ children }: any) => (
-      <h4 className="text-base font-semibold mt-5 mb-2 text-foreground">{children}</h4>
+      <h4 className="text-base font-semibold mt-4 mb-2 text-foreground">{children}</h4>
     ),
     h5: ({ children }: any) => (
-      <h5 className="text-base sm:text-sm font-semibold mt-4 mb-2 text-foreground">{children}</h5>
+      <h5 className="text-sm font-semibold mt-3.5 mb-1.5 text-foreground">{children}</h5>
     ),
     h6: ({ children }: any) => (
-      <h6 className="text-sm sm:text-xs font-semibold mt-4 mb-2 text-muted-foreground uppercase tracking-wide">
+      <h6 className="text-xs font-semibold mt-3 mb-1.5 text-muted-foreground uppercase tracking-widest">
         {children}
       </h6>
     ),

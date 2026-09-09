@@ -301,11 +301,14 @@ export const MessageList = React.memo(function MessageList({
       role="log"
       aria-label="Chat messages"
       aria-live="polite"
-      className={`flex-1 min-h-0 overflow-y-auto px-2 py-2 sm:px-5 sm:py-5 ${
+      className={`flex-1 min-h-0 overflow-y-auto px-2 py-3 sm:px-5 sm:py-6 ${
         isRateLimited ? "pb-80" : "pb-56"
       }`}
     >
-      <div ref={innerRef} className="space-y-2 sm:space-y-3 flex flex-col pb-4 min-h-full">
+      <div
+        ref={innerRef}
+        className="space-y-1 sm:space-y-2 flex flex-col pb-4 min-h-full max-w-4xl mx-auto w-full"
+      >
         {/* Loading state */}
         {effectiveLoading && (
           <div

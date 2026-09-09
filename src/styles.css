@@ -295,6 +295,8 @@ html[data-font-family="serif"] body {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Smooth font-size transitions when user switches size setting */
+    transition: font-size 0.2s ease;
   }
 
   * {
@@ -306,7 +308,7 @@ html[data-font-family="serif"] body {
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1.65;
     font-feature-settings: "cv11", "ss01";
     -webkit-tap-highlight-color: transparent;
   }
@@ -562,6 +564,9 @@ html[data-font-family="serif"] body {
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  /* Inherit font-size from html root so accessibility scale works */
+  font-size: inherit;
+  line-height: 1.7;
 }
 
 /* Code blocks - wrap instead of scroll */
@@ -622,28 +627,29 @@ html[data-font-family="serif"] body {
   word-wrap: break-word;
 }
 
-/* Lists - wrap */
+/* Lists - wrap and space */
 .prose-ai ul,
 .prose-ai ol {
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  margin: 0.625rem 0;
 }
 
 .prose-ai ul {
   list-style-type: disc;
-  padding-left: 1.25rem;
+  padding-left: 1.375rem;
 }
 
 .prose-ai ol {
   list-style-type: decimal;
-  padding-left: 1.25rem;
+  padding-left: 1.375rem;
 }
 
 .prose-ai ol ol {
   list-style-type: lower-alpha;
   padding-left: 1.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
 }
 
 .prose-ai ol ol ol {
@@ -654,22 +660,24 @@ html[data-font-family="serif"] body {
 .prose-ai ul ul {
   list-style-type: circle;
   padding-left: 1.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
 }
 
 .prose-ai li > ol,
 .prose-ai li > ul {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
 }
 
 .prose-ai li {
   display: list-item;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  line-height: 1.7;
+  padding: 0.1rem 0;
 }
 
-/* Headings - wrap */
+/* Headings - wrap and consistent scale */
 .prose-ai h1,
 .prose-ai h2,
 .prose-ai h3,
@@ -678,12 +686,19 @@ html[data-font-family="serif"] body {
 .prose-ai h6 {
   overflow-wrap: break-word;
   word-wrap: break-word;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
-/* Paragraphs - wrap */
+/* Paragraphs - wrap and space */
 .prose-ai p {
   overflow-wrap: break-word;
   word-wrap: break-word;
+  margin-bottom: 0.875rem;
+  line-height: 1.75;
+}
+.prose-ai p:last-child {
+  margin-bottom: 0;
 }
 
 /* Math equations - wrap or scale down */
@@ -863,7 +878,8 @@ html[data-font-family="serif"] body {
 /* These rules are a safety net for any element the React component map misses */
 
 .markdown-content {
-  line-height: 1.7;
+  font-size: inherit; /* Scales with html.text-sm / text-base / text-lg */
+  line-height: 1.72;
   word-break: break-word;
 }
 
@@ -899,18 +915,48 @@ html[data-font-family="serif"] body {
 }
 
 /* ── Accessibility Modes ─────────────────────────────────────────── */
-.reduce-motion * {
-  animation: none !important;
-  transition: none !important;
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
-.high-contrast {
-  --border: hsl(24 20% 10% / 0.5);
-  --muted-foreground: hsl(24 10% 10%);
+/* Font Size Scale (from Accessibility Settings)
+ * Applied to <html> so every em/rem value in the tree scales proportionally.
+ * This covers MessageBubble, markdown, sidebar, settings — everything. */
+html.text-sm {
+  font-size: 14px !important;
 }
-.dark.high-contrast {
-  --border: rgba(255, 255, 255, 0.4);
-  --muted-foreground: rgba(255, 255, 255, 0.9);
+html.text-base {
+  font-size: 16px !important;
+}
+html.text-lg {
+  font-size: 18.5px !important;
+}
+
+/* High Contrast — Light */
+.high-contrast {
+  --border: hsl(24 35% 20% / 0.9) !important;
+  --input: hsl(24 35% 20% / 0.9) !important;
+  --muted-foreground: hsl(24 20% 12%) !important;
+  --foreground: hsl(24 25% 5%) !important;
+  --card: #ffffff !important;
+  --background: #fafafa !important;
+  --muted: hsl(38 20% 90%) !important;
+}
+/* High Contrast — Dark */
+.dark.high-contrast,
+.dark .high-contrast {
+  --border: rgba(255, 255, 255, 0.65) !important;
+  --input: rgba(255, 255, 255, 0.65) !important;
+  --muted-foreground: rgba(255, 255, 255, 0.97) !important;
+  --foreground: #ffffff !important;
+  --card: #0a0a0a !important;
+  --background: #000000 !important;
+  --muted: #1a1a1a !important;
 }
 
 /* ── Modern Glassmorphic Surfaces & Micro-interactions ───────────── */

@@ -308,16 +308,16 @@ export const MessageBubble = memo(function MessageBubble({
   };
 
   return (
-    <div className={`flex w-full group py-2.5 sm:py-3 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex w-full group py-3 sm:py-4 ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`flex flex-col relative ${
-          isUser ? "max-w-[85%] sm:max-w-[75%]" : "w-full px-3 sm:px-8"
+          isUser ? "max-w-[88%] sm:max-w-[72%]" : "w-full px-3 sm:px-6"
         }`}
       >
         <div
           className={`${
             isUser
-              ? "px-5 py-3.5 bg-muted/60 text-foreground rounded-3xl rounded-tr-sm"
+              ? "px-4 py-3 bg-muted/70 text-foreground rounded-2xl rounded-tr-md shadow-sm border border-border/30"
               : "px-0 py-1 bg-transparent text-foreground"
           } text-base leading-relaxed relative transition-colors duration-200`}
         >

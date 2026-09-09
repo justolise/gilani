@@ -47,10 +47,10 @@ export function MarkdownOl({ children, node, start, className, ...props }: any) 
   // depth >= 2: lower-roman (i, ii, iii...)
   const depthClass =
     depth === 0
-      ? "list-decimal my-3 pl-6 space-y-1.5"
+      ? "list-decimal my-3.5 pl-6 space-y-2"
       : depth === 1
-        ? "list-[lower-alpha] mt-1.5 mb-1 pl-5 space-y-1"
-        : "list-[lower-roman] mt-1 mb-1 pl-5 space-y-1";
+        ? "list-[lower-alpha] mt-2 mb-1.5 pl-5 space-y-1.5"
+        : "list-[lower-roman] mt-1.5 mb-1 pl-5 space-y-1";
 
   return (
     <PracticeCounterCtx.Provider value={practiceNumbers}>
@@ -76,10 +76,10 @@ export function MarkdownUl({ children, className, ...props }: any) {
   // depth >= 2: square (■)
   const depthClass =
     depth === 0
-      ? "list-disc my-3 pl-6 space-y-1.5"
+      ? "list-disc my-3.5 pl-6 space-y-2"
       : depth === 1
-        ? "list-[circle] mt-1.5 mb-1 pl-5 space-y-1"
-        : "list-[square] mt-1 mb-1 pl-5 space-y-1";
+        ? "list-[circle] mt-2 mb-1.5 pl-5 space-y-1.5"
+        : "list-[square] mt-1.5 mb-1 pl-5 space-y-1";
 
   return (
     <ListDepthContext.Provider value={depth + 1}>
@@ -150,7 +150,7 @@ export function MarkdownLi({ children, checked, node, ...props }: any) {
 
   return (
     <li
-      className="text-base leading-relaxed sm:leading-7 my-1 [&>p]:mb-1 [&>p:last-child]:mb-0"
+      className="text-base leading-[1.72] my-0.5 [&>p]:mb-1.5 [&>p:last-child]:mb-0"
       style={{ display: "list-item" }}
       {...props}
     >
