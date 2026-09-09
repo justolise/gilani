@@ -291,6 +291,12 @@ html[data-font-family="serif"] body {
 }
 
 @layer base {
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   * {
     border-color: var(--color-border);
   }
@@ -299,7 +305,10 @@ html[data-font-family="serif"] body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
     font-feature-settings: "cv11", "ss01";
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1,
@@ -735,14 +744,14 @@ html[data-font-family="serif"] body {
 
 /* ── PrismJS overrides for consistent styling ───────────────────── */
 .prose-ai pre[class*="language-"] {
-  margin: 0.5rem 0 !important;
-  padding: 0.75rem !important;
-  padding-top: 1.5rem !important;
-  border-radius: 0.75rem !important;
+  margin: 0.75rem 0 !important;
+  padding: 0.875rem !important;
+  padding-top: 1.75rem !important;
+  border-radius: 0.875rem !important;
   background: #131722 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  font-size: 11px !important;
-  line-height: 1.5 !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
   overflow: hidden !important;
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
@@ -752,8 +761,17 @@ html[data-font-family="serif"] body {
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
-  font-size: 11px !important;
-  line-height: 1.5 !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+}
+
+@media (min-width: 640px) {
+  .prose-ai pre[class*="language-"] {
+    font-size: 14px !important;
+  }
+  .prose-ai code[class*="language-"] {
+    font-size: 14px !important;
+  }
 }
 
 /* Dark mode adjustments for Prism */

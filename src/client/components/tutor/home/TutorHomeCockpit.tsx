@@ -105,7 +105,7 @@ export function TutorHomeCockpit({
           {greeting}
         </h1>
 
-        <p className="text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-400 delay-150">
+        <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-400 delay-150">
           {firstName
             ? `What are we mastering today, ${firstName}? Pick a learning mode or ask directly below.`
             : "What concept or problem are we mastering today? Select a learning mode or ask directly below."}
@@ -128,7 +128,7 @@ export function TutorHomeCockpit({
 
       {/* Pedagogical Action Accelerators */}
       <div className="w-full flex flex-col items-center gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 font-medium self-start sm:self-center">
+        <div className="flex items-center gap-1.5 text-sm sm:text-xs text-muted-foreground/80 font-medium self-start sm:self-center">
           <Sparkles className="w-3.5 h-3.5 text-primary/70" />
           <span>How would you like to learn?</span>
         </div>

@@ -78,12 +78,12 @@ export function SidebarUserMenu({
           {!isCompact && (
             <div className="flex-1 min-w-0 flex items-center justify-between">
               <div className="flex flex-col min-w-0 pr-1">
-                <p className="text-xs font-semibold truncate text-foreground leading-tight group-hover:text-primary transition-colors">
+                <p className="text-sm sm:text-xs font-semibold truncate text-foreground leading-tight group-hover:text-primary transition-colors">
                   {displayName}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
-                    className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
+                    className={`text-[10px] sm:text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.2 rounded ${
                       isPro
                         ? "bg-[#C96A3D]/20 text-[#E28743] border border-[#C96A3D]/30"
                         : "bg-muted text-muted-foreground"
@@ -91,12 +91,12 @@ export function SidebarUserMenu({
                   >
                     {isPro ? "PRO" : "FREE"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground/60 truncate font-mono">
+                  <span className="text-xs sm:text-[10px] text-muted-foreground/60 truncate font-mono">
                     {curriculum || (isAdmin ? "Admin" : isTeacher ? "Teacher" : null)}
                   </span>
                 </div>
               </div>
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
             </div>
           )}
         </button>
@@ -105,11 +105,11 @@ export function SidebarUserMenu({
       <DropdownMenuContent
         side={isCompact ? "right" : "top"}
         align={isCompact ? "end" : "start"}
-        className="w-64 p-1.5 shadow-2xl rounded-2xl border border-white/[0.08] bg-[#131722]/98 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
+        className="w-72 p-1.5 shadow-2xl rounded-2xl border border-white/[0.08] bg-[#131722]/98 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200"
       >
         <DropdownMenuLabel className="px-3 py-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg overflow-hidden border border-white/[0.08] bg-[#0f1117] flex items-center justify-center flex-shrink-0">
+            <div className="h-9 w-9 rounded-lg overflow-hidden border border-white/[0.08] bg-[#0f1117] flex items-center justify-center flex-shrink-0">
               {avatarUrl ? (
                 avatarUrl.startsWith("preset:") ? (
                   <PresetAvatarSVG preset={avatarUrl.substring(7)} />
@@ -117,19 +117,19 @@ export function SidebarUserMenu({
                   <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                 )
               ) : (
-                <span className="font-serif text-xs font-bold text-foreground">
+                <span className="font-serif text-sm font-bold text-foreground">
                   {displayName.substring(0, 2).toUpperCase()}
                 </span>
               )}
             </div>
             <div className="flex flex-col min-w-0">
-              <p className="text-xs font-semibold truncate text-white">{displayName}</p>
-              <p className="text-[11px] text-white/40 truncate">{userEmail}</p>
+              <p className="text-sm font-semibold truncate text-white">{displayName}</p>
+              <p className="text-xs text-white/50 truncate">{userEmail}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-white/[0.06]">
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider ${
                 isAdmin
                   ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
                   : isTeacher
@@ -139,11 +139,11 @@ export function SidebarUserMenu({
                       : "bg-white/[0.06] text-white/60"
               }`}
             >
-              <Sparkles className="h-2.5 w-2.5" />
+              <Sparkles className="h-3 w-3" />
               {isAdmin ? "ADMIN" : isTeacher ? "TEACHER" : currentPlan.toUpperCase()}
             </span>
             {(curriculum || isAdmin || isTeacher) && (
-              <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 font-mono text-[9px] font-semibold text-white/60">
+              <span className="inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 font-mono text-[10px] font-semibold text-white/60">
                 {curriculum || (isAdmin ? "Admin Panel" : "Teacher Portal")}
               </span>
             )}
@@ -158,7 +158,7 @@ export function SidebarUserMenu({
             <Link
               to="/teacher/escalations"
               onClick={onCloseSidebar}
-              className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
             >
               <ShieldAlert className="h-4 w-4 text-purple-400" />
               <span>Student Escalations</span>
@@ -172,7 +172,7 @@ export function SidebarUserMenu({
             <Link
               to="/admin/users"
               onClick={onCloseSidebar}
-              className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+              className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
             >
               <Users className="h-4 w-4 text-blue-400" />
               <span>User Management</span>
@@ -186,7 +186,7 @@ export function SidebarUserMenu({
           <Link
             to="/settings"
             onClick={onCloseSidebar}
-            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
           >
             <Settings className="h-4 w-4 text-white/50" />
             <span>{t("nav_settings")}</span>
@@ -197,7 +197,7 @@ export function SidebarUserMenu({
           <Link
             to="/about"
             onClick={onCloseSidebar}
-            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
           >
             <Info className="h-4 w-4 text-white/50" />
             <span>About GilaniAI</span>
@@ -208,7 +208,7 @@ export function SidebarUserMenu({
           <Link
             to="/faq"
             onClick={onCloseSidebar}
-            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
           >
             <HelpCircle className="h-4 w-4 text-white/50" />
             <span>Help & FAQ</span>
@@ -219,7 +219,7 @@ export function SidebarUserMenu({
           <Link
             to="/contact"
             onClick={onCloseSidebar}
-            className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-white/80 hover:text-white hover:bg-white/[0.08] transition-colors min-h-[44px]"
           >
             <Mail className="h-4 w-4 text-white/50" />
             <span>Contact & Support</span>
@@ -230,7 +230,7 @@ export function SidebarUserMenu({
 
         <DropdownMenuItem
           onClick={onSignOut}
-          className="flex w-full items-center gap-2.5 cursor-pointer px-3 py-2 text-xs font-medium rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+          className="flex w-full items-center gap-2.5 cursor-pointer px-3.5 py-2.5 text-sm font-medium rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors min-h-[44px]"
         >
           <LogOut className="h-4 w-4 text-red-400" />
           <span>Log out</span>

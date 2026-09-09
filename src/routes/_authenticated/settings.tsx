@@ -224,7 +224,7 @@ function SettingsPage() {
             <div className="px-3 py-3 space-y-4">
               {TAB_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-0.5">
-                  <p className="px-2.5 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
+                  <p className="px-3 py-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground/60">
                     {group.label}
                   </p>
                   {group.tabs.map((tab) => {
@@ -234,21 +234,21 @@ function SettingsPage() {
                       <button
                         key={tab.id}
                         onClick={() => handleTabClick(tab.id)}
-                        className={`w-full flex items-center justify-between px-2.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer min-h-[46px] ${
                           isActive
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
                         }`}
                       >
-                        <span className="flex items-center gap-2.5">
+                        <span className="flex items-center gap-3">
                           <Icon
-                            className={`h-4 w-4 flex-shrink-0 transition-colors ${
+                            className={`h-4.5 w-4.5 flex-shrink-0 transition-colors ${
                               isActive ? "text-primary" : "text-muted-foreground/70"
                             }`}
                           />
                           <span>{tab.label}</span>
                         </span>
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 flex-shrink-0" />
                       </button>
                     );
                   })}

@@ -319,7 +319,7 @@ export const MessageBubble = memo(function MessageBubble({
             isUser
               ? "px-5 py-3.5 bg-muted/60 text-foreground rounded-3xl rounded-tr-sm"
               : "px-0 py-1 bg-transparent text-foreground"
-          } text-[15px] sm:text-base leading-relaxed relative transition-colors duration-200`}
+          } text-base leading-relaxed relative transition-colors duration-200`}
         >
           {!isUser ? (
             <div className="flex flex-col w-full">
@@ -411,22 +411,22 @@ export const MessageBubble = memo(function MessageBubble({
               {/* Footer: action buttons + persistent G badge (only when finished and settled) */}
               {showBubbleCard && !isStreamActive && typewriterFinished && (
                 <div className="flex flex-col gap-1.5 mt-2 animate-in fade-in duration-300">
-                  <div className="flex items-center gap-1 transition-opacity duration-200">
+                  <div className="flex items-center gap-1.5 sm:gap-1 transition-opacity duration-200 flex-wrap">
                     <button
                       onClick={handleCopy}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center"
                       title="Copy message"
                       aria-label="Copy message"
                     >
                       {copied ? (
                         <>
-                          <Check className="h-3.5 w-3.5 text-green-500" />
+                          <Check className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-green-500" />
                           <span className="text-green-500 animate-in fade-in duration-150">
                             Copied!
                           </span>
                         </>
                       ) : (
-                        <Copy className="h-3.5 w-3.5" />
+                        <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                       )}
                     </button>
 
@@ -434,7 +434,7 @@ export const MessageBubble = memo(function MessageBubble({
                       <button
                         onClick={isRateLimited ? undefined : onReload}
                         disabled={isRateLimited}
-                        className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md ${
+                        className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
                           isRateLimited
                             ? "opacity-40 cursor-not-allowed text-muted-foreground"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
@@ -442,28 +442,30 @@ export const MessageBubble = memo(function MessageBubble({
                         title={isRateLimited ? "Rate limit reached" : "Retry response"}
                         aria-label="Retry response"
                       >
-                        <RefreshCw className="h-3.5 w-3.5" />
+                        <RefreshCw className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                       </button>
                     )}
 
-                    <span className="w-px h-4 bg-border/70 mx-1" />
+                    <span className="w-px h-4 bg-border/70 mx-1 hidden sm:block" />
 
                     <button
                       onClick={() => handleVote(1)}
                       disabled={voting}
-                      className={`inline-flex items-center gap-1 text-xs font-medium transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted cursor-pointer active:scale-110 ${
+                      className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-all duration-150 px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer active:scale-110 min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
                         vote === 1 ? "text-green-500" : "text-muted-foreground hover:text-green-500"
                       }`}
                       title="Helpful response"
                       aria-label="Mark as helpful"
                     >
-                      <ThumbsUp className={`h-3.5 w-3.5 ${vote === 1 ? "fill-current" : ""}`} />
+                      <ThumbsUp
+                        className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${vote === 1 ? "fill-current" : ""}`}
+                      />
                     </button>
 
                     <button
                       onClick={() => handleVote(-1)}
                       disabled={voting}
-                      className={`inline-flex items-center gap-1 text-xs font-medium transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted cursor-pointer active:scale-110 ${
+                      className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-all duration-150 px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer active:scale-110 min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
                         vote === -1
                           ? "text-destructive"
                           : "text-muted-foreground hover:text-destructive"
@@ -471,12 +473,14 @@ export const MessageBubble = memo(function MessageBubble({
                       title="Not helpful — we'll improve"
                       aria-label="Mark as not helpful"
                     >
-                      <ThumbsDown className={`h-3.5 w-3.5 ${vote === -1 ? "fill-current" : ""}`} />
+                      <ThumbsDown
+                        className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${vote === -1 ? "fill-current" : ""}`}
+                      />
                     </button>
 
                     {onEscalate && (
                       <>
-                        <span className="w-px h-4 bg-border/70 mx-1" />
+                        <span className="w-px h-4 bg-border/70 mx-1 hidden sm:block" />
                         <button
                           onClick={onEscalate}
                           disabled={
@@ -484,7 +488,7 @@ export const MessageBubble = memo(function MessageBubble({
                             escalationStatus === "open" ||
                             escalationStatus === "in_review"
                           }
-                          className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 rounded-md cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg cursor-pointer min-h-[38px] sm:min-h-0 justify-center ${
                             escalationStatus === "resolved"
                               ? "text-emerald-500 hover:bg-emerald-500/10"
                               : escalationStatus === "in_review" || escalationStatus === "open"
@@ -500,7 +504,7 @@ export const MessageBubble = memo(function MessageBubble({
                           }
                           aria-label="Escalate to Teacher"
                         >
-                          <GraduationCap className="h-3.5 w-3.5" />
+                          <GraduationCap className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                           <span className="hidden sm:inline">
                             {escalationStatus === "resolved"
                               ? "Teacher Answered"
@@ -515,12 +519,12 @@ export const MessageBubble = memo(function MessageBubble({
                     {onExportPDF && (
                       <button
                         onClick={onExportPDF}
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
+                        className="inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer min-h-[38px] sm:min-h-0 justify-center"
                         title="Export this conversation as PDF"
                         aria-label="Export conversation as PDF"
                       >
-                        <FileDown className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Export PDF</span>
+                        <FileDown className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        <span className="hidden sm:inline">PDF</span>
                       </button>
                     )}
                   </div>

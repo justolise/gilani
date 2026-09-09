@@ -36,10 +36,10 @@ export function StudyContinuityCard({
                 <History className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+                <p className="text-xs uppercase font-semibold tracking-wider text-muted-foreground">
                   Resume Study Session
                 </p>
-                <p className="text-xs font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {latestThread.title || "Untitled Session"}
                 </p>
               </div>
@@ -48,10 +48,10 @@ export function StudyContinuityCard({
             <Link
               to="/tutor/$threadId"
               params={{ threadId: latestThread.id }}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/90 flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-all duration-150 active:scale-95"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/90 flex-shrink-0 px-3 py-2 min-h-[38px] rounded-lg bg-primary/10 hover:bg-primary/15 transition-all duration-150 active:scale-95"
             >
               <span>Resume</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         )}
@@ -65,15 +65,15 @@ export function StudyContinuityCard({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-[10px] uppercase font-semibold tracking-wider text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xs uppercase font-semibold tracking-wider text-emerald-600 dark:text-emerald-400">
                     {todayPlanTask.isToday ? "Today's Study Goal" : "Upcoming Goal"}
                   </p>
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                    <Clock className="w-2.5 h-2.5" />
+                  <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                    <Clock className="w-3 h-3" />
                     {todayPlanTask.item.durationMinutes}m
                   </span>
                 </div>
-                <p className="text-xs font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {todayPlanTask.item.subject}: {todayPlanTask.item.topic}
                 </p>
               </div>
@@ -87,13 +87,13 @@ export function StudyContinuityCard({
                 const prompt = `Let's work on my scheduled study goal for ${todayPlanTask.item.subject}: "${todayPlanTask.item.topic}". The specific task is: "${todayPlanTask.item.task}". Please guide me through it step-by-step.`;
                 onStartPlanTask(prompt);
               }}
-              className={`inline-flex items-center gap-1 text-xs font-semibold flex-shrink-0 px-2.5 py-1.5 rounded-lg transition-colors ${
+              className={`inline-flex items-center gap-1.5 text-sm font-semibold flex-shrink-0 px-3 py-2 min-h-[38px] rounded-lg transition-colors ${
                 disabled
                   ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
                   : "text-emerald-600 dark:text-emerald-400 hover:opacity-80 bg-emerald-500/10 hover:bg-emerald-500/15 cursor-pointer"
               }`}
             >
-              <Play className="w-3 h-3 fill-current" />
+              <Play className="w-3.5 h-3.5 fill-current" />
               <span>Study</span>
             </button>
           </div>

@@ -25,7 +25,7 @@ export function QuizCard({
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+              className={`text-xs font-mono px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
                 quiz.difficulty === "easy"
                   ? "bg-emerald-500/10 text-emerald-500"
                   : quiz.difficulty === "hard"
@@ -35,7 +35,7 @@ export function QuizCard({
             >
               {quiz.difficulty}
             </span>
-            <span className="text-xs text-muted-foreground font-mono">
+            <span className="text-xs sm:text-sm text-muted-foreground font-mono">
               {questionCount} question{questionCount !== 1 ? "s" : ""}
             </span>
           </div>
@@ -61,15 +61,15 @@ export function QuizCard({
           params={{ quizId: quiz.id }}
           className="block group-hover:text-primary transition-colors"
         >
-          <h3 className="font-semibold text-foreground line-clamp-2 mb-2 leading-snug">
+          <h3 className="font-semibold text-base sm:text-lg text-foreground line-clamp-2 mb-2 leading-snug">
             {quiz.topic}
           </h3>
         </Link>
       </div>
 
-      <div className="pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5 font-mono text-[11px]">
-          <Calendar className="h-3 w-3" />
+      <div className="pt-4 border-t border-border/50 flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+        <div className="flex items-center gap-1.5 font-mono text-xs">
+          <Calendar className="h-3.5 w-3.5" />
           {new Date(quiz.created_at).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
@@ -77,12 +77,12 @@ export function QuizCard({
         </div>
 
         {latestAttempt ? (
-          <div className="flex items-center gap-1 font-semibold text-emerald-500">
-            <CheckCircle2 className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1 font-semibold text-emerald-500 text-xs sm:text-sm">
+            <CheckCircle2 className="h-4 w-4" />
             <span>{Math.round(latestAttempt.score)}%</span>
           </div>
         ) : (
-          <span className="text-muted-foreground/60 italic text-[11px]">Not attempted</span>
+          <span className="text-muted-foreground/60 italic text-xs">Not attempted</span>
         )}
       </div>
     </div>

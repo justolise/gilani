@@ -6,7 +6,7 @@ export function MarkdownP({ children }: any) {
   const { type, newChildren } = extractCallout(children);
   if (type) return <CustomCallout type={type}>{newChildren}</CustomCallout>;
   return (
-    <p className="text-[15px] sm:text-base leading-relaxed sm:leading-7 mb-4 last:mb-0 text-foreground/90">
+    <p className="text-base leading-relaxed sm:leading-7 mb-4 last:mb-0 text-foreground/90">
       {children}
     </p>
   );
@@ -66,7 +66,7 @@ export function MarkdownBlockquote({ children }: any) {
   const { type, newChildren } = extractCallout(children);
   if (type) return <CustomCallout type={type}>{newChildren}</CustomCallout>;
   return (
-    <blockquote className="border-l-4 border-primary/50 pl-3.5 my-3 bg-primary/5 rounded-r-xl py-2 text-sm text-muted-foreground italic">
+    <blockquote className="border-l-4 border-primary/50 pl-4 my-3.5 bg-primary/5 rounded-r-xl py-2.5 text-base sm:text-base text-muted-foreground italic leading-relaxed">
       {children}
     </blockquote>
   );

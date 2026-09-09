@@ -24,10 +24,10 @@ export function getMarkdownComponents(isStreaming: boolean) {
       <h4 className="text-base font-semibold mt-5 mb-2 text-foreground">{children}</h4>
     ),
     h5: ({ children }: any) => (
-      <h5 className="text-sm font-semibold mt-4 mb-2 text-foreground">{children}</h5>
+      <h5 className="text-base sm:text-sm font-semibold mt-4 mb-2 text-foreground">{children}</h5>
     ),
     h6: ({ children }: any) => (
-      <h6 className="text-xs font-semibold mt-4 mb-2 text-muted-foreground uppercase tracking-wide">
+      <h6 className="text-sm sm:text-xs font-semibold mt-4 mb-2 text-muted-foreground uppercase tracking-wide">
         {children}
       </h6>
     ),
@@ -52,12 +52,12 @@ export function getMarkdownComponents(isStreaming: boolean) {
     li: MarkdownLi,
     blockquote: MarkdownBlockquote,
     details: ({ children }: any) => (
-      <details className="my-3 rounded-2xl border border-border/80 bg-card/80 dark:bg-card/40 p-3.5 text-sm shadow-xs transition-all duration-200 group open:ring-1 open:ring-primary/20">
+      <details className="my-3 rounded-2xl border border-border/80 bg-card/80 dark:bg-card/40 p-4 text-base sm:text-sm shadow-xs transition-all duration-200 group open:ring-1 open:ring-primary/20">
         {children}
       </details>
     ),
     summary: ({ children }: any) => (
-      <summary className="cursor-pointer font-semibold text-xs sm:text-sm text-foreground select-none flex items-center gap-2 list-none hover:text-primary transition-colors focus-visible:outline-none">
+      <summary className="cursor-pointer font-semibold text-sm sm:text-base text-foreground select-none flex items-center gap-2 list-none hover:text-primary transition-colors focus-visible:outline-none">
         <span className="inline-block transition-transform duration-200 group-open:rotate-90 text-primary">
           ▸
         </span>
@@ -67,13 +67,13 @@ export function getMarkdownComponents(isStreaming: boolean) {
     hr: () => <hr className="my-6 border-border/60" />,
     table: ({ children }: any) => (
       <div className="my-6 w-full max-w-full overflow-x-auto rounded-2xl border border-border shadow-sm">
-        <table className="min-w-full text-sm sm:text-[15px] border-collapse bg-card">
+        <table className="min-w-full text-base sm:text-sm border-collapse bg-card">
           {children}
         </table>
       </div>
     ),
     thead: ({ children }: any) => (
-      <thead className="bg-primary/5 text-xs uppercase tracking-wider font-bold border-b-2 border-border/80">
+      <thead className="bg-primary/5 text-sm sm:text-xs uppercase tracking-wider font-bold border-b-2 border-border/80">
         {children}
       </thead>
     ),
@@ -82,12 +82,12 @@ export function getMarkdownComponents(isStreaming: boolean) {
       <tr className="hover:bg-muted/30 transition-colors even:bg-muted/10">{children}</tr>
     ),
     th: ({ children }: any) => (
-      <th className="px-5 py-3.5 text-left text-xs font-bold text-primary tracking-wide border-r border-border/40 last:border-r-0">
+      <th className="px-5 py-3.5 text-left text-sm sm:text-xs font-bold text-primary tracking-wide border-r border-border/40 last:border-r-0">
         {children}
       </th>
     ),
     td: ({ children }: any) => (
-      <td className="px-5 py-3.5 text-sm sm:text-[15px] leading-relaxed border-r border-border/40 last:border-r-0">
+      <td className="px-5 py-3.5 text-base sm:text-sm leading-relaxed border-r border-border/40 last:border-r-0">
         {children}
       </td>
     ),

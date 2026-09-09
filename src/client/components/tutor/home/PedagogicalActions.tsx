@@ -97,7 +97,7 @@ export function PedagogicalActions({
               <div className="flex-1 min-w-0 pr-4">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span
-                    className={`text-xs sm:text-sm font-semibold truncate transition-colors ${
+                    className={`text-sm sm:text-base font-semibold truncate transition-colors ${
                       disabled
                         ? "text-muted-foreground"
                         : "text-foreground group-hover:text-primary"
@@ -108,7 +108,7 @@ export function PedagogicalActions({
                 </div>
                 {/* Badge chip */}
                 <span
-                  className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-md mb-1 ${
+                  className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded-md mb-1 ${
                     disabled
                       ? "opacity-40 bg-muted text-muted-foreground"
                       : `${action.colorClass} opacity-80`
@@ -116,7 +116,7 @@ export function PedagogicalActions({
                 >
                   {action.badge}
                 </span>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug line-clamp-2">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-snug line-clamp-2">
                   {action.subtitle}
                 </p>
               </div>

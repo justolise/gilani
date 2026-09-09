@@ -150,7 +150,7 @@ export function MarkdownLi({ children, checked, node, ...props }: any) {
 
   return (
     <li
-      className="text-[15px] sm:text-base leading-relaxed sm:leading-7 my-0.5 [&>p]:mb-1 [&>p:last-child]:mb-0"
+      className="text-base leading-relaxed sm:leading-7 my-1 [&>p]:mb-1 [&>p:last-child]:mb-0"
       style={{ display: "list-item" }}
       {...props}
     >

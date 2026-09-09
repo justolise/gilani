@@ -57,13 +57,13 @@ export function ThreadHeader({
 
   const timerContent = timerState ? (
     <div
-      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider flex-shrink-0 transition-all duration-300 ${
+      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold uppercase tracking-wider flex-shrink-0 transition-all duration-300 ${
         timerState.running
           ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/20"
           : "border-border bg-muted/40 text-muted-foreground"
       }`}
     >
-      <Timer className={`h-3 w-3 ${timerState.running ? "animate-pulse" : ""}`} />
+      <Timer className={`h-3.5 w-3.5 ${timerState.running ? "animate-pulse" : ""}`} />
       <span className="font-mono">
         {String(timerState.minutes).padStart(2, "0")}:{String(timerState.seconds).padStart(2, "0")}
       </span>

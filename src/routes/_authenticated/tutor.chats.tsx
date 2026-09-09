@@ -123,14 +123,14 @@ function ChatsPage() {
 
       {/* Search */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2 focus-within:border-primary/50 transition-colors">
+        <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-3.5 py-2.5 sm:py-2 focus-within:border-primary/50 transition-colors">
           <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <input
             type="text"
             placeholder="Search chats..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 outline-none"
+            className="flex-1 bg-transparent text-base sm:text-sm text-foreground placeholder:text-muted-foreground/60 outline-none"
           />
         </div>
       </div>
@@ -140,14 +140,14 @@ function ChatsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+            <p className="text-sm text-muted-foreground font-mono uppercase tracking-wider">
               Loading chats…
             </p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3 text-center">
             <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base sm:text-sm text-muted-foreground">
               {search ? "No chats match your search" : "No chats yet — start a new one!"}
             </p>
           </div>
@@ -158,26 +158,26 @@ function ChatsPage() {
               if (group.length === 0) return null;
               return (
                 <div key={key}>
-                  <h2 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest font-mono mb-2 px-1 border-b border-border/20 pb-1">
+                  <h2 className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider font-mono mb-2 px-1 border-b border-border/20 pb-1">
                     {GROUP_LABELS[key]}
                   </h2>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     {group.map((t) => (
                       <Link
                         key={t.id}
                         to="/tutor/$threadId"
                         params={{ threadId: t.id } as any}
-                        className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-muted/30 transition-colors group"
+                        className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-muted/30 transition-colors group min-h-[48px]"
                       >
-                        <div className="h-9 w-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
-                          <MessageSquare className="h-4 w-4" />
+                        <div className="h-10 w-10 sm:h-9 sm:w-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center flex-shrink-0 group-hover:bg-primary/25 transition-colors">
+                          <MessageSquare className="h-5 w-5 sm:h-4 sm:w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
+                          <p className="text-base sm:text-sm font-medium text-foreground truncate">
                             {t.title || ""}
                           </p>
                           {t.updated_at && (
-                            <p className="text-xs text-muted-foreground mt-0.5">
+                            <p className="text-xs sm:text-xs text-muted-foreground mt-0.5">
                               {new Date(t.updated_at).toLocaleDateString(undefined, {
                                 month: "short",
                                 day: "numeric",
@@ -190,16 +190,16 @@ function ChatsPage() {
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <button
                             onClick={(e) => deleteThread(t.id, e)}
-                            className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-2 sm:p-1.5 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 min-h-[38px] min-w-[38px] flex items-center justify-center"
                             title="Delete chat"
                           >
                             {deletingId === t.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-4 w-4 sm:h-3.5 sm:w-3.5 animate-spin" />
                             ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                             )}
                           </button>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                          <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70 transition-colors" />
                         </div>
                       </Link>
                     ))}

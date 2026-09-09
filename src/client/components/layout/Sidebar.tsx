@@ -181,7 +181,7 @@ export function Sidebar({ shell }: Props) {
           lg:translate-x-0 lg:static lg:h-dvh
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           ${collapsed ? "lg:w-14" : "lg:w-[270px]"}
-          w-[84vw] max-w-[315px] sm:max-w-[320px]
+          w-[86vw] max-w-[325px] sm:max-w-[330px]
           pt-[var(--safe-top,0px)] lg:pt-0
           pb-[var(--safe-bottom,0px)] lg:pb-0
           pl-[var(--safe-left,0px)]
@@ -347,13 +347,15 @@ export function Sidebar({ shell }: Props) {
               >
                 {/* Workspace / Scope details — no G icon in expanded view */}
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="font-bold text-xs text-primary tracking-tight">GilaniAI</span>
-                  <span className="text-muted-foreground/30 text-xs font-mono">/</span>
-                  <span className="text-[11px] font-mono font-medium text-muted-foreground truncate">
+                  <span className="font-bold text-sm sm:text-xs text-primary tracking-tight">
+                    GilaniAI
+                  </span>
+                  <span className="text-muted-foreground/30 text-sm sm:text-xs font-mono">/</span>
+                  <span className="text-xs sm:text-[11px] font-mono font-medium text-muted-foreground truncate">
                     {curriculum || (isTeacher ? "Teacher" : isAdmin ? "Admin" : "KCSE")}
                   </span>
                 </div>
-                <ChevronDown className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors ml-0.5 flex-shrink-0" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors ml-0.5 flex-shrink-0" />
               </Link>
 
               {/* Header Right Action: Close on Mobile, Collapse on Desktop */}
@@ -361,7 +363,7 @@ export function Sidebar({ shell }: Props) {
                 {/* Mobile close button */}
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer"
+                  className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                   aria-label="Close menu"
                 >
                   <X className="h-4 w-4" />
@@ -387,10 +389,10 @@ export function Sidebar({ shell }: Props) {
                     createNewThread();
                     setSidebarOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-foreground text-background dark:bg-white dark:text-black hover:opacity-90 active:scale-[0.99] transition-all text-xs font-semibold shadow-xs cursor-pointer group"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-foreground text-background dark:bg-white dark:text-black hover:opacity-90 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold shadow-xs cursor-pointer group min-h-[44px] sm:min-h-0"
                 >
                   <span className="flex items-center gap-2">
-                    <Plus className="h-3.5 w-3.5 group-hover:rotate-90 transition-transform duration-200" />
+                    <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5 group-hover:rotate-90 transition-transform duration-200" />
                     New Chat
                   </span>
                   <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono rounded bg-background/20 dark:bg-black/15 text-background dark:text-black">
@@ -404,7 +406,7 @@ export function Sidebar({ shell }: Props) {
             <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
               {/* Section: Platform Navigation – all roles */}
               <div className="space-y-0.5">
-                <p className="px-2.5 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
+                <p className="px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/60">
                   Platform
                 </p>
 
@@ -421,7 +423,7 @@ export function Sidebar({ shell }: Props) {
                       to={item.to as any}
                       onClick={() => setSidebarOpen(false)}
                       className={`
-                        group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer select-none
+                        group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all cursor-pointer select-none min-h-[42px] sm:min-h-0
                         ${
                           active
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
@@ -457,13 +459,13 @@ export function Sidebar({ shell }: Props) {
                         window.dispatchEvent(new CustomEvent("custom:trigger-escalation"));
                       }
                     }}
-                    className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer"
+                    className="w-full flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer min-h-[42px] sm:min-h-0"
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
                       <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground/70" />
                       <span>Teacher Help</span>
                     </span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70">
+                    <span className="text-[10px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground/80 font-semibold">
                       Escalate
                     </span>
                   </button>
@@ -472,7 +474,7 @@ export function Sidebar({ shell }: Props) {
                 {/* Teacher / Admin portal nav – below a divider */}
                 {(isTeacher || isAdmin) && (
                   <div className="pt-2 mt-1 border-t border-border/20 space-y-0.5">
-                    <p className="px-2.5 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
+                    <p className="px-2.5 py-1 text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/60">
                       {isAdmin ? "Admin Tools" : "Teacher Tools"}
                     </p>
 
@@ -480,7 +482,7 @@ export function Sidebar({ shell }: Props) {
                       <Link
                         to="/teacher/escalations"
                         onClick={() => setSidebarOpen(false)}
-                        className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
+                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-[42px] sm:min-h-0 ${
                           path.startsWith("/teacher")
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
@@ -502,7 +504,7 @@ export function Sidebar({ shell }: Props) {
                       <Link
                         to="/admin/users"
                         onClick={() => setSidebarOpen(false)}
-                        className={`group flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium transition-all ${
+                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-[42px] sm:min-h-0 ${
                           path.startsWith("/admin")
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
@@ -527,11 +529,11 @@ export function Sidebar({ shell }: Props) {
               {isStudent && (
                 <div className="space-y-1.5 pt-1 border-t border-border/20">
                   <div className="flex items-center justify-between px-2.5 py-1">
-                    <p className="text-[9px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/50">
+                    <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-muted-foreground/60">
                       Recent Chats
                     </p>
                     {threads.length > 0 && (
-                      <span className="text-[10px] font-mono text-muted-foreground/40">
+                      <span className="text-xs sm:text-[10px] font-mono text-muted-foreground/50">
                         {threads.length}
                       </span>
                     )}
@@ -547,14 +549,14 @@ export function Sidebar({ shell }: Props) {
                         placeholder="Search chats…"
                         value={threadSearch}
                         onChange={(e) => setThreadSearch(e.target.value)}
-                        className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] pl-8 pr-14 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/[0.06] transition-all"
+                        className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] pl-8 pr-14 py-2 sm:py-1.5 text-base sm:text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/[0.06] transition-all"
                       />
                       {threadSearch ? (
                         <button
                           onClick={() => setThreadSearch("")}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-0.5"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-1 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       ) : (
                         <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] font-mono text-muted-foreground/30 bg-white/[0.04] border border-white/[0.06] px-1 py-0.5 rounded">
@@ -566,12 +568,12 @@ export function Sidebar({ shell }: Props) {
 
                   {/* Thread Group List */}
                   {threadsLoading ? (
-                    <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground/60 animate-pulse">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <div className="flex items-center gap-2 px-3 py-2 text-sm sm:text-xs text-muted-foreground/60 animate-pulse">
+                      <Loader2 className="h-4 w-4 sm:h-3.5 sm:w-3.5 animate-spin" />
                       <span>Loading chats…</span>
                     </div>
                   ) : threads.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-muted-foreground/40 italic">
+                    <p className="px-3 py-2 text-sm sm:text-xs text-muted-foreground/40 italic">
                       No chats yet. Start one above!
                     </p>
                   ) : (
@@ -588,7 +590,7 @@ export function Sidebar({ shell }: Props) {
 
                         return (
                           <div key={key} className="space-y-0.5">
-                            <span className="px-2.5 text-[9px] font-mono text-muted-foreground/40 uppercase tracking-wide">
+                            <span className="px-2.5 text-[11px] font-mono text-muted-foreground/50 uppercase tracking-wide">
                               {label}
                             </span>
                             <div className="space-y-[1px]">
@@ -605,7 +607,7 @@ export function Sidebar({ shell }: Props) {
                                     onTouchEnd={handleThreadTouchEnd}
                                     onTouchMove={handleThreadTouchEnd}
                                     onContextMenu={(e) => e.preventDefault()}
-                                    className={`group flex items-center justify-between rounded-xl px-2.5 py-2 text-xs transition-all relative select-none ${
+                                    className={`group flex items-center justify-between rounded-xl px-3 py-2.5 sm:py-2 text-sm sm:text-xs transition-all relative select-none min-h-[40px] sm:min-h-0 ${
                                       isCurrent
                                         ? "bg-muted/70 text-foreground font-semibold shadow-xs border-l-2 border-primary pl-2"
                                         : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border-l-2 border-transparent"
@@ -627,7 +629,7 @@ export function Sidebar({ shell }: Props) {
                                             setRenamingId(null);
                                           }
                                         }}
-                                        className="flex-1 min-w-0 bg-transparent border border-primary/50 rounded-md px-1.5 py-0.5 text-xs outline-none focus:ring-1 focus:ring-primary"
+                                        className="flex-1 min-w-0 bg-transparent border border-primary/50 rounded-md px-1.5 py-0.5 text-sm sm:text-xs outline-none focus:ring-1 focus:ring-primary"
                                         autoFocus
                                       />
                                     ) : (
@@ -645,7 +647,7 @@ export function Sidebar({ shell }: Props) {
                                           e.preventDefault();
                                           startRename(tItem.id, tItem.title || "Untitled Chat");
                                         }}
-                                        className="truncate flex-1 py-0.5 text-left outline-none cursor-pointer"
+                                        className="truncate flex-1 py-1 sm:py-0.5 text-left outline-none cursor-pointer"
                                       >
                                         {tItem.title || "New Chat"}
                                       </Link>
@@ -700,13 +702,13 @@ export function Sidebar({ shell }: Props) {
                     setSidebarOpen(false);
                     setShowPlans(true);
                   }}
-                  className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl border border-[#C96A3D]/30 bg-[#C96A3D]/10 hover:bg-[#C96A3D]/15 active:scale-[0.99] transition-all text-xs font-semibold text-[#E28743] cursor-pointer group"
+                  className="w-full flex items-center justify-between px-3.5 py-2 sm:py-1.5 rounded-xl border border-[#C96A3D]/30 bg-[#C96A3D]/10 hover:bg-[#C96A3D]/15 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold text-[#E28743] cursor-pointer group min-h-[42px] sm:min-h-0"
                 >
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-[#E28743]" />
                     Upgrade to Pro
                   </span>
-                  <span className="text-[10px] font-mono group-hover:translate-x-0.5 transition-transform">
+                  <span className="text-xs sm:text-[10px] font-mono group-hover:translate-x-0.5 transition-transform">
                     ↗
                   </span>
                 </button>

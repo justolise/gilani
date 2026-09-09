@@ -60,7 +60,7 @@ export function QuizOptionButton({ label, index, state, onClick }: QuizOptionBut
         )}
         {/* "selected" (test mode) and "locked" states intentionally fall through to LETTERS[index] above — no correctness icon shown until results. */}
       </span>
-      <div className="text-sm font-medium text-foreground [&>p]:m-0">
+      <div className="text-base font-medium text-foreground [&>p]:m-0">
         {typeof label === "string" ? <MarkdownRenderer content={label} /> : label}
       </div>
     </button>

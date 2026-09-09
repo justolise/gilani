@@ -214,7 +214,7 @@ export function ChatInput({
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-foreground leading-tight">
+              <p className="truncate text-sm font-semibold text-foreground leading-tight">
                 {attachedFile.name}
               </p>
               <p className="font-mono text-xs text-muted-foreground mt-0.5 leading-tight flex flex-wrap items-center gap-x-1.5">
@@ -233,7 +233,7 @@ export function ChatInput({
             </div>
             <button
               onClick={onRemoveFile}
-              className="flex-shrink-0 rounded-xl p-1.5 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive active:scale-90"
+              className="flex-shrink-0 rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive active:scale-90 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               title="Remove attachment"
               type="button"
             >
@@ -290,17 +290,17 @@ export function ChatInput({
                 )}
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" sideOffset={8} className="w-48 p-1.5 z-50">
+            <DropdownMenuContent align="start" sideOffset={8} className="w-52 p-1.5 z-50">
               {/* Upload Document / Image from gallery */}
               <DropdownMenuItem
                 asChild
-                className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
               >
                 <label
                   htmlFor={isDisabled ? undefined : "chat-file-input"}
                   className="flex w-full items-center cursor-pointer"
                 >
-                  <Paperclip className="h-4 w-4 text-muted-foreground mr-2" />
+                  <Paperclip className="h-4 w-4 text-muted-foreground mr-2.5" />
                   <span className="text-sm font-medium">Document / Image</span>
                 </label>
               </DropdownMenuItem>
@@ -309,9 +309,9 @@ export function ChatInput({
               {onScanClick && (
                 <DropdownMenuItem
                   onClick={onScanClick}
-                  className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
                 >
-                  <Camera className="h-4 w-4 text-muted-foreground mr-2" />
+                  <Camera className="h-4 w-4 text-muted-foreground mr-2.5" />
                   <span className="text-sm font-medium">Scan (Camera)</span>
                 </DropdownMenuItem>
               )}
@@ -320,10 +320,10 @@ export function ChatInput({
               {onVoiceClick && (
                 <DropdownMenuItem
                   onClick={onVoiceClick}
-                  className="cursor-pointer gap-2.5 p-2 rounded-lg min-h-[44px]"
+                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
                 >
                   <Mic
-                    className={`h-4 w-4 mr-2 ${isListening ? "text-red-500" : "text-muted-foreground"}`}
+                    className={`h-4 w-4 mr-2.5 ${isListening ? "text-red-500" : "text-muted-foreground"}`}
                   />
                   <span className="text-sm font-medium">
                     {isListening ? "Stop Voice" : "Voice"}
@@ -336,7 +336,7 @@ export function ChatInput({
           {/* Center: auto-growing textarea */}
           <textarea
             ref={textareaRef}
-            className="flex-1 min-w-0 resize-none bg-transparent py-2.5 text-[15px] sm:text-base leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 transition-all duration-150"
+            className="flex-1 min-w-0 resize-none bg-transparent py-2.5 text-base leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 transition-all duration-150"
             rows={1}
             value={input}
             onChange={onInputChange}
@@ -389,7 +389,7 @@ export function ChatInput({
           <Link
             to="/faq"
             hash="can-the-ai-make-mistakes"
-            className="block w-full min-w-0 font-mono text-[11px] sm:text-xs text-muted-foreground/60 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis hover:text-muted-foreground/90 hover:underline transition-colors"
+            className="block w-full min-w-0 font-mono text-xs text-muted-foreground/60 text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis hover:text-muted-foreground/90 hover:underline transition-colors"
           >
             GilaniAI can make mistakes. Please check responses.
           </Link>

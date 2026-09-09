@@ -43,16 +43,16 @@ export function AppHeader({
       <div className="flex-1 flex flex-col justify-center items-center min-w-0 px-2 text-center">
         {centerContent}
         {!centerContent && title && (
-          <h2 className="text-sm font-semibold text-foreground truncate">{title}</h2>
+          <h2 className="text-base font-semibold text-foreground truncate">{title}</h2>
         )}
         {!centerContent && subtitle && (
-          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">{subtitle}</p>
         )}
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink-0">
-        <div className="hidden md:inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-          <ShieldCheck className="h-3 w-3" />
+        <div className="hidden md:inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <ShieldCheck className="h-3.5 w-3.5" />
           <span>Safe Learning</span>
         </div>
 
