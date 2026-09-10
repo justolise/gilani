@@ -12,7 +12,7 @@ import { log } from "@/server/logger";
  *
  * TODO: Wire up to a Slack webhook or email alert for production notification.
  */
-export const Route = createFileRoute("/api/mpesa/stuck-payments-check" as any)({
+export const Route = createFileRoute("/api/mpesa/stuck-payments-check")({
   server: {
     handlers: {
       GET: async () => {

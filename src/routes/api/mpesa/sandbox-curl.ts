@@ -9,7 +9,7 @@ import { authenticateRequest } from "@/server/api-auth.server";
  * The callback secret is read from server env and never exposed to the client bundle.
  * Requires a valid user session — prevents abuse.
  */
-export const Route = createFileRoute("/api/mpesa/sandbox-curl" as any)({
+export const Route = createFileRoute("/api/mpesa/sandbox-curl")({
   server: {
     handlers: {
       GET: async () => {

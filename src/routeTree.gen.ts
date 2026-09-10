@@ -35,6 +35,8 @@ import { Route as AuthenticatedTutorQuizzesRouteImport } from './routes/_authent
 import { Route as AuthenticatedTutorSavedRouteImport } from './routes/_authenticated/tutor.saved'
 import { Route as ApiMpesaCallbackRouteImport } from './routes/api/mpesa/callback'
 import { Route as ApiMpesaInitiateRouteImport } from './routes/api/mpesa/initiate'
+import { Route as ApiMpesaSandboxCurlRouteImport } from './routes/api/mpesa/sandbox-curl'
+import { Route as ApiMpesaStuckPaymentsCheckRouteImport } from './routes/api/mpesa/stuck-payments-check'
 import { Route as ApiNewsletterSendRouteImport } from './routes/api/newsletter/send'
 import { Route as ApiNewsletterSubscribeRouteImport } from './routes/api/newsletter/subscribe'
 import { Route as ApiNotificationsDigestRouteImport } from './routes/api/notifications/digest'
@@ -179,6 +181,17 @@ const ApiMpesaInitiateRoute = ApiMpesaInitiateRouteImport.update({
   path: '/api/mpesa/initiate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMpesaSandboxCurlRoute = ApiMpesaSandboxCurlRouteImport.update({
+  id: '/api/mpesa/sandbox-curl',
+  path: '/api/mpesa/sandbox-curl',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMpesaStuckPaymentsCheckRoute =
+  ApiMpesaStuckPaymentsCheckRouteImport.update({
+    id: '/api/mpesa/stuck-payments-check',
+    path: '/api/mpesa/stuck-payments-check',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiNewsletterSendRoute = ApiNewsletterSendRouteImport.update({
   id: '/api/newsletter/send',
   path: '/api/newsletter/send',
@@ -254,6 +267,8 @@ export interface FileRoutesByFullPath {
   '/tutor/saved': typeof AuthenticatedTutorSavedRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/initiate': typeof ApiMpesaInitiateRoute
+  '/api/mpesa/sandbox-curl': typeof ApiMpesaSandboxCurlRoute
+  '/api/mpesa/stuck-payments-check': typeof ApiMpesaStuckPaymentsCheckRoute
   '/api/newsletter/send': typeof ApiNewsletterSendRoute
   '/api/newsletter/subscribe': typeof ApiNewsletterSubscribeRoute
   '/api/notifications/digest': typeof ApiNotificationsDigestRoute
@@ -290,6 +305,8 @@ export interface FileRoutesByTo {
   '/tutor/saved': typeof AuthenticatedTutorSavedRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/initiate': typeof ApiMpesaInitiateRoute
+  '/api/mpesa/sandbox-curl': typeof ApiMpesaSandboxCurlRoute
+  '/api/mpesa/stuck-payments-check': typeof ApiMpesaStuckPaymentsCheckRoute
   '/api/newsletter/send': typeof ApiNewsletterSendRoute
   '/api/newsletter/subscribe': typeof ApiNewsletterSubscribeRoute
   '/api/notifications/digest': typeof ApiNotificationsDigestRoute
@@ -328,6 +345,8 @@ export interface FileRoutesById {
   '/_authenticated/tutor/saved': typeof AuthenticatedTutorSavedRoute
   '/api/mpesa/callback': typeof ApiMpesaCallbackRoute
   '/api/mpesa/initiate': typeof ApiMpesaInitiateRoute
+  '/api/mpesa/sandbox-curl': typeof ApiMpesaSandboxCurlRoute
+  '/api/mpesa/stuck-payments-check': typeof ApiMpesaStuckPaymentsCheckRoute
   '/api/newsletter/send': typeof ApiNewsletterSendRoute
   '/api/newsletter/subscribe': typeof ApiNewsletterSubscribeRoute
   '/api/notifications/digest': typeof ApiNotificationsDigestRoute
@@ -366,6 +385,8 @@ export interface FileRouteTypes {
     | '/tutor/saved'
     | '/api/mpesa/callback'
     | '/api/mpesa/initiate'
+    | '/api/mpesa/sandbox-curl'
+    | '/api/mpesa/stuck-payments-check'
     | '/api/newsletter/send'
     | '/api/newsletter/subscribe'
     | '/api/notifications/digest'
@@ -402,6 +423,8 @@ export interface FileRouteTypes {
     | '/tutor/saved'
     | '/api/mpesa/callback'
     | '/api/mpesa/initiate'
+    | '/api/mpesa/sandbox-curl'
+    | '/api/mpesa/stuck-payments-check'
     | '/api/newsletter/send'
     | '/api/newsletter/subscribe'
     | '/api/notifications/digest'
@@ -439,6 +462,8 @@ export interface FileRouteTypes {
     | '/_authenticated/tutor/saved'
     | '/api/mpesa/callback'
     | '/api/mpesa/initiate'
+    | '/api/mpesa/sandbox-curl'
+    | '/api/mpesa/stuck-payments-check'
     | '/api/newsletter/send'
     | '/api/newsletter/subscribe'
     | '/api/notifications/digest'
@@ -467,6 +492,8 @@ export interface RootRouteChildren {
   ApiStreamTestRoute: typeof ApiStreamTestRoute
   ApiMpesaCallbackRoute: typeof ApiMpesaCallbackRoute
   ApiMpesaInitiateRoute: typeof ApiMpesaInitiateRoute
+  ApiMpesaSandboxCurlRoute: typeof ApiMpesaSandboxCurlRoute
+  ApiMpesaStuckPaymentsCheckRoute: typeof ApiMpesaStuckPaymentsCheckRoute
   ApiNewsletterSendRoute: typeof ApiNewsletterSendRoute
   ApiNewsletterSubscribeRoute: typeof ApiNewsletterSubscribeRoute
   ApiNotificationsDigestRoute: typeof ApiNotificationsDigestRoute
@@ -661,6 +688,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMpesaInitiateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mpesa/sandbox-curl': {
+      id: '/api/mpesa/sandbox-curl'
+      path: '/api/mpesa/sandbox-curl'
+      fullPath: '/api/mpesa/sandbox-curl'
+      preLoaderRoute: typeof ApiMpesaSandboxCurlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mpesa/stuck-payments-check': {
+      id: '/api/mpesa/stuck-payments-check'
+      path: '/api/mpesa/stuck-payments-check'
+      fullPath: '/api/mpesa/stuck-payments-check'
+      preLoaderRoute: typeof ApiMpesaStuckPaymentsCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/newsletter/send': {
       id: '/api/newsletter/send'
       path: '/api/newsletter/send'
@@ -785,6 +826,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStreamTestRoute: ApiStreamTestRoute,
   ApiMpesaCallbackRoute: ApiMpesaCallbackRoute,
   ApiMpesaInitiateRoute: ApiMpesaInitiateRoute,
+  ApiMpesaSandboxCurlRoute: ApiMpesaSandboxCurlRoute,
+  ApiMpesaStuckPaymentsCheckRoute: ApiMpesaStuckPaymentsCheckRoute,
   ApiNewsletterSendRoute: ApiNewsletterSendRoute,
   ApiNewsletterSubscribeRoute: ApiNewsletterSubscribeRoute,
   ApiNotificationsDigestRoute: ApiNotificationsDigestRoute,
