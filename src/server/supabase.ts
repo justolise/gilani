@@ -20,6 +20,17 @@ function createSupabaseAdminClient() {
     throw new Error(message);
   }
 
+  // ⚠️ SCALABILITY & CONNECTION POOLING:
+  // @supabase/supabase-js connects over HTTPS to Supabase's PostgREST gateway.
+  // SUPABASE_URL must always be the HTTP endpoint: https://<project-ref>.supabase.co
+  //
+  // To optimize connection pooling under heavy serverless load (Vercel):
+  // 1. In Supabase Dashboard → Settings → Database → Connection Pooling:
+  //    - Ensure Pool Mode is set to "Transaction" (Supavisor / pgBouncer).
+  //    - Increase PostgREST pool size if experiencing database queue timeouts.
+  // 2. If using direct SQL clients (Prisma, Drizzle, or pg) rather than @supabase/supabase-js,
+  //    use the dedicated transaction pooler connection string on port 6543:
+  //    DATABASE_URL=postgresql://postgres.[ref]:[password]@[host]:6543/postgres?pgbouncer=true
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: {
       storage: undefined,

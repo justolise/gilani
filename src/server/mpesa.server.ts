@@ -6,7 +6,16 @@ const MPESA_BASE =
     ? "https://api.safaricom.co.ke"
     : "https://sandbox.safaricom.co.ke";
 
+// ── Token cache: Safaricom tokens are valid 3600s. Cache in module scope
+// to avoid a redundant OAuth round-trip on every STK push / status query.
+// 60s safety margin prevents using a token about to expire mid-flight.
+let _mpesaToken: { token: string; expiresAt: number } | null = null;
+
 async function getMpesaToken(): Promise<string> {
+  if (_mpesaToken && Date.now() < _mpesaToken.expiresAt - 60_000) {
+    return _mpesaToken.token;
+  }
+
   const auth = Buffer.from(
     `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`,
   ).toString("base64");
@@ -17,6 +26,9 @@ async function getMpesaToken(): Promise<string> {
 
   const data = await res.json();
   if (!data.access_token) throw new Error("Failed to get M-Pesa token");
+
+  // Cache for 3600s (Safaricom default), with 60s safety buffer
+  _mpesaToken = { token: data.access_token, expiresAt: Date.now() + 3_600_000 };
   return data.access_token;
 }
 
@@ -78,7 +90,10 @@ export async function initiateSTKPush(
     PartyB: process.env.MPESA_SHORTCODE,
     PhoneNumber: normalized,
     // CS-AUTHZ-001: Embed callback secret in URL so only requests from Safaricom
-    // (who received this URL) will carry the correct token
+    // (who received this URL) will carry the correct token.
+    // FUTURE: Consider HMAC-SHA256 body-signature verification instead
+    // (sign the callback body with the secret, verify in callback handler)
+    // to avoid the secret appearing in server access logs.
     CallBackURL: `${process.env.APP_URL}/api/mpesa/callback?token=${encodeURIComponent(process.env.MPESA_CALLBACK_SECRET || "")}`,
     AccountReference: `GILANI_${plan.toUpperCase()}_${userId.slice(0, 8)}`,
     TransactionDesc: `Gilani AI ${plan} Plan`,

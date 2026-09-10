@@ -128,6 +128,17 @@ function AuthedShell() {
               onSave={async (displayName, role, curriculum) => {
                 await assignUserRole({ data: { role, displayName, curriculum } });
                 window.dispatchEvent(new CustomEvent("custom:profile-updated"));
+                // Navigate to tutor and fire onboarding welcome event so the
+                // tutor page can pre-populate the first message automatically.
+                navigate({ to: "/tutor" });
+                // Small delay to let the route mount before firing the event
+                setTimeout(() => {
+                  window.dispatchEvent(
+                    new CustomEvent("gilani:onboarding-welcome", {
+                      detail: { displayName, curriculum },
+                    }),
+                  );
+                }, 500);
               }}
             />
           )}

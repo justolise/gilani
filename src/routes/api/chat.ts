@@ -20,6 +20,7 @@ import {
   buildThinkingSteps,
   persistAssistantResponse,
 } from "@/server/chat/persistence.server";
+import { log } from "@/server/logger";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/api/chat")({
           try {
             authResult = await authenticateRequest(request);
           } catch (err) {
-            console.error("[API Chat] Auth failed:", JSON.stringify({ error: String(err) }));
+            log.error("[chat] auth_failed", { error: String(err) });
             if (err instanceof Response) return err;
             return new Response(JSON.stringify({ error: "Unauthorized access" }), {
               status: 401,
@@ -43,7 +44,18 @@ export const Route = createFileRoute("/api/chat")({
 
           const chatSchema = z.object({
             threadId: z.string().max(200).optional(),
-            messages: z.array(z.any()).max(200).optional(),
+            messages: z
+              .array(
+                z
+                  .object({
+                    role: z.enum(["user", "assistant", "system", "tool"]),
+                    content: z.union([z.string().max(50_000), z.array(z.any()).max(20)]).optional(),
+                    // Allow any other fields (id, toolInvocations, parts, etc.)
+                  })
+                  .passthrough(),
+              )
+              .max(100)
+              .optional(),
             isRetry: z.boolean().optional(),
             attachmentMeta: z
               .object({
@@ -95,7 +107,7 @@ export const Route = createFileRoute("/api/chat")({
             });
           }
 
-          // ─── Use ai-gateway, with automatic multi-provider fallback ──────
+          // ─── Use ai-gateway, with automatic multi-provider fallback ───────────────
           const gateway = createGoogleAiProvider();
 
           // Whitelist allowed model identifiers to prevent arbitrary provider requests
@@ -117,7 +129,7 @@ export const Route = createFileRoute("/api/chat")({
             });
           }
 
-          console.log(`[API Chat] Using provider: google (gemini), with fallback`);
+          log.info("[chat] stream_start", { userId, model: requestedModel });
 
           // ─── Database Checks ─────────────────────────────────────────────
           const lastMessage = messages?.[messages.length - 1];
@@ -262,9 +274,15 @@ export const Route = createFileRoute("/api/chat")({
               const cachedTokens = usage?.cachedContentTokenCount ?? 0;
               const totalTokens = usage?.totalTokenCount ?? 0;
               const cacheHit = cachedTokens > 0;
-              console.log(
-                `[API Chat] google finished. Length: ${assistantText.length}. FinishReason: ${finishReason}. Tokens: ${totalTokens} (cached: ${cachedTokens}) Cache: ${cacheHit ? "✅ HIT" : "❌ MISS"}`,
-              );
+              log.info("[chat] stream_end", {
+                userId,
+                threadId,
+                length: assistantText.length,
+                finishReason,
+                totalTokens,
+                cachedTokens,
+                cacheHit,
+              });
 
               const fullAssistantText =
                 steps
@@ -277,14 +295,26 @@ export const Route = createFileRoute("/api/chat")({
 
               const thinkingSteps = buildThinkingSteps(steps);
 
-              await persistAssistantResponse({
-                threadId,
-                userId,
-                safeText,
-                thinkingSteps,
-                providerMetadata,
-                result,
-              });
+              // ROBUSTNESS: Outer try/catch so a DB failure after stream close is
+              // logged as CRITICAL rather than silently swallowed. The stream has
+              // already been sent to the client, so we can only log — not recover.
+              try {
+                await persistAssistantResponse({
+                  threadId,
+                  userId,
+                  safeText,
+                  thinkingSteps,
+                  providerMetadata,
+                  result,
+                });
+              } catch (persistErr) {
+                log.error("[chat] persist_failed", {
+                  threadId,
+                  userId,
+                  textLength: safeText.length,
+                  error: persistErr instanceof Error ? persistErr.message : String(persistErr),
+                });
+              }
             },
           });
 
@@ -307,14 +337,10 @@ export const Route = createFileRoute("/api/chat")({
             },
           });
         } catch (error: unknown) {
-          console.error(
-            "[API Chat] Error:",
-            JSON.stringify({
-              message: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined,
-              userId: authResult?.userId,
-            }),
-          );
+          log.error("[chat] unhandled_error", {
+            message: error instanceof Error ? error.message : String(error),
+            userId: authResult?.userId,
+          });
 
           const isRateLimit = isRateLimitError(error);
           const errorMessage =

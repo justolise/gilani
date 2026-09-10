@@ -89,6 +89,21 @@ if (typeof window !== "undefined" && import.meta.env.VITE_SENTRY_DSN) {
     tracesSampleRate: 1.0,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+    ignoreErrors: [
+      "Failed to fetch dynamically imported module",
+      "error loading dynamically imported module",
+      "Importing a module script failed",
+      "Unable to preload CSS",
+      /^Loading chunk [0-9]+ failed/,
+    ],
+    beforeSend(event, hint) {
+      const error = hint?.originalException;
+      if (isChunkLoadError(error)) {
+        triggerChunkReload("Sentry intercepted chunk load error");
+        return null; // Suppress alert noise during application updates
+      }
+      return event;
+    },
   });
 }
 
@@ -262,6 +277,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
         { rel: "manifest", href: "/manifest.json" },
         { rel: "stylesheet", href: appCss },
+        // Font preloads: fetch critical weights early to eliminate invisible-text flash.
+        // Inter 400 = body text, Playfair 700 = headings. crossOrigin required for CORS fonts.
+        {
+          rel: "preload",
+          href: "/@fontsource/inter/files/inter-latin-400-normal.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
+        {
+          rel: "preload",
+          href: "/@fontsource/playfair-display/files/playfair-display-latin-700-normal.woff2",
+          as: "font",
+          type: "font/woff2",
+          crossOrigin: "anonymous",
+        },
         { rel: "preconnect", href: "https://lxgwoizxoqnymkkwaplq.supabase.co" },
         { rel: "dns-prefetch", href: "https://lxgwoizxoqnymkkwaplq.supabase.co" },
         { rel: "preconnect", href: "https://cdnjs.cloudflare.com", crossOrigin: "anonymous" },
@@ -444,12 +475,36 @@ function RootComponent() {
         });
     };
 
+    // Reload when a new SW takes control (SKIP_WAITING fired after a deploy).
+    // This ensures users always load the latest JS/CSS instead of hitting
+    // chunk-load errors from stale cached assets.
+    const handleControllerChange = () => {
+      const reloadKey = "gilaniai_sw_reload";
+      const lastReload = sessionStorage.getItem(reloadKey);
+      const now = Date.now();
+      // Rate-limit to once per 30s to avoid reload loops
+      if (!lastReload || now - parseInt(lastReload, 10) > 30_000) {
+        sessionStorage.setItem(reloadKey, now.toString());
+        console.log("[GilaniAI PWA] New SW activated — reloading for fresh assets");
+        window.location.reload();
+      }
+    };
+
+    navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
+
     if (document.readyState === "complete") {
       registerSW();
     } else {
       window.addEventListener("load", registerSW);
-      return () => window.removeEventListener("load", registerSW);
+      return () => {
+        window.removeEventListener("load", registerSW);
+        navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      };
     }
+
+    return () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+    };
   }, []);
 
   // Capture the browser's native PWA install prompt and surface it via a custom event
@@ -508,7 +563,8 @@ function RootComponent() {
       }
     };
 
-    const handlePreloadError = () => {
+    const handlePreloadError = (event?: any) => {
+      event?.preventDefault?.();
       safeReload("Vite preload error (outdated assets after redeployment)");
     };
 

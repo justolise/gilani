@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/client/hooks/use-auth";
 import { PLANS, PlanId } from "@/shared/plans";
 import { supabase } from "@/client/supabase";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Zap, GraduationCap, Star, School, X, Loader2, Wallet, Check } from "lucide-react";
 import { friendlyError } from "@/shared/utils/async";
 import { TOPUP_TOKENS_PER_KES, TOPUP_MIN_KES } from "@/shared/plans";
+import { SandboxHelper } from "@/client/components/SandboxHelper";
 
 const PLAN_ICONS: Record<PlanId, typeof Zap> = {
   free: Zap,
@@ -25,6 +26,40 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
   const [sent, setSent] = useState(false);
   const [tab, setTab] = useState<"plans" | "topup">("plans");
   const [topupAmount, setTopupAmount] = useState<string>("");
+  const [sandboxCheckoutId, setSandboxCheckoutId] = useState<string | null>(null);
+
+  // ── Usage meter: fetch today's message count for urgency context ──
+  const [usageStatus, setUsageStatus] = useState<{
+    messagesUsed: number;
+    messagesMax: number;
+    plan: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.access_token) return;
+      fetch("/api/chat/rate-limit-status", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.messagesMax) {
+            setUsageStatus({
+              messagesUsed: d.messagesUsed ?? 0,
+              messagesMax: d.messagesMax,
+              plan: d.plan ?? currentPlan,
+            });
+          }
+        })
+        .catch(() => {}); // non-fatal
+    });
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isSandbox =
+    import.meta.env.VITE_MPESA_ENV === "sandbox" ||
+    import.meta.env.VITE_MPESA_ENV === undefined || // not set = sandbox by default
+    window.location.hostname === "localhost";
 
   const handleTopup = async () => {
     if (!user?.id) {
@@ -55,6 +90,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      setSandboxCheckoutId(data.checkoutRequestId ?? null);
       setSent(true);
       toast.success(
         `📱 M-Pesa prompt sent! You'll receive ${(parsed * TOPUP_TOKENS_PER_KES).toLocaleString()} tokens.`,
@@ -97,6 +133,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
+      setSandboxCheckoutId(data.checkoutRequestId ?? null);
       setSent(true);
       toast.success("📱 M-Pesa prompt sent! Enter your PIN to activate.");
     } catch (err: any) {
@@ -128,6 +165,53 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             Current plan: <span className="text-primary">{currentPlan}</span>
           </p>
+
+          {/* ── Daily Usage Meter ── */}
+          {usageStatus && (
+            <div className="rounded-lg border border-border/60 bg-accent/20 px-3 py-2.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Today’s messages
+                </span>
+                <span
+                  className={`font-mono text-[10px] font-bold ${
+                    usageStatus.messagesUsed >= usageStatus.messagesMax
+                      ? "text-destructive"
+                      : usageStatus.messagesUsed / usageStatus.messagesMax >= 0.8
+                        ? "text-amber-500"
+                        : "text-primary"
+                  }`}
+                >
+                  {usageStatus.messagesUsed} / {usageStatus.messagesMax}
+                </span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    usageStatus.messagesUsed >= usageStatus.messagesMax
+                      ? "bg-destructive"
+                      : usageStatus.messagesUsed / usageStatus.messagesMax >= 0.8
+                        ? "bg-amber-500"
+                        : "bg-primary"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, (usageStatus.messagesUsed / usageStatus.messagesMax) * 100)}%`,
+                  }}
+                />
+              </div>
+              {usageStatus.messagesUsed >= usageStatus.messagesMax && (
+                <p className="text-[10px] text-destructive font-mono">
+                  Daily limit reached — upgrade to keep learning!
+                </p>
+              )}
+              {usageStatus.messagesUsed / usageStatus.messagesMax >= 0.8 &&
+                usageStatus.messagesUsed < usageStatus.messagesMax && (
+                  <p className="text-[10px] text-amber-500 font-mono">
+                    Almost at your daily limit — upgrade for more.
+                  </p>
+                )}
+            </div>
+          )}
 
           {currentPlan === "free" && (
             <div className="flex rounded-lg border border-border overflow-hidden text-xs font-mono">
@@ -239,6 +323,9 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
                   <p className="text-xs text-emerald-600 dark:text-emerald-500">
                     Enter your M-Pesa PIN to complete. Your plan activates instantly after payment.
                   </p>
+                  {isSandbox && sandboxCheckoutId && (
+                    <SandboxHelper checkoutRequestId={sandboxCheckoutId} />
+                  )}
                   <button
                     onClick={onClose}
                     className="mt-2 text-xs font-mono underline text-muted-foreground"
@@ -341,6 +428,9 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
                   <p className="text-xs text-emerald-600 dark:text-emerald-500">
                     Enter your M-Pesa PIN. Tokens will be added to your wallet instantly.
                   </p>
+                  {isSandbox && sandboxCheckoutId && (
+                    <SandboxHelper checkoutRequestId={sandboxCheckoutId} />
+                  )}
                   <button
                     onClick={onClose}
                     className="mt-2 text-xs font-mono underline text-muted-foreground"

@@ -30,6 +30,11 @@ export default defineConfig({
           process.env.SUPABASE_ANON_KEY ||
           "",
       ),
+      // Expose sandbox flag to client — safe, not a secret.
+      // SECURITY: MPESA_CALLBACK_SECRET is intentionally NOT exposed to the client.
+      // The sandbox-curl command is generated server-side by the authenticated
+      // /api/mpesa/sandbox-curl endpoint and returned to the client at runtime.
+      "import.meta.env.VITE_MPESA_ENV": JSON.stringify(process.env.MPESA_ENV || "sandbox"),
     },
     ssr: {
       external: ["nodemailer"],
@@ -41,6 +46,14 @@ export default defineConfig({
       chunkSizeWarningLimit: 3000,
       rollupOptions: {
         output: {
+          // PERFORMANCE: Vendor chunks split by library family to allow
+          // parallel downloads and maximize cache reuse.
+          //
+          // UPGRADE PATH — Route-level lazy loading:
+          // Replace createFileRoute() with createLazyFileRoute() for heavy
+          // feature routes (tutor, notes, chemistry, physics) so their JS only
+          // loads when the user actually navigates to that section.
+          // See: https://tanstack.com/router/latest/docs/framework/react/guide/code-splitting
           manualChunks(id) {
             if (id.includes("node_modules")) {
               if (

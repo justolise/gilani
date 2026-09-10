@@ -14,6 +14,17 @@ export interface RateLimitOptions {
 // Tracks consecutive DB failures. After 3 failures within 30 s, the rate
 // limiter fails CLOSED (denies all requests) rather than open. This prevents
 // a DB outage from disabling rate limiting entirely.
+//
+// ⚠️  SERVERLESS CAVEAT: This state is module-scoped in-memory. On Vercel/
+// Cloudflare Workers, each request may be handled by a different worker
+// instance that has its own memory space. The circuit breaker state is NOT
+// shared across instances and may be reset on each cold start.
+//
+// UPGRADE PATH: Replace this with Upstash Redis for distributed, shared state:
+//   import { Redis } from '@upstash/redis';
+//   const redis = Redis.fromEnv();
+//   Use redis.incr() + redis.expire() for atomic rate limit counters.
+//   This also replaces the Supabase RPC upsert_rate_limit with faster Redis ops.
 const _circuitBreaker = {
   failures: 0,
   lastFailureAt: 0,
@@ -154,24 +165,32 @@ export type RateLimitAction = "chat" | "quiz" | "planner" | "notes";
 /**
  * Fetch the user's current plan from profiles, then check
  * both per-minute and daily limits against their plan allowance for the given action.
+ *
+ * @param cachedPlan - If the caller already has the user's plan (e.g. from a profile
+ *   cache), pass it here to skip an extra DB round-trip. Falls back to DB lookup if omitted.
  */
 export async function checkPlanRateLimit(
   userId: string,
   action: RateLimitAction = "chat",
   skipIncrement: boolean = false,
+  cachedPlan?: string,
 ): Promise<{ allowed: boolean; retryAfterMs: number; isDaily: boolean; plan: string }> {
-  // Get user plan from profiles
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("plan, plan_expiry")
-    .eq("id", userId)
-    .maybeSingle();
+  // Use the caller-supplied plan if available — avoids a redundant DB fetch
+  // when the calling code (e.g. chat.ts) already has the profile in memory.
+  let plan = cachedPlan ?? null;
 
-  // Fall back to free if no plan or plan expired
-  let plan = profile?.plan ?? "free";
-  if (profile?.plan_expiry) {
-    const expiry = new Date(profile.plan_expiry);
-    if (expiry < new Date()) plan = "free";
+  if (!plan) {
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("plan, plan_expiry")
+      .eq("id", userId)
+      .maybeSingle();
+
+    plan = profile?.plan ?? "free";
+    if (profile?.plan_expiry) {
+      const expiry = new Date(profile.plan_expiry);
+      if (expiry < new Date()) plan = "free";
+    }
   }
 
   const limits = getPlanLimits(plan);

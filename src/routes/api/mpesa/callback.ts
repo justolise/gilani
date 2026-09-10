@@ -5,6 +5,7 @@ import { upgradePlan, creditTopupTokens, verifyTransactionStatus } from "@/serve
 import { z } from "zod";
 import { sendTransactionalEmail, mpesaReceiptEmail } from "@/server/email.server";
 import { sendSMS } from "@/server/sms.server";
+import { log } from "@/server/logger";
 
 import crypto from "node:crypto";
 
@@ -25,20 +26,23 @@ export const Route = createFileRoute("/api/mpesa/callback")({
             providedToken.length !== expectedToken.length ||
             !crypto.timingSafeEqual(Buffer.from(providedToken), Buffer.from(expectedToken))
           ) {
-            console.error("[M-Pesa Callback] Rejected request with invalid or missing token");
+            log.warn("[mpesa_callback] rejected_invalid_token", {
+              ip: request.headers.get("cf-connecting-ip") ?? "",
+            });
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
 
-          // Verify Safaricom IP for production deployments (Defense-in-depth)
+          // Verify Safaricom IP only when using real M-Pesa (MPESA_ENV=production).
+          // In sandbox mode we allow curl/manual callbacks for testing on the live app.
           const clientIp =
             request.headers.get("cf-connecting-ip") ||
             request.headers.get("x-real-ip") ||
             request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
             "";
-          if (process.env.NODE_ENV === "production" && clientIp) {
+          if (process.env.MPESA_ENV === "production" && clientIp) {
             const isMpesaIp = /^196\.201\.(212|213|214)\.\d{1,3}$/.test(clientIp);
             if (!isMpesaIp) {
-              console.error(`[M-Pesa Callback] Rejected request from unauthorized IP: ${clientIp}`);
+              log.warn("[mpesa_callback] rejected_unauthorized_ip", { clientIp });
               return new Response(JSON.stringify({ ResultCode: 1 }), { status: 403 });
             }
           }
@@ -95,9 +99,10 @@ export const Route = createFileRoute("/api/mpesa/callback")({
           // Safaricom retries failed callbacks. If we already processed this
           // payment, return 200 immediately without re-applying the plan upgrade.
           if (payment.status === "completed") {
-            console.warn(
-              `[M-Pesa Callback] Duplicate callback for already-completed payment ${payment.id} — ignoring`,
-            );
+            log.warn("[mpesa_callback] duplicate_callback", {
+              paymentId: payment.id,
+              checkoutRequestId,
+            });
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
 
@@ -110,13 +115,21 @@ export const Route = createFileRoute("/api/mpesa/callback")({
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
 
-          // Active verification: check Safaricom before crediting
-          const isVerified = await verifyTransactionStatus(checkoutRequestId);
-          if (!isVerified) {
-            console.error(
-              `[M-Pesa Callback] Transaction verification failed for ${checkoutRequestId}`,
+          // Active verification: check Safaricom before crediting.
+          // Skip in sandbox — the STK query API is unreliable in sandbox and returns
+          // failure codes even for simulated successful payments.
+          if (process.env.MPESA_ENV === "production") {
+            const isVerified = await verifyTransactionStatus(checkoutRequestId);
+            if (!isVerified) {
+              console.error(
+                `[M-Pesa Callback] Transaction verification failed for ${checkoutRequestId}`,
+              );
+              return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
+            }
+          } else {
+            console.info(
+              `[M-Pesa Callback] Sandbox mode — skipping transaction verification for ${checkoutRequestId}`,
             );
-            return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
 
           // Get M-Pesa receipt number
@@ -220,13 +233,17 @@ export const Route = createFileRoute("/api/mpesa/callback")({
             console.error("[M-Pesa Callback] Failed to send SMS:", smsErr?.message);
           }
 
-          console.log(`[M-Pesa Callback] ✅ ${payment.user_id} → ${payment.plan} (${receipt})`);
+          log.info("[mpesa_callback] payment_completed", {
+            userId: payment.user_id,
+            plan: payment.plan,
+            receipt,
+            amount: payment.amount,
+          });
           return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
         } catch (err: any) {
-          console.error(
-            "[M-Pesa Callback Error]",
-            JSON.stringify({ message: err?.message, stack: err?.stack }),
-          );
+          log.error("[mpesa_callback] unhandled_error", {
+            message: err?.message,
+          });
           // Always return 200 to Safaricom or they will retry
           return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
         }
