@@ -6,7 +6,7 @@ import { log } from "@/server/logger";
 /**
  * GET /api/mpesa/stuck-payments-check
  *
- * Called by Vercel cron every 12 hours.
+ * Called by Vercel cron daily (at 06:00 UTC).
  * Queries for payments stuck in 'pending' state for > 30 minutes and logs them
  * as structured errors so they appear in Vercel log alerts / monitoring.
  *
