@@ -65,9 +65,9 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border/70 bg-background/92 backdrop-blur-xl pb-[var(--safe-bottom,env(safe-area-inset-bottom,0px))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] transition-all"
+      className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t border-border/70 bg-background/92 backdrop-blur-xl pb-(--safe-bottom,env(safe-area-inset-bottom,0px)) shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)] transition-all"
     >
-      <div className="flex h-15 sm:h-16 items-center justify-around px-2">
+      <div className="flex h-14 sm:h-16 items-center justify-around px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
 
@@ -77,7 +77,7 @@ export function MobileBottomNav() {
                 key={item.id}
                 type="button"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`flex flex-1 flex-col items-center justify-center gap-1 py-1 text-center transition-all active:scale-90 min-h-[50px] min-w-[48px] cursor-pointer ${
+                className={`flex flex-1 flex-col items-center justify-center gap-1 py-1 text-center transition-all active:scale-90 min-h-12.5 min-w-12 cursor-pointer ${
                   sidebarOpen
                     ? "text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground"
@@ -112,7 +112,7 @@ export function MobileBottomNav() {
             <Link
               key={item.id}
               to={item.to as any}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 py-1 text-center transition-all active:scale-90 min-h-[50px] min-w-[48px] relative ${
+              className={`flex flex-1 flex-col items-center justify-center gap-1 py-1 text-center transition-all active:scale-90 min-h-12.5 min-w-12 relative ${
                 isActive
                   ? "text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"

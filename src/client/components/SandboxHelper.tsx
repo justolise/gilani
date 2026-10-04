@@ -62,7 +62,7 @@ export function SandboxHelper({ checkoutRequestId }: Props) {
   return (
     <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 text-left p-3 space-y-2">
       <div className="flex items-center gap-1.5">
-        <Terminal className="h-3 w-3 text-amber-700 dark:text-amber-400 flex-shrink-0" />
+        <Terminal className="h-3 w-3 text-amber-700 dark:text-amber-400 shrink-0" />
         <p className="font-mono text-[10px] uppercase tracking-wider font-bold text-amber-700 dark:text-amber-400">
           Sandbox mode — simulate callback
         </p>

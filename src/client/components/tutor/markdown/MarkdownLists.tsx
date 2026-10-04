@@ -105,7 +105,7 @@ export function MarkdownLi({ children, checked, node, ...props }: any) {
           type="checkbox"
           checked={checked}
           readOnly
-          className="mt-1.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0 cursor-default"
+          className="mt-1.5 h-4 w-4 rounded border-border accent-primary shrink-0 cursor-default"
         />
         <span className="flex-1">{children}</span>
       </li>

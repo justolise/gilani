@@ -1,71 +1,70 @@
 import { createServerFn } from "@tanstack/react-start";
-
 import { z } from "zod";
+import { supabaseAdmin, requireAuth, requireTeacherOrAdmin } from "@/server/index";
+import { generateSessionTitle } from "@/server/chat/title.server";
+import {
+  sendEscalationNotification,
+  sendResolutionNotification,
+} from "@/server/chat/escalations.server";
 
-export const createEscalationFn = createServerFn({ method: "POST" })
-  .validator(
-    z.object({
-      conversationId: z.string().uuid(),
-      reason: z.string().default("student_request"),
-      detail: z.string().default("Student manually requested teacher review."),
-      reviewerId: z.string().uuid().nullable(),
-    }),
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    // Check for existing open escalation
-    const { data: existing } = await supabaseAdmin
-      .from("escalations")
-      .select("id")
-      .eq("conversation_id", data.conversationId)
-      .eq("status", "open")
-      .maybeSingle();
-    if (existing) return { alreadyOpen: true };
+/**
+ * Tutor & Study Session Server Functions
+ *
+ * Exposes RPC endpoints for:
+ * 1. Thread & Session Management (delete, rename, AI title generation)
+ * 2. Teacher Escalation & Review (lookup, create, notifications)
+ */
 
-    const { error } = await supabaseAdmin.from("escalations").insert({
-      conversation_id: data.conversationId,
-      user_id: authResult.userId,
-      reason: data.reason,
-      status: "open",
-      detail: data.detail,
-      reviewer_id: data.reviewerId,
-    });
-    if (error) throw error;
-    return { alreadyOpen: false };
-  });
+// ============================================================================
+// 1. Thread & Session Management
+// ============================================================================
 
+/**
+ * Delete a study session thread.
+ * Only the student who created the thread can delete it.
+ */
 export const deleteThreadFn = createServerFn({ method: "POST" })
   .validator(z.object({ threadId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    // Only delete the thread if it belongs to the authenticated user
+    const { userId } = await requireAuth();
+
     const { error } = await supabaseAdmin
       .from("conversations")
       .delete()
       .eq("id", data.threadId)
-      .eq("user_id", authResult.userId);
+      .eq("user_id", userId);
+
     if (error) throw error;
     return true;
   });
 
+/**
+ * Rename a study session thread.
+ * Uses upsert to accommodate the race condition where renaming completes
+ * before the first chat message row is committed.
+ */
+export const renameThreadFn = createServerFn({ method: "POST" })
+  .validator(z.object({ threadId: z.string().uuid(), title: z.string().trim().min(1).max(120) }))
+  .handler(async ({ data }) => {
+    const { userId } = await requireAuth();
+
+    const { error } = await supabaseAdmin.from("conversations").upsert(
+      {
+        id: data.threadId,
+        user_id: userId,
+        title: data.title,
+      },
+      { onConflict: "id" },
+    );
+
+    if (error) throw error;
+    return { success: true };
+  });
+
+/**
+ * Generate a short 3-5 word topic title from the student's initial question.
+ * Optionally saves the generated title to the conversation record in the database.
+ */
 export const generateThreadTitleFn = createServerFn({ method: "POST" })
   .validator(
     z.union([
@@ -80,73 +79,17 @@ export const generateThreadTitleFn = createServerFn({ method: "POST" })
     const threadId = typeof data === "object" ? data.threadId : undefined;
     const firstMessage = typeof data === "object" ? data.text : data;
 
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
     let authUserId: string | null = null;
     try {
-      const authResult = await authenticateRequest(request);
-      authUserId = authResult.userId;
+      const auth = await requireAuth();
+      authUserId = auth.userId;
     } catch {
-      /* allow title generation without failing, but user_id needed for saving */
+      // Allow title generation without failing unauthenticated preview sessions
     }
 
-    let title = "";
+    const title = await generateSessionTitle(firstMessage);
 
-    try {
-      const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-      const { generateText } = await import("ai");
-      const gateway = createGoogleAiProvider();
-      const models = gateway.getAllChatModels("gemini-2.5-flash");
-
-      for (let i = 0; i < models.length; i++) {
-        const { model, name } = models[i];
-        try {
-          if (i > 0) {
-            const { backoffDelay } = await import("@/shared/utils/provider-backoff");
-            await backoffDelay(i);
-          }
-          const cleanPrompt = firstMessage.slice(0, 300).trim();
-          const result = await generateText({
-            model: model as any,
-            maxTokens: 25,
-            prompt: `Generate a short 3 to 5 word topic title for a student study session that begins with this question: "${cleanPrompt}". Return ONLY the title words. No quotes, no prefix like "Title:", no ending punctuation.`,
-          } as any);
-
-          if (result.text && result.text.trim()) {
-            title = result.text.trim();
-            break;
-          }
-        } catch (err) {
-          console.warn(`[Title Gen] Attempt with ${name} failed:`, err);
-        }
-      }
-    } catch (gatewayErr) {
-      console.warn("[Title Gen] Gateway initialization failed:", gatewayErr);
-    }
-
-    // Clean quotes or conversational prefix/suffix
-    if (title) {
-      title = title.replace(/^["'“”‘“#*\s]+|["'“”’*\s]+$/g, "").trim();
-      title = title.replace(/^(title|session|study session|topic):\s*/i, "").trim();
-    }
-
-    // Fallback if AI generation failed or returned empty
-    if (!title || title.length < 2) {
-      const words = firstMessage
-        .replace(/<[^>]+>/g, "")
-        .replace(/\[[^\]]+\]/g, "")
-        .trim()
-        .split(/\s+/)
-        .slice(0, 5)
-        .join(" ");
-      title = words.length > 50 ? words.slice(0, 47) + "…" : words || "Study Session";
-    }
-
-    // Cap title length to 80 chars max
-    title = title.slice(0, 80).trim();
-
-    // Persist directly to DB if threadId and userId are available
+    // Save directly to the database if threadId and authenticated user exist
     if (threadId && authUserId) {
       try {
         await supabaseAdmin.from("conversations").upsert(
@@ -158,71 +101,96 @@ export const generateThreadTitleFn = createServerFn({ method: "POST" })
           { onConflict: "id" },
         );
       } catch (dbErr) {
-        console.error("[Title Gen] Failed to persist title to database:", dbErr);
+        console.error("[Title Gen] Failed to persist title:", dbErr);
       }
     }
 
     return title;
   });
 
+// ============================================================================
+// 2. Teacher Escalations & Reviews
+// ============================================================================
+
+/**
+ * Look up a teacher or admin user by their email address.
+ * Used when a student wants to assign an escalation directly to their specific teacher.
+ */
 export const lookupTeacherByEmail = createServerFn({ method: "POST" })
   .validator(z.string().email())
   .handler(async ({ data: email }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    try {
-      await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    // Look up user by email using admin API
+    await requireAuth();
+
+    // 1. Find profile by email
     const { data: profile, error } = await supabaseAdmin
       .from("profiles")
       .select("id")
       .eq("email", email.toLowerCase())
       .single();
-    if (error || !profile) throw new Error("No teacher found with that email address.");
-    const user = { id: profile.id };
 
-    // Verify they are a teacher or admin
+    if (error || !profile) {
+      throw new Error("No teacher found with that email address.");
+    }
+
+    // 2. Verify user has teacher or admin role
     const { data: roleCheck } = await supabaseAdmin
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
+      .eq("user_id", profile.id)
       .in("role", ["teacher", "admin"])
-      .single();
+      .maybeSingle();
 
-    if (!roleCheck) throw new Error("That email does not belong to a registered teacher.");
+    if (!roleCheck) {
+      throw new Error("No teacher found with that email address.");
+    }
 
-    return user.id;
+    return { id: profile.id };
   });
 
-export async function createNotification({
-  userId,
-  title,
-  message,
-  type,
-  link,
-}: {
-  userId: string;
-  title: string;
-  message: string;
-  type: string;
-  link?: string;
-}) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore — supabaseAdmin is only available in server-side execution paths;
-  // this function is exclusively called from createServerFn handlers.
-  await (supabaseAdmin as any).from("notifications").insert({
-    user_id: userId,
-    title,
-    message,
-    type,
-    link: link ?? null,
-  } as any);
-}
+/**
+ * Request teacher review for an existing study session (creates an escalation record).
+ * Returns { alreadyOpen: true } if an open escalation already exists for this thread.
+ */
+export const createEscalationFn = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      conversationId: z.string().uuid(),
+      reason: z.string().default("student_request"),
+      detail: z.string().default("Student manually requested teacher review."),
+      reviewerId: z.string().uuid().nullable(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const { userId } = await requireAuth();
+
+    // Prevent duplicate open escalations for the same conversation
+    const { data: existing } = await supabaseAdmin
+      .from("escalations")
+      .select("id")
+      .eq("conversation_id", data.conversationId)
+      .eq("status", "open")
+      .maybeSingle();
+
+    if (existing) {
+      return { alreadyOpen: true };
+    }
+
+    const { error } = await supabaseAdmin.from("escalations").insert({
+      conversation_id: data.conversationId,
+      user_id: userId,
+      reason: data.reason,
+      status: "open",
+      detail: data.detail,
+      reviewer_id: data.reviewerId,
+    });
+
+    if (error) throw error;
+    return { alreadyOpen: false };
+  });
+
+/**
+ * Send in-app and email notifications when a new escalation is created.
+ */
 export const createEscalationNotification = createServerFn({ method: "POST" })
   .validator(
     z.object({
@@ -231,110 +199,19 @@ export const createEscalationNotification = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    let authResult: any;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const studentId = authResult.userId;
-    const { conversationId, reviewerId } = data;
-
-    // Fetch student profile details for context
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("display_name")
-      .eq("id", studentId)
-      .maybeSingle();
-    const studentName = profile?.display_name || "A student";
-    const appUrl = process.env.APP_URL || "https://gilaniai.site";
-
-    if (reviewerId) {
-      // Notify specific teacher in DB
-      await (supabaseAdmin as any).from("notifications").insert({
-        user_id: reviewerId,
-        title: "New Escalation Assigned",
-        message: "A student has requested your review on a study session.",
-        type: "escalation",
-        link: "/teacher/escalations",
-      } as any);
-
-      // Email the specific teacher
-      // CS-LOG-001: Log reviewer ID only — never log email addresses to prevent PII leakage in server logs
-      console.log("[Escalation] Sending email to teacher ID:", reviewerId);
-      const { data: reviewerUser } = await supabaseAdmin.auth.admin.getUserById(reviewerId);
-      if (reviewerUser?.user?.email) {
-        const emailResult = await sendTransactionalEmail({
-          to: reviewerUser.user.email,
-          subject: `[GilaniAI] Escalation Assigned: Review Requested`,
-          fromEmail: "info@gilaniai.site",
-          fromName: "GilaniAI",
-          html: emailTemplate({
-            heading: "New Escalation Assigned",
-            body: `<strong>${studentName}</strong> has requested your review on their study session. Please check your escalations dashboard to respond.`,
-            buttonText: "Open Escalations Dashboard",
-            buttonUrl: `${appUrl}/login?signout=true&redirect=/teacher/escalations`,
-            footerNote:
-              "You are receiving this because you are registered as a teacher on GilaniAI.",
-          }),
-          text: `Hello Teacher,\n\n${studentName} has requested your review on their study session. You can view and reply to this escalation by visiting your dashboard:\n\n${appUrl}/teacher/escalations\n\nBest regards,\nThe GilaniAI Team`,
-        });
-        console.log("[Escalation] Email send result:", emailResult);
-      }
-    } else {
-      // Notify all teachers and admins in DB
-      const { data: teachers } = await supabaseAdmin
-        .from("user_roles")
-        .select("user_id")
-        .in("role", ["teacher", "admin"]);
-
-      if (teachers && teachers.length > 0) {
-        await (supabaseAdmin as any).from("notifications").insert(
-          teachers.map(
-            (t) =>
-              ({
-                user_id: t.user_id,
-                title: "New Escalation Request",
-                message: "A student has requested a teacher review on a study session.",
-                type: "escalation",
-                link: "/teacher/escalations",
-              }) as any,
-          ),
-        );
-
-        // Email all teachers/admins in parallel
-        const emails = await Promise.all(
-          teachers.map(async (t) => {
-            const { data: u } = await supabaseAdmin.auth.admin.getUserById(t.user_id);
-            return u?.user?.email;
-          }),
-        );
-        const validEmails = emails.filter((email): email is string => !!email);
-        if (validEmails.length > 0) {
-          await sendTransactionalEmail({
-            to: validEmails,
-            subject: `[GilaniAI] New Escalation Request Available`,
-            fromEmail: "info@gilaniai.site",
-            fromName: "GilaniAI",
-            html: emailTemplate({
-              heading: "New Escalation Request Available",
-              body: `<strong>${studentName}</strong> has requested a teacher review on their study session. Since this request is unassigned, any teacher can claim and review it.`,
-              buttonText: "View Escalations",
-              buttonUrl: `${appUrl}/login?signout=true&redirect=/teacher/escalations`,
-              footerNote:
-                "You are receiving this because you are registered as a teacher or admin on GilaniAI.",
-            }),
-            text: `Hello Teacher/Admin,\n\n${studentName} has requested a teacher review on their study session. Since this request is unassigned, any teacher can claim and review it:\n\n${appUrl}/teacher/escalations\n\nBest regards,\nThe GilaniAI Team`,
-          });
-        }
-      }
-    }
+    const { userId: studentId } = await requireAuth();
+    await sendEscalationNotification({
+      studentId,
+      conversationId: data.conversationId,
+      reviewerId: data.reviewerId,
+    });
+    return { success: true };
   });
 
+/**
+ * Send in-app and email notifications to the student when their escalation has been resolved.
+ * Must be called by an authenticated teacher or admin.
+ */
 export const createResolutionNotification = createServerFn({ method: "POST" })
   .validator(
     z.object({
@@ -343,77 +220,10 @@ export const createResolutionNotification = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    let authResult: any;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    // Verify caller is a teacher/admin
-    const { requireRole } = await import("@/server/api-auth.server");
-    const isTeacher = await requireRole(authResult.userId, "teacher");
-    const isAdmin = await requireRole(authResult.userId, "admin");
-    if (!isTeacher && !isAdmin) throw new Error("Forbidden: Teacher access required");
-    const { studentId, conversationId } = data;
-
-    // Insert database notification
-    await (supabaseAdmin as any).from("notifications").insert({
-      user_id: studentId,
-      title: "Teacher Responded!",
-      message: "Your teacher has reviewed your study session and left a response.",
-      type: "success",
-      link: `/tutor/${conversationId}`,
-    } as any);
-
-    // Email student
-    const { data: studentUser } = await supabaseAdmin.auth.admin.getUserById(studentId);
-    if (studentUser?.user?.email) {
-      const appUrl = process.env.APP_URL || "https://gilaniai.site";
-      await sendTransactionalEmail({
-        to: studentUser.user.email,
-        subject: `[GilaniAI] Teacher Responded to your Study Session!`,
-        fromEmail: "info@gilaniai.site",
-        fromName: "GilaniAI",
-        html: emailTemplate({
-          heading: "Your teacher has responded! 🎉",
-          body: "Great news — your teacher has reviewed your study session and left a response. Click below to view their feedback and continue learning.",
-          buttonText: "View Teacher's Response",
-          buttonUrl: `${appUrl}/login?signout=true&redirect=/tutor/${conversationId}`,
-          footerNote:
-            "You are receiving this because you submitted an escalation request on GilaniAI.",
-        }),
-        text: `Hello student,\n\nYour teacher has reviewed your study session and left a response! Click the link below to view their response and continue learning:\n\n${appUrl}/tutor/${conversationId}\n\nBest regards,\nThe GilaniAI Team`,
-      });
-    }
-  });
-
-export const renameThreadFn = createServerFn({ method: "POST" })
-  .validator(z.object({ threadId: z.string().uuid(), title: z.string().trim().min(1).max(120) }))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { sendTransactionalEmail, emailTemplate } = await import("@/server/email.server");
-    const request = (await import("@tanstack/react-start/server")).getRequest();
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    // Use upsert to handle the race condition where title generation completes
-    // BEFORE the /api/chat endpoint has finished creating the conversation row.
-    const { error } = await supabaseAdmin.from("conversations").upsert(
-      {
-        id: data.threadId,
-        user_id: authResult.userId,
-        title: data.title,
-      },
-      { onConflict: "id" },
-    );
-    if (error) throw error;
+    await requireTeacherOrAdmin();
+    await sendResolutionNotification({
+      studentId: data.studentId,
+      conversationId: data.conversationId,
+    });
     return { success: true };
   });

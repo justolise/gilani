@@ -50,10 +50,11 @@ export function AdminUsersPage() {
     [],
   );
   const dashboard = useAdminDashboard(serverFns);
+  const { loadDashboardData } = dashboard;
 
   useEffect(() => {
-    dashboard.loadDashboardData();
-  }, [dashboard.loadDashboardData]);
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   if (dashboard.loadingData) return <GilaniLoader />;
 
@@ -152,7 +153,7 @@ export function AdminUsersPage() {
               <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground leading-tight">
                 {label}
               </p>
-              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} flex-shrink-0`} />
+              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} shrink-0`} />
             </div>
             <p className={`font-serif text-xl sm:text-3xl font-bold ${color}`}>{value}</p>
           </div>
@@ -190,7 +191,7 @@ export function AdminUsersPage() {
               <p className="font-mono text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground leading-tight">
                 {label}
               </p>
-              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} flex-shrink-0`} />
+              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color} shrink-0`} />
             </div>
             <p className={`font-serif text-xl sm:text-3xl font-bold ${color}`}>{value}</p>
           </div>
@@ -205,13 +206,13 @@ export function AdminUsersPage() {
             <button
               key={t.id}
               onClick={() => dashboard.setTab(t.id as any)}
-              className={`snap-start flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-wider rounded-xl border transition-all whitespace-nowrap flex-shrink-0 min-h-[36px] sm:min-h-[40px] cursor-pointer ${
+              className={`snap-start flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 text-[10px] sm:text-xs font-bold font-mono uppercase tracking-wider rounded-xl border transition-all whitespace-nowrap shrink-0 min-h-9 sm:min-h-10 cursor-pointer ${
                 dashboard.tab === t.id
                   ? "border-primary text-primary bg-primary/5 font-extrabold shadow-sm"
                   : "border-border/60 text-muted-foreground bg-transparent hover:text-foreground hover:border-border hover:bg-accent/30"
               }`}
             >
-              <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+              <Icon className="h-3.5 w-3.5 shrink-0" />
               <span>{t.label}</span>
               {"badge" in t && (t as any).badge > 0 && (
                 <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground leading-none">

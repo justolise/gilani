@@ -5,7 +5,6 @@
     "src/**/*.test.tsx",
     "src/**/*.spec.ts",
     "src/**/*.spec.tsx",
-    "src/client/components/ui/alert-dialog.tsx",
     "src/client/components/ui/chart.tsx",
     "src/client/components/ui/drawer.tsx",
     "src/client/components/ui/form.tsx"
@@ -31,7 +30,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/server": ["./src/server/index.ts"]
     }
   }
 }

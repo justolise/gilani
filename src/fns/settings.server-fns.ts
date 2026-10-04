@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { supabaseAdmin, requireAuth, sendTransactionalEmail, emailTemplate } from "@/server/index";
+import { invalidateCachedProfile } from "@/server/chat/profile-cache.server";
 
 export const saveUserSettingsFn = createServerFn({ method: "POST" })
   .validator(
@@ -18,21 +19,7 @@ export const saveUserSettingsFn = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { invalidateCachedProfile } = await import("@/server/chat/profile-cache.server");
-
-    const request = getRequest();
-    let authResult;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-        cause: err,
-      });
-    }
-
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     // Build the core payload for profiles table
     const updatePayload: Record<string, any> = {
@@ -96,20 +83,7 @@ export const saveUserSettingsFn = createServerFn({ method: "POST" })
   });
 
 export const clearAllChatHistoryFn = createServerFn({ method: "POST" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/server/supabase");
-  const { authenticateRequest } = await import("@/server/api-auth.server");
-
-  const request = getRequest();
-  let authResult;
-  try {
-    authResult = await authenticateRequest(request);
-  } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-      cause: err,
-    });
-  }
-
-  const userId = authResult.userId;
+  const { userId } = await requireAuth();
 
   // Delete all messages belonging to the user
   await supabaseAdmin.from("messages").delete().eq("user_id", userId);
@@ -126,21 +100,8 @@ export const clearAllChatHistoryFn = createServerFn({ method: "POST" }).handler(
 });
 
 export const exportUserDataFn = createServerFn({ method: "POST" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/server/supabase");
-  const { authenticateRequest } = await import("@/server/api-auth.server");
-
-  const request = getRequest();
-  let authResult;
-  try {
-    authResult = await authenticateRequest(request);
-  } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-      cause: err,
-    });
-  }
-
-  const userId = authResult.userId;
-  const userEmail = authResult.user.email;
+  const { userId, user } = await requireAuth();
+  const userEmail = user.email;
 
   // Fetch profile
   const { data: profile } = await supabaseAdmin
@@ -190,3 +151,56 @@ export const exportUserDataFn = createServerFn({ method: "POST" }).handler(async
     studyGoals: studyGoals || [],
   };
 });
+
+export const deleteAccount = createServerFn({ method: "POST" })
+  .validator((raw: unknown) => {
+    if (typeof raw !== "object" || raw === null || typeof (raw as any).otp !== "string") {
+      throw new Error("Invalid payload");
+    }
+    const otp = (raw as any).otp.trim();
+    if (!/^\d{4,8}$/.test(otp)) {
+      throw new Error("A valid 6-digit verification code is required.");
+    }
+    return { otp };
+  })
+  .handler(async ({ data }) => {
+    const { userId, user } = await requireAuth();
+
+    const cleanOtp = data.otp;
+    if (!cleanOtp) {
+      throw new Error("A valid verification code is required to delete your account.");
+    }
+
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (roleRow?.role === "admin") {
+      throw new Error("Admin accounts cannot be self-deleted. Transfer ownership first.");
+    }
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) {
+      throw new Error(error.message || "Failed to delete account. Please contact support.");
+    }
+
+    const userEmail = user.email;
+    if (userEmail) {
+      try {
+        await sendTransactionalEmail({
+          to: userEmail,
+          subject: "Your GilaniAI account has been deleted",
+          fromEmail: "noreply@gilaniai.site",
+          html: emailTemplate({
+            heading: "Account Deleted",
+            body: "This confirms that your GilaniAI account and all associated data have been permanently deleted, as requested.",
+            footerNote: "This is an automated confirmation. No further action is needed.",
+          }),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+  });

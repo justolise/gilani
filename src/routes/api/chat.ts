@@ -224,7 +224,7 @@ export const Route = createFileRoute("/api/chat")({
           });
 
           // ─── Stream with Gemini (auto-fallback to Groq/OpenAI/Mistral) ───
-          console.log(`[API Chat] Streaming with provider: google (gemini)`);
+          // stream_start is already logged by log.info above
 
           const streamAbortController = new AbortController();
           let streamTimeoutId: NodeJS.Timeout | null = setTimeout(() => {

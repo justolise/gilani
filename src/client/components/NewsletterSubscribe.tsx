@@ -58,7 +58,7 @@ export function NewsletterSubscribe({ userId, userEmail, userName, variant = "ca
       <div
         className={`flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 ${variant === "banner" ? "w-full" : ""}`}
       >
-        <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+        <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
         <div>
           <p className="text-sm font-bold text-emerald-700">You're subscribed!</p>
           <p className="text-xs text-emerald-600">Check your email for a welcome message.</p>
@@ -72,7 +72,7 @@ export function NewsletterSubscribe({ userId, userEmail, userName, variant = "ca
       <div className="w-full rounded-xl border border-primary/20 bg-primary/5 px-4 py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center gap-2 flex-1">
-            <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+            <Mail className="h-4 w-4 text-primary shrink-0" />
             <div>
               <p className="text-sm font-bold text-foreground">Stay updated with GilaniAI</p>
               <p className="text-xs text-muted-foreground">
@@ -91,7 +91,7 @@ export function NewsletterSubscribe({ userId, userEmail, userName, variant = "ca
             <button
               onClick={handleSubscribe}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors flex-shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors shrink-0"
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Subscribe"}
             </button>

@@ -31,7 +31,7 @@ import { LanguageRegionTab } from "@/client/components/settings/tabs/LanguageReg
 import { AccessibilityTab } from "@/client/components/settings/tabs/AccessibilityTab";
 import { ShortcutsTab } from "@/client/components/settings/tabs/ShortcutsTab";
 import { PlansModal } from "@/client/components/PlansModal";
-import { deleteAccount } from "@/routes/_authenticated/settings";
+import { deleteAccount } from "@/fns/settings.server-fns";
 
 type TabId =
   | "profile"
@@ -110,19 +110,20 @@ export default function SettingsPage() {
   ];
 
   const allTabs = TAB_GROUPS.flatMap((g) => g.tabs);
+  const { activeTab, setActiveTab } = settings;
 
   // Default to "profile" on desktop
   useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth >= 768 && !settings.activeTab) {
-      settings.setActiveTab("profile");
+    if (typeof window !== "undefined" && window.innerWidth >= 768 && !activeTab) {
+      setActiveTab("profile");
     }
-  }, []);
+  }, [activeTab, setActiveTab]);
 
-  const activeTabMeta = allTabs.find((t) => t.id === settings.activeTab);
+  const activeTabMeta = allTabs.find((t) => t.id === activeTab);
   const activeTabLabel = activeTabMeta?.label ?? t("tab_settings");
 
   const handleTabClick = (tabId: TabId) => {
-    settings.setActiveTab(tabId);
+    setActiveTab(tabId);
     setMobileView("content");
   };
 
@@ -133,7 +134,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col h-full bg-background w-full">
       {/* ── Mobile Top Bar ─────────────────────────────── */}
-      <div className="md:hidden flex items-center justify-between border-b border-border/60 px-4 h-14 flex-shrink-0 bg-sidebar/95 dark:bg-[#191715]/95 backdrop-blur-xl">
+      <div className="md:hidden flex items-center justify-between border-b border-border/60 px-4 h-14 shrink-0 bg-sidebar/95 dark:bg-[#191715]/95 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -180,7 +181,7 @@ export default function SettingsPage() {
                       <button
                         key={tab.id}
                         onClick={() => handleTabClick(tab.id)}
-                        className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer min-h-[46px] ${
+                        className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer min-h-11.5 ${
                           isActive
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
@@ -188,13 +189,13 @@ export default function SettingsPage() {
                       >
                         <span className="flex items-center gap-3">
                           <Icon
-                            className={`h-4.5 w-4.5 flex-shrink-0 transition-colors ${
+                            className={`h-4.5 w-4.5 shrink-0 transition-colors ${
                               isActive ? "text-primary" : "text-muted-foreground/70"
                             }`}
                           />
                           <span>{tab.label}</span>
                         </span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 flex-shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                       </button>
                     );
                   })}
@@ -217,14 +218,14 @@ export default function SettingsPage() {
           {/* ── Left Nav (Sidebar Clone) ── */}
           <div
             className="
-              w-[270px] flex-shrink-0 flex flex-col
+              w-67.5 shrink-0 flex flex-col
               bg-sidebar dark:bg-[#191715]
               border-r border-sidebar-border/80
               overflow-hidden
             "
           >
             {/* Scope-switcher header — matches sidebar exactly */}
-            <div className="flex items-center justify-between px-3 pt-3.5 pb-2 flex-shrink-0 border-b border-sidebar-border/40">
+            <div className="flex items-center justify-between px-3 pt-3.5 pb-2 shrink-0 border-b border-sidebar-border/40">
               <div className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted/40 transition-colors group cursor-default max-w-full min-w-0">
                 {/* Breadcrumb — no G icon, GilaniAI in primary */}
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -234,12 +235,12 @@ export default function SettingsPage() {
                     Settings
                   </span>
                 </div>
-                <ChevronDown className="h-3 w-3 text-muted-foreground/30 ml-0.5 flex-shrink-0" />
+                <ChevronDown className="h-3 w-3 text-muted-foreground/30 ml-0.5 shrink-0" />
               </div>
 
               {/* Saving indicator */}
               {settings.busy && (
-                <span className="text-[10px] font-mono text-muted-foreground/60 animate-pulse flex-shrink-0 pr-1">
+                <span className="text-[10px] font-mono text-muted-foreground/60 animate-pulse shrink-0 pr-1">
                   saving…
                 </span>
               )}
@@ -274,7 +275,7 @@ export default function SettingsPage() {
                       >
                         <span className="flex items-center gap-2.5 min-w-0 truncate">
                           <Icon
-                            className={`h-4 w-4 flex-shrink-0 transition-colors ${
+                            className={`h-4 w-4 shrink-0 transition-colors ${
                               isActive
                                 ? "text-primary"
                                 : "text-muted-foreground/70 group-hover:text-foreground"
@@ -284,7 +285,7 @@ export default function SettingsPage() {
                         </span>
                         {/* Active dot — mirrors sidebar's dot indicator */}
                         {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                         )}
                       </button>
                     );
@@ -294,7 +295,7 @@ export default function SettingsPage() {
             </nav>
 
             {/* Footer divider — mirrors sidebar footer */}
-            <div className="flex-shrink-0 border-t border-sidebar-border/50 px-3 py-3">
+            <div className="shrink-0 border-t border-sidebar-border/50 px-3 py-3">
               <div className="flex items-center gap-2 px-2 py-1">
                 <Settings className="h-3.5 w-3.5 text-muted-foreground/30" />
                 <span className="text-[10px] font-mono text-muted-foreground/30 tracking-wide">
@@ -307,7 +308,7 @@ export default function SettingsPage() {
           {/* ── Right Content Area ── */}
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background">
             {/* Content header bar */}
-            <div className="flex items-center justify-between px-10 pt-8 pb-4 border-b border-border/30 flex-shrink-0">
+            <div className="flex items-center justify-between px-10 pt-8 pb-4 border-b border-border/30 shrink-0">
               <div className="space-y-0.5">
                 <h2 className="text-xl font-semibold text-foreground">
                   {settings.activeTab ? activeTabLabel : ""}
@@ -321,7 +322,7 @@ export default function SettingsPage() {
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-10 py-8">
               {!settings.activeTab ? (
-                <div className="flex-col items-center justify-center h-full min-h-[300px] text-center gap-4 flex">
+                <div className="flex-col items-center justify-center h-full min-h-75 text-center gap-4 flex">
                   <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
                     <Settings className="h-5 w-5 text-muted-foreground/50" />
                   </div>

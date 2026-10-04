@@ -193,7 +193,7 @@ export function ConsentSecurityTab({ settings, userEmail }: Props) {
             ) : (
               <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 space-y-3 animate-in fade-in duration-200">
                 <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-xs font-bold text-destructive">
                       Permanently clear all chat history?

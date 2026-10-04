@@ -1,8 +1,5 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
-import { authenticateRequest } from "@/server/api-auth.server";
 import { supabase } from "@/client/supabase";
 import { LayoutContext } from "@/client/contexts/layout-context";
 import { DisclaimerModal } from "@/client/components/DisclaimerModal";
@@ -15,28 +12,14 @@ import { MobileBottomNav } from "@/client/components/layout/MobileBottomNav";
 import { AppGuideModal } from "@/client/components/guide/AppGuideModal";
 import { I18nProvider } from "@/client/i18n/I18nContext";
 import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileForm";
-import { assignUserRole } from "@/fns/auth-actions.server-fns";
+import { assignUserRole, checkSessionAuth } from "@/fns/auth-actions.server-fns";
 import * as Sentry from "@sentry/react";
 import { isChunkLoadError, triggerChunkReload } from "@/shared/utils/chunk-reload";
-
-const requireAuth = createServerFn({ method: "GET" }).handler(async () => {
-  const request = getRequest();
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return { authenticated: null as boolean | null };
-  }
-  try {
-    await authenticateRequest(request);
-    return { authenticated: true };
-  } catch {
-    return { authenticated: false };
-  }
-});
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
     if (typeof window === "undefined") {
-      const { authenticated } = await requireAuth();
+      const { authenticated } = await checkSessionAuth();
       if (authenticated === false) {
         throw redirect({ to: "/login", search: { redirect: location.href, signout: true } as any });
       }
@@ -119,7 +102,7 @@ function AuthedShell() {
   return (
     <I18nProvider>
       <LayoutContext.Provider value={layoutValue}>
-        <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground pt-[var(--safe-top,0px)] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)]">
+        <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground pt-(--safe-top,0px) pl-(--safe-left,0px) pr-(--safe-right,0px)">
           <DisclaimerModal />
           <AppGuideModal />
           {needsProfileSetup && (

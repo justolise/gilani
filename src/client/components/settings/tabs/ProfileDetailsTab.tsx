@@ -53,7 +53,7 @@ export function ProfileDetailsTab({ settings, userEmail, PresetAvatarSVG }: Prop
 
         {/* Avatar Showcase & Controls */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-background/50 border border-border/30 p-5 rounded-2xl">
-          <div className="relative group flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full overflow-hidden border-2 border-primary/30 bg-background shadow-md">
+          <div className="relative group flex h-24 w-24 shrink-0 items-center justify-center rounded-full overflow-hidden border-2 border-primary/30 bg-background shadow-md">
             {settings.avatarUrl ? (
               isPreset && currentPresetId ? (
                 <PresetAvatarSVG preset={currentPresetId} />
@@ -315,7 +315,7 @@ export function ProfileDetailsTab({ settings, userEmail, PresetAvatarSVG }: Prop
         </div>
 
         <div className="rounded-xl border border-border/60 bg-background p-4 flex items-center gap-4 shadow-2xs">
-          <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-border/80 bg-background/50 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border/80 bg-background/50 flex items-center justify-center">
             {settings.avatarUrl ? (
               isPreset && currentPresetId ? (
                 <PresetAvatarSVG preset={currentPresetId} />

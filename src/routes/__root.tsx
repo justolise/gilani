@@ -369,7 +369,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ORG_JSON_LD }} />
       </head>
-      <body suppressHydrationWarning style={{ background: "hsl(var(--background, 24 15% 8%))" }}>
+      <body
+        suppressHydrationWarning
+        style={{ backgroundColor: "var(--color-background, #ffffff)" }}
+      >
         {children}
         <Scripts />
       </body>

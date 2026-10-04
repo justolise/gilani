@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { withTimeout } from "@/shared/utils/async";
 import { sanitizeCurriculum, sanitizeUntrustedInput } from "@/shared/utils/tutor-prompt";
 
 import { getPlanLimits } from "@/shared/plans";
+import {
+  supabaseAdmin,
+  requireAuth,
+  checkPlanRateLimit,
+  getPlanRateLimitStatus,
+} from "@/server/index";
 
 // Memory cache for deduplicating identical requests (5-min TTL)
 const quizCache = new Map<string, { result: any; expiresAt: number }>();
@@ -48,19 +53,7 @@ export const generateQuizFn = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     // Enforces both per-minute and plan-based daily quota (getPlanLimits().dailyQuizzes)
     const rateLimit = await checkPlanRateLimit(userId, "quiz");
@@ -102,6 +95,7 @@ export const generateQuizFn = createServerFn({ method: "POST" })
       const geminiKey = (process.env.GEMINI_API_KEY || "").trim();
       if (geminiKey) {
         const { embed } = await import("ai");
+        const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
         const embModel = createGoogleAiProvider().textEmbeddingModel();
         const { embedding } = await withTimeout(
           embed({
@@ -195,6 +189,7 @@ export const generateQuizFn = createServerFn({ method: "POST" })
     ].join("\n\n");
 
     const { generateObject } = await import("ai");
+    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
     const gateway = createGoogleAiProvider();
 
     let result;
@@ -257,19 +252,7 @@ export const submitQuizAttemptFn = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     const { data: quiz, error: quizError } = await supabaseAdmin
       .from("quizzes")
@@ -300,15 +283,10 @@ export const submitQuizAttemptFn = createServerFn({ method: "POST" })
 
 // ─── Quiz form options (plan-derived, sourced from the user's Supabase profile) ───
 export const getQuizFormOptionsFn = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/server/supabase");
-  const { authenticateRequest } = await import("@/server/api-auth.server");
-  const { checkPlanRateLimit, getPlanRateLimitStatus } = await import("@/server/rate-limit.server");
-  const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-  const request = getRequest();
   let userId: string | null = null;
   try {
-    const authResult = await authenticateRequest(request);
-    userId = authResult.userId;
+    const auth = await requireAuth();
+    userId = auth.userId;
   } catch {
     // Unauthenticated — fall back to free-tier options
   }
@@ -348,19 +326,7 @@ export const getQuizFormOptionsFn = createServerFn({ method: "GET" }).handler(as
 export const deleteQuizFn = createServerFn({ method: "POST" })
   .validator(z.object({ quizId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     const { data: quiz } = await supabaseAdmin
       .from("quizzes")

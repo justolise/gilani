@@ -7,6 +7,8 @@ import { Zap, GraduationCap, Star, School, X, Loader2, Wallet, Check } from "luc
 import { friendlyError } from "@/shared/utils/async";
 import { TOPUP_TOKENS_PER_KES, TOPUP_MIN_KES } from "@/shared/plans";
 import { SandboxHelper } from "@/client/components/SandboxHelper";
+import { getRateLimitStatus } from "@/fns/rate-limit.server-fns";
+import { api } from "@/client/api";
 
 const PLAN_ICONS: Record<PlanId, typeof Zap> = {
   free: Zap,
@@ -37,24 +39,18 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.access_token) return;
-      fetch("/api/chat/rate-limit-status", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+    getRateLimitStatus({ data: "chat" })
+      .then((d) => {
+        if (d?.messagesMax) {
+          setUsageStatus({
+            messagesUsed: d.messagesUsed ?? 0,
+            messagesMax: d.messagesMax,
+            plan: d.plan ?? currentPlan,
+          });
+        }
       })
-        .then((r) => r.json())
-        .then((d) => {
-          if (d.messagesMax) {
-            setUsageStatus({
-              messagesUsed: d.messagesUsed ?? 0,
-              messagesMax: d.messagesMax,
-              plan: d.plan ?? currentPlan,
-            });
-          }
-        })
-        .catch(() => {}); // non-fatal
-    });
-  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+      .catch(() => {}); // non-fatal
+  }, [user?.id, currentPlan]);
 
   const isSandbox =
     import.meta.env.VITE_MPESA_ENV === "sandbox" ||
@@ -77,19 +73,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
     }
     setLoading(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const res = await fetch("/api/mpesa/initiate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ phone, plan: "topup", amount: parsed }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await api.mpesa.initiate({ phone, plan: "topup", amount: parsed });
       setSandboxCheckoutId(data.checkoutRequestId ?? null);
       setSent(true);
       toast.success(
@@ -118,21 +102,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
 
     setLoading(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const res = await fetch("/api/mpesa/initiate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({ phone, plan: selected }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
+      const data = await api.mpesa.initiate({ phone, plan: selected });
       setSandboxCheckoutId(data.checkoutRequestId ?? null);
       setSent(true);
       toast.success("📱 M-Pesa prompt sent! Enter your PIN to activate.");
@@ -154,7 +124,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors min-h-11 min-w-11 flex items-center justify-center cursor-pointer"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -263,7 +233,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
                           </p>
                         </div>
                       </div>
-                      <div className="text-right flex-shrink-0 ml-4">
+                      <div className="text-right shrink-0 ml-4">
                         <p className="font-bold text-primary">KES {plan.price}</p>
                         <p className="font-mono text-[9px] text-muted-foreground">per month</p>
                       </div>
@@ -280,7 +250,7 @@ export function PlansModal({ onClose, currentPlan = "free" }: Props) {
                 <ul className="space-y-2 text-xs text-muted-foreground">
                   {PLANS[selected].features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2.5">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                       <span>{feat}</span>
                     </li>
                   ))}

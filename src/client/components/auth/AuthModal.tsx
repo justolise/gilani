@@ -67,7 +67,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     }
   };
 
-  const routeToDestination = async () => {
+  const routeToDestination = useCallback(async () => {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
     if (!userId) return navigate({ to: "/tutor" as any, search: { new: "1" } as any });
@@ -85,7 +85,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
     } else {
       navigate({ to: "/tutor" as any, search: { new: "1" } as any });
     }
-  };
+  }, [navigate]);
 
   const verifyOtpWithCode = useCallback(
     async (codeToVerify: string) => {
@@ -134,7 +134,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
         );
       }
     },
-    [email, onAuthComplete, onClose],
+    [email, onAuthComplete, onClose, routeToDestination],
   );
 
   const handleOtpChange = (index: number, value: string) => {
@@ -270,24 +270,24 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-[420px] z-10 my-auto animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-105 z-10 my-auto animate-in fade-in zoom-in-95 duration-300">
         {/* Outer glow */}
-        <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-[#C96A3D]/20 via-transparent to-transparent blur-sm pointer-events-none" />
+        <div className="absolute -inset-px rounded-3xl bg-linear-to-br from-[#C96A3D]/20 via-transparent to-transparent blur-sm pointer-events-none" />
 
-        <div className="relative rounded-3xl border border-white/[0.08] bg-[#131722]/95 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
+        <div className="relative rounded-3xl border border-white/8 bg-[#131722]/95 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
           {/* Top accent bar */}
-          <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70 flex-shrink-0" />
+          <div className="h-0.5 w-full bg-linear-to-r from-transparent via-[#C96A3D] to-transparent opacity-70 shrink-0" />
 
           <div className="overflow-y-auto p-6 sm:p-8 space-y-5">
             {/* Close button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/6 transition-colors"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -326,7 +326,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                 <button
                   onClick={onGoogle}
                   disabled={loadingProvider !== null}
-                  className="w-full flex items-center justify-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] py-3.5 text-sm font-semibold text-white hover:bg-white/[0.08] hover:border-white/15 disabled:opacity-50 transition-all duration-200 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-3 rounded-2xl border border-white/8 bg-white/4 py-3.5 text-sm font-semibold text-white hover:bg-white/8 hover:border-white/15 disabled:opacity-50 transition-all duration-200 cursor-pointer"
                 >
                   {loadingProvider === "google" ? (
                     <Loader2 className="h-4 w-4 animate-spin text-white/40" />
@@ -338,11 +338,11 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="h-px flex-1 bg-white/[0.06]" />
+                  <div className="h-px flex-1 bg-white/6" />
                   <span className="text-[10px] font-mono uppercase tracking-widest text-white/20">
                     or
                   </span>
-                  <div className="h-px flex-1 bg-white/[0.06]" />
+                  <div className="h-px flex-1 bg-white/6" />
                 </div>
 
                 {/* Email Form */}
@@ -358,7 +358,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                       maxLength={254}
                       disabled={loadingProvider !== null}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3.5 text-base sm:text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
+                      className="w-full rounded-2xl border border-white/8 bg-white/4 pl-10 pr-4 py-3.5 text-base sm:text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/6 transition-all disabled:opacity-50"
                     />
                   </div>
 
@@ -403,7 +403,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
               <form onSubmit={onVerifyOtp} className="space-y-5">
                 {emailStatus === "incomplete" && (
                   <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
-                    <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-200/80 leading-relaxed">
                       Your previous sign-up wasn't completed. Verify your email to finish setting up
                       your account.
@@ -412,7 +412,7 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                 )}
 
                 {/* 6-box OTP */}
-                <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-[340px] mx-auto">
+                <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-85 mx-auto">
                   {otpDigits.map((digit, i) => (
                     <input
                       key={i}
@@ -428,8 +428,8 @@ export function AuthModal({ onClose, onAuthStart, onAuthComplete }: AuthModalPro
                       disabled={loadingProvider !== null}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                      className={`flex-1 min-w-0 max-w-[46px] h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
-                        ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
+                      className={`flex-1 min-w-0 max-w-11.5 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/4 text-white transition-all focus:outline-none disabled:opacity-50
+                        ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/10"}
                         focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
                     />
                   ))}

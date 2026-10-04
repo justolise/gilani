@@ -39,7 +39,7 @@ export function AuthForm() {
 
   const otpString = otp.join("");
 
-  const routeToDestination = async () => {
+  const routeToDestination = useCallback(async () => {
     const { data: session } = await supabase.auth.getSession();
     const userId = session.session?.user.id;
     if (!userId) return navigate({ to: "/tutor" as any, search: { new: "1" } as any });
@@ -57,7 +57,7 @@ export function AuthForm() {
     } else {
       navigate({ to: "/tutor" as any, search: { new: "1" } as any });
     }
-  };
+  }, [navigate]);
 
   const sendOtp = async (targetEmail: string) => {
     const { error } = await supabase.auth.signInWithOtp({ email: targetEmail });
@@ -114,7 +114,7 @@ export function AuthForm() {
         );
       }
     },
-    [email],
+    [email, routeToDestination],
   );
 
   // ── OTP digit input ───────────────────────────────────────────────────────
@@ -276,10 +276,10 @@ export function AuthForm() {
   // ── UI ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-[420px] mx-auto animate-in fade-in zoom-in-95 duration-300">
-      <div className="relative rounded-3xl border border-white/[0.08] bg-[#131722]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+    <div className="w-full max-w-105 mx-auto animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative rounded-3xl border border-white/8 bg-[#131722]/95 backdrop-blur-xl shadow-2xl overflow-hidden">
         {/* Top accent bar */}
-        <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-[#C96A3D] to-transparent opacity-70" />
+        <div className="h-0.5 w-full bg-linear-to-r from-transparent via-[#C96A3D] to-transparent opacity-70" />
 
         <div className="p-7 sm:p-9 space-y-6">
           {/* Header */}
@@ -314,7 +314,7 @@ export function AuthForm() {
               <button
                 onClick={onGoogle}
                 disabled={loadingProvider !== null}
-                className="w-full flex items-center justify-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.04] py-3.5 text-sm font-semibold text-white hover:bg-white/[0.08] hover:border-white/15 disabled:opacity-50 transition-all duration-200 cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 rounded-2xl border border-white/8 bg-white/4 py-3.5 text-sm font-semibold text-white hover:bg-white/8 hover:border-white/15 disabled:opacity-50 transition-all duration-200 cursor-pointer"
               >
                 {loadingProvider === "google" ? (
                   <Loader2 className="h-4 w-4 animate-spin text-white/40" />
@@ -326,11 +326,11 @@ export function AuthForm() {
 
               {/* Divider */}
               <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/[0.06]" />
+                <div className="h-px flex-1 bg-white/6" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-white/20">
                   or
                 </span>
-                <div className="h-px flex-1 bg-white/[0.06]" />
+                <div className="h-px flex-1 bg-white/6" />
               </div>
 
               {/* Email form */}
@@ -346,7 +346,7 @@ export function AuthForm() {
                     maxLength={254}
                     disabled={loadingProvider !== null}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.04] pl-10 pr-4 py-3.5 text-base sm:text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/[0.06] transition-all disabled:opacity-50"
+                    className="w-full rounded-2xl border border-white/8 bg-white/4 pl-10 pr-4 py-3.5 text-base sm:text-sm text-white placeholder-white/25 focus:border-[#C96A3D]/50 focus:outline-none focus:ring-1 focus:ring-[#C96A3D]/30 focus:bg-white/6 transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -393,7 +393,7 @@ export function AuthForm() {
               {/* Banner for incomplete registration */}
               {emailStatus === "incomplete" && (
                 <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
-                  <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-200/80 leading-relaxed">
                     Your previous sign-up wasn't completed. Verify your email to finish setting up
                     your account.
@@ -402,7 +402,7 @@ export function AuthForm() {
               )}
 
               {/* 6-box OTP input */}
-              <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-[340px] mx-auto">
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 w-full max-w-85 mx-auto">
                 {otp.map((digit, i) => (
                   <input
                     key={i}
@@ -418,8 +418,8 @@ export function AuthForm() {
                     disabled={loadingProvider !== null}
                     onChange={(e) => handleOtpChange(i, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className={`flex-1 min-w-0 max-w-[46px] h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/[0.04] text-white transition-all focus:outline-none disabled:opacity-50
-                      ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/[0.10]"}
+                    className={`flex-1 min-w-0 max-w-11.5 h-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono rounded-xl border bg-white/4 text-white transition-all focus:outline-none disabled:opacity-50
+                      ${digit ? "border-[#C96A3D]/60 bg-[#C96A3D]/10" : "border-white/10"}
                       focus:border-[#C96A3D] focus:ring-2 focus:ring-[#C96A3D]/25 focus:bg-white/[0.07]`}
                   />
                 ))}

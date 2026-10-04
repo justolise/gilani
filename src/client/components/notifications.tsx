@@ -189,7 +189,7 @@ export function NotificationBell({
                   className="flex-1 text-left px-4 py-3.5 hover:bg-accent/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-start gap-2.5">
-                    <div className="flex-shrink-0 flex flex-col items-center gap-1.5 pt-0.5">
+                    <div className="shrink-0 flex flex-col items-center gap-1.5 pt-0.5">
                       <span
                         className={`rounded-full border px-1.5 py-0.5 font-mono text-[7px] uppercase tracking-wider ${typeColors[n.type] ?? typeColors.info}`}
                       >
@@ -223,7 +223,7 @@ export function NotificationBell({
                 </button>
 
                 {/* Delete button */}
-                <div className="flex-shrink-0 flex items-center pr-2 self-center">
+                <div className="shrink-0 flex items-center pr-2 self-center">
                   <button
                     onClick={(e) => handleDelete(e, n.id)}
                     disabled={deleting === n.id}

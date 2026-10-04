@@ -1,5 +1,8 @@
 import { renderErrorPage } from "./shared/utils/error-page";
 
+// Re-export backend services facade so `@/server` imports resolve cleanly in all contexts
+export * from "./server/index";
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };

@@ -1,35 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { supabaseAdmin } from "@/server/supabase";
+import { consumeVerifyToken } from "@/fns/auth-actions.server-fns";
 import { Logo } from "@/client/components/ui/logo";
 import { CheckCircle2, XCircle } from "lucide-react";
-
-const consumeVerifyToken = createServerFn({ method: "GET" })
-  .validator(z.object({ token: z.string().min(1) }))
-  .handler(async ({ data }) => {
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .eq("email_verify_token", data.token)
-      .maybeSingle();
-
-    if (!profile) return { success: false };
-
-    const { data: roleRow } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", profile.id)
-      .maybeSingle();
-
-    // Intentionally keep email_verify_token in place — this verification is
-    // informational only and never gates access, so it's safe (and necessary)
-    // to make the link idempotent. Nulling it caused false "expired" screens
-    // when a link was opened twice (e.g. corporate email link-scanners).
-    await supabaseAdmin.from("profiles").update({ email_verified: true }).eq("id", profile.id);
-
-    return { success: true, role: roleRow?.role ?? "student" };
-  });
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -51,7 +23,7 @@ function VerifyEmailPage() {
 
   return (
     <div className="min-h-dvh flex items-center justify-center bg-[#0f1117] text-[#e2e4f0] px-4 pt-[calc(2rem+var(--safe-top,0px))] pb-[calc(2rem+var(--safe-bottom,0px))] pl-[max(1rem,var(--safe-left,0px))] pr-[max(1rem,var(--safe-right,0px))]">
-      <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-[#131722] shadow-2xl p-8 sm:p-10 space-y-6 text-center">
+      <div className="w-full max-w-md rounded-3xl border border-white/8 bg-[#131722] shadow-2xl p-8 sm:p-10 space-y-6 text-center">
         <Logo to="/" size="md" className="mx-auto" />
         {success ? (
           <>

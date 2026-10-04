@@ -109,3 +109,57 @@ export async function requireRole(userId: string, role: "teacher" | "admin"): Pr
     .single();
   return !error && !!data;
 }
+
+/**
+ * Resolves the authenticated user for server functions.
+ * Automatically reads the current request if not explicitly passed,
+ * validates the Bearer token, and returns { userId, user, supabaseAdmin }.
+ * Throws a standard Error if unauthorized.
+ */
+export async function requireAuth(request?: Request) {
+  const req = request ?? (await import("@tanstack/react-start/server")).getRequest();
+  try {
+    const authResult = await authenticateRequest(req);
+    return {
+      userId: authResult.userId,
+      user: authResult.user,
+      supabaseAdmin,
+    };
+  } catch (err) {
+    if (err instanceof Response) {
+      const body = await err.json().catch(() => ({}));
+      throw new Error(body.error || "Unauthorized", { cause: err });
+    }
+    throw new Error(err instanceof Error ? err.message : "Unauthorized", { cause: err });
+  }
+}
+
+/**
+ * Ensures the authenticated user has the 'admin' role.
+ */
+export async function requireAdmin(request?: Request) {
+  const auth = await requireAuth(request);
+  const isAdmin = await requireRole(auth.userId, "admin");
+  if (!isAdmin) {
+    throw new Error("Forbidden: Admin access required");
+  }
+  return auth;
+}
+
+/**
+ * Ensures the authenticated user has either 'teacher' or 'admin' role.
+ */
+export async function requireTeacherOrAdmin(request?: Request) {
+  const auth = await requireAuth(request);
+  const { data: roleCheck } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", auth.userId)
+    .in("role", ["teacher", "admin"])
+    .maybeSingle();
+
+  if (!roleCheck) {
+    throw new Error("Forbidden: Teacher or Admin access required");
+  }
+  return { ...auth, role: roleCheck.role as "teacher" | "admin" };
+}

@@ -210,7 +210,7 @@ export function UsageBanners({
         <div className="rounded-2xl border border-orange-200 bg-orange-50/70 dark:bg-orange-950/25 dark:border-orange-900/40 backdrop-blur-sm overflow-hidden shadow-sm animate-in fade-in duration-200">
           <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3.5 sm:py-2">
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-              <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+              <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500 dark:text-orange-400 shrink-0" />
               <p className="text-[11px] sm:text-xs font-semibold text-orange-800 dark:text-orange-300 leading-tight truncate whitespace-nowrap">
                 {remaining <= 1 ? (
                   <>
@@ -231,12 +231,12 @@ export function UsageBanners({
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
                   type="button"
-                  className="flex-shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-orange-500 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-orange-600 active:scale-95 transition-all duration-200 shadow-sm whitespace-nowrap"
+                  className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-orange-500 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-orange-600 active:scale-95 transition-all duration-200 shadow-sm whitespace-nowrap"
                 >
                   <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span>Upgrade</span>
@@ -245,7 +245,7 @@ export function UsageBanners({
               <button
                 type="button"
                 onClick={() => setDismissedBanners((p) => [...p, "approaching"])}
-                className="rounded-lg p-0.5 sm:p-1 text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors flex-shrink-0"
+                className="rounded-lg p-0.5 sm:p-1 text-orange-600 hover:bg-orange-200 dark:text-orange-400 dark:hover:bg-orange-900/50 transition-colors shrink-0"
                 aria-label="Dismiss limit warning"
               >
                 <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -267,7 +267,7 @@ export function UsageBanners({
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 backdrop-blur-sm overflow-hidden shadow-sm animate-in fade-in duration-200">
           <div className="flex items-center justify-between gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-3.5 sm:py-2">
             <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 text-destructive dark:text-red-400" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 text-destructive dark:text-red-400" />
               <p className="text-[11px] sm:text-xs font-semibold text-destructive dark:text-red-300 leading-tight truncate whitespace-nowrap">
                 {isDaily ? (
                   <>
@@ -297,12 +297,12 @@ export function UsageBanners({
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {onUpgrade && (
                 <button
                   onClick={onUpgrade}
                   type="button"
-                  className="flex-shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-destructive px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all shadow-sm whitespace-nowrap"
+                  className="shrink-0 inline-flex items-center gap-1 sm:gap-1.5 rounded-lg bg-destructive px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all shadow-sm whitespace-nowrap"
                 >
                   <CreditCard className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   <span>Upgrade</span>
@@ -311,7 +311,7 @@ export function UsageBanners({
               <button
                 type="button"
                 onClick={() => setDismissedBanners((p) => [...p, "ratelimit"])}
-                className="rounded-lg p-0.5 sm:p-1 text-destructive/80 hover:bg-destructive/20 hover:text-destructive transition-colors flex-shrink-0"
+                className="rounded-lg p-0.5 sm:p-1 text-destructive/80 hover:bg-destructive/20 hover:text-destructive transition-colors shrink-0"
                 aria-label="Dismiss rate limit banner"
               >
                 <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -325,7 +325,7 @@ export function UsageBanners({
       {chatError && !rateLimited && !dismissedBanners.includes("error") && (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 backdrop-blur-sm shadow-sm animate-in fade-in duration-200">
           <div className="flex items-start gap-2.5 px-3.5 py-3">
-            <div className="flex-shrink-0 mt-0.5">
+            <div className="shrink-0 mt-0.5">
               <AlertCircle className="h-4 w-4 text-destructive dark:text-red-400" />
             </div>
             <div className="flex-1 min-w-0">
@@ -345,7 +345,7 @@ export function UsageBanners({
             </div>
             <button
               onClick={() => setDismissedBanners((p) => [...p, "error"])}
-              className="flex-shrink-0 rounded-lg p-1 text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
+              className="shrink-0 rounded-lg p-1 text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-colors"
               title="Dismiss error"
               type="button"
               aria-label="Dismiss error"
@@ -360,7 +360,7 @@ export function UsageBanners({
       {docUploadError && (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 backdrop-blur-sm shadow-sm animate-in fade-in duration-200">
           <div className="flex items-start gap-2.5 px-3.5 py-3">
-            <div className="flex-shrink-0 mt-0.5">
+            <div className="shrink-0 mt-0.5">
               <AlertCircle className="h-4 w-4 text-destructive dark:text-red-400" />
             </div>
             <div className="flex-1 min-w-0">
@@ -374,7 +374,7 @@ export function UsageBanners({
             {onClearDocError && (
               <button
                 onClick={onClearDocError}
-                className="flex-shrink-0 rounded-lg p-1 text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+                className="shrink-0 rounded-lg p-1 text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
                 title="Dismiss error"
                 type="button"
                 aria-label="Dismiss upload error"

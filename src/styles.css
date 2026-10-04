@@ -503,11 +503,11 @@ html[data-font-family="serif"] body {
 .animate-thinking-shimmer {
   background: linear-gradient(
     90deg,
-    hsl(var(--foreground) / 0.45) 0%,
-    hsl(var(--primary)) 40%,
-    hsl(var(--foreground)) 50%,
-    hsl(var(--primary)) 60%,
-    hsl(var(--foreground) / 0.45) 100%
+    color-mix(in srgb, var(--foreground) 45%, transparent) 0%,
+    var(--primary) 40%,
+    var(--foreground) 50%,
+    var(--primary) 60%,
+    color-mix(in srgb, var(--foreground) 45%, transparent) 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -772,6 +772,12 @@ html[data-font-family="serif"] body {
   word-wrap: break-word !important;
 }
 
+/* Light mode code block: a rich warm near-black background */
+:root:not(.dark) .prose-ai pre[class*="language-"] {
+  background: #1a1512 !important;
+  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
 .prose-ai code[class*="language-"] {
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
@@ -793,6 +799,26 @@ html[data-font-family="serif"] body {
 .dark .prose-ai pre[class*="language-"] {
   background: #131722 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Themed thin scrollbar for panels with intentional scroll ──── */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-border) 40%, transparent) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  display: block !important;
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-muted-foreground) 20%, transparent);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--color-muted-foreground) 35%, transparent);
 }
 
 /* ─── Global Scrollbar Hiding ───────────────────────────────────────────────── */
@@ -961,25 +987,25 @@ html.text-lg {
 
 /* ── Modern Glassmorphic Surfaces & Micro-interactions ───────────── */
 .glass-panel {
-  background: hsl(var(--card) / 0.75);
+  background: color-mix(in srgb, var(--card) 75%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.6);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 
 .glass-card {
-  background: hsl(var(--card) / 0.6);
+  background: color-mix(in srgb, var(--card) 60%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid hsl(var(--border) / 0.5);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: hsl(var(--card) / 0.85);
-  border-color: hsl(var(--primary) / 0.35);
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px -6px hsl(var(--primary) / 0.12);
+  box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 .interactive-scale {

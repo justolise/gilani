@@ -207,7 +207,7 @@ export function AdminSettingsAnalyticsTab() {
                   </div>
                   <p className="text-muted-foreground font-mono">User: {e.user_id?.slice(0, 8)}…</p>
                 </div>
-                <time className="text-muted-foreground whitespace-nowrap flex-shrink-0">
+                <time className="text-muted-foreground whitespace-nowrap shrink-0">
                   {new Date(e.created_at).toLocaleString()}
                 </time>
               </div>

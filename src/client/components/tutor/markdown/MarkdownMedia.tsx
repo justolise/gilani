@@ -5,7 +5,11 @@ import { extractCallout, CustomCallout } from "./CalloutCards";
 export function MarkdownP({ children }: any) {
   const { type, newChildren } = extractCallout(children);
   if (type) return <CustomCallout type={type}>{newChildren}</CustomCallout>;
-  return <p className="text-base leading-[1.75] mb-3.5 last:mb-0 text-foreground/90">{children}</p>;
+  return (
+    <p className="text-base sm:text-[15px] leading-[1.78] mb-3.5 last:mb-0 text-foreground/92">
+      {children}
+    </p>
+  );
 }
 
 export function MarkdownA({ href, children }: any) {
@@ -20,11 +24,11 @@ export function MarkdownA({ href, children }: any) {
       href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-sky-500 hover:text-sky-400 dark:text-sky-400 dark:hover:text-sky-300 underline decoration-sky-500/50 hover:decoration-sky-400 underline-offset-2 decoration-2 transition-colors font-medium cursor-pointer break-words"
+      className="inline-flex items-center gap-1 text-sky-500 hover:text-sky-400 dark:text-sky-400 dark:hover:text-sky-300 underline decoration-sky-500/50 hover:decoration-sky-400 underline-offset-2 decoration-2 transition-colors font-medium cursor-pointer wrap-break-word"
       title={safeHref}
     >
       {children}
-      <ExternalLink className="h-3.5 w-3.5 flex-shrink-0 opacity-80" />
+      <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-80" />
     </a>
   );
 }
@@ -62,7 +66,7 @@ export function MarkdownBlockquote({ children }: any) {
   const { type, newChildren } = extractCallout(children);
   if (type) return <CustomCallout type={type}>{newChildren}</CustomCallout>;
   return (
-    <blockquote className="border-l-[3px] border-primary/60 pl-4 my-4 bg-primary/[0.04] rounded-r-xl py-3 text-base text-muted-foreground/90 italic leading-[1.7]">
+    <blockquote className="border-l-[3px] border-primary/60 pl-4 my-4 bg-primary/4 rounded-r-xl py-3 text-base text-muted-foreground/90 italic leading-[1.7]">
       {children}
     </blockquote>
   );

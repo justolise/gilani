@@ -233,6 +233,8 @@ export function useTutorChat({
     regenerate,
     loadMessages,
   });
+  const { setUserVotes } = messageMgmt;
+  const { setEscalationStatus } = escalationState;
 
   useEffect(() => {
     if (messagesData) {
@@ -243,10 +245,10 @@ export function useTutorChat({
       } else if (messagesRef.current.length === 0) {
         setMessages([]);
       }
-      escalationState.setEscalationStatus(messagesData.escalationStatus as any);
-      messageMgmt.setUserVotes(messagesData.userVotes);
+      setEscalationStatus(messagesData.escalationStatus as any);
+      setUserVotes(messagesData.userVotes);
     }
-  }, [messagesData, setMessages]);
+  }, [messagesData, setMessages, setEscalationStatus, setUserVotes]);
 
   useEffect(() => {
     if (queryMessagesError) {

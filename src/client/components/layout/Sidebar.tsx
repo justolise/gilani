@@ -181,11 +181,11 @@ export function Sidebar({ shell }: Props) {
           transition-[transform,width] duration-250 ease-out
           lg:translate-x-0 lg:static lg:h-dvh
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          ${collapsed ? "lg:w-14" : "lg:w-[270px]"}
-          w-[86vw] max-w-[325px] sm:max-w-[330px]
-          pt-[var(--safe-top,0px)] lg:pt-0
-          pb-[var(--safe-bottom,0px)] lg:pb-0
-          pl-[var(--safe-left,0px)]
+          ${collapsed ? "lg:w-14" : "lg:w-67.5"}
+          w-[86vw] max-w-81.25 sm:max-w-82.5
+          pt-(--safe-top,0px) lg:pt-0
+          pb-(--safe-bottom,0px) lg:pb-0
+          pl-(--safe-left,0px)
         `}
       >
         {/* ── Collapsed Desktop Rail View (w-14) ── */}
@@ -340,11 +340,11 @@ export function Sidebar({ shell }: Props) {
           /* ── Full Vercel Panel View (Mobile + Desktop Expanded) ── */
           <div className="flex flex-col h-full select-none">
             {/* ── 1. Vercel Scope Switcher & Header ── */}
-            <div className="flex items-center justify-between px-3 pt-3.5 pb-2 flex-shrink-0 border-b border-border/20">
+            <div className="flex items-center justify-between px-3 pt-3.5 pb-2 shrink-0 border-b border-border/20">
               <Link
                 to="/tutor"
                 onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted/40 transition-colors group cursor-pointer max-w-[220px]"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-muted/40 transition-colors group cursor-pointer max-w-55"
               >
                 {/* Workspace / Scope details — no G icon in expanded view */}
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -356,7 +356,7 @@ export function Sidebar({ shell }: Props) {
                     {curriculum || (isTeacher ? "Teacher" : isAdmin ? "Admin" : "KCSE")}
                   </span>
                 </div>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors ml-0.5 flex-shrink-0" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors ml-0.5 shrink-0" />
               </Link>
 
               {/* Header Right Action: Close on Mobile, Collapse on Desktop */}
@@ -364,7 +364,7 @@ export function Sidebar({ shell }: Props) {
                 {/* Mobile close button */}
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer min-h-11 min-w-11 flex items-center justify-center"
                   aria-label="Close menu"
                 >
                   <X className="h-4 w-4" />
@@ -384,13 +384,13 @@ export function Sidebar({ shell }: Props) {
 
             {/* ── 2. Vercel Action Button: "+ New Chat" – students only ── */}
             {isStudent && (
-              <div className="px-3 pt-3 pb-1 flex-shrink-0">
+              <div className="px-3 pt-3 pb-1 shrink-0">
                 <button
                   onClick={() => {
                     createNewThread();
                     setSidebarOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-transparent text-primary hover:bg-primary/10 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold cursor-pointer group min-h-[44px] sm:min-h-0"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-transparent text-primary hover:bg-primary/10 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold cursor-pointer group min-h-11 sm:min-h-0"
                 >
                   <span className="flex items-center gap-2">
                     <Plus className="h-4 w-4 sm:h-3.5 sm:w-3.5 group-hover:rotate-90 transition-transform duration-200" />
@@ -424,7 +424,7 @@ export function Sidebar({ shell }: Props) {
                       to={item.to as any}
                       onClick={() => setSidebarOpen(false)}
                       className={`
-                        group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all cursor-pointer select-none min-h-[42px] sm:min-h-0
+                        group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all cursor-pointer select-none min-h-10.5 sm:min-h-0
                         ${
                           active
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
@@ -434,7 +434,7 @@ export function Sidebar({ shell }: Props) {
                     >
                       <span className="flex items-center gap-2.5 min-w-0 truncate">
                         <item.icon
-                          className={`h-4 w-4 flex-shrink-0 transition-colors ${
+                          className={`h-4 w-4 shrink-0 transition-colors ${
                             active
                               ? "text-primary"
                               : "text-muted-foreground/70 group-hover:text-foreground"
@@ -442,9 +442,7 @@ export function Sidebar({ shell }: Props) {
                         />
                         <span className="truncate">{item.label}</span>
                       </span>
-                      {active && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                      )}
+                      {active && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
                     </Link>
                   );
                 })}
@@ -460,10 +458,10 @@ export function Sidebar({ shell }: Props) {
                         window.dispatchEvent(new CustomEvent("custom:trigger-escalation"));
                       }
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer min-h-[42px] sm:min-h-0"
+                    className="w-full flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium text-muted-foreground hover:bg-muted/30 hover:text-foreground transition-all cursor-pointer min-h-10.5 sm:min-h-0"
                   >
                     <span className="flex items-center gap-2.5 min-w-0">
-                      <ShieldAlert className="h-4 w-4 flex-shrink-0 text-muted-foreground/70" />
+                      <ShieldAlert className="h-4 w-4 shrink-0 text-muted-foreground/70" />
                       <span>Teacher Help</span>
                     </span>
                     <span className="text-[10px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground/80 font-semibold">
@@ -483,7 +481,7 @@ export function Sidebar({ shell }: Props) {
                       <Link
                         to="/teacher/escalations"
                         onClick={() => setSidebarOpen(false)}
-                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-[42px] sm:min-h-0 ${
+                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-10.5 sm:min-h-0 ${
                           path.startsWith("/teacher")
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
@@ -491,12 +489,12 @@ export function Sidebar({ shell }: Props) {
                       >
                         <span className="flex items-center gap-2.5 min-w-0">
                           <ShieldAlert
-                            className={`h-4 w-4 flex-shrink-0 ${path.startsWith("/teacher") ? "text-primary" : "text-purple-400"}`}
+                            className={`h-4 w-4 shrink-0 ${path.startsWith("/teacher") ? "text-primary" : "text-purple-400"}`}
                           />
                           <span>Student Escalations</span>
                         </span>
                         {path.startsWith("/teacher") && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                         )}
                       </Link>
                     )}
@@ -505,7 +503,7 @@ export function Sidebar({ shell }: Props) {
                       <Link
                         to="/admin/users"
                         onClick={() => setSidebarOpen(false)}
-                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-[42px] sm:min-h-0 ${
+                        className={`group flex items-center justify-between px-3 py-2.5 sm:py-2 rounded-xl text-sm sm:text-xs font-medium transition-all min-h-10.5 sm:min-h-0 ${
                           path.startsWith("/admin")
                             ? "bg-muted/70 text-foreground font-semibold shadow-xs"
                             : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
@@ -513,12 +511,12 @@ export function Sidebar({ shell }: Props) {
                       >
                         <span className="flex items-center gap-2.5 min-w-0">
                           <Users
-                            className={`h-4 w-4 flex-shrink-0 ${path.startsWith("/admin") ? "text-primary" : "text-blue-400"}`}
+                            className={`h-4 w-4 shrink-0 ${path.startsWith("/admin") ? "text-primary" : "text-blue-400"}`}
                           />
                           <span>User Management</span>
                         </span>
                         {path.startsWith("/admin") && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                         )}
                       </Link>
                     )}
@@ -550,17 +548,17 @@ export function Sidebar({ shell }: Props) {
                         placeholder="Search chats…"
                         value={threadSearch}
                         onChange={(e) => setThreadSearch(e.target.value)}
-                        className="w-full rounded-lg bg-white/[0.03] border border-white/[0.06] pl-8 pr-14 py-2 sm:py-1.5 text-base sm:text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/[0.06] transition-all"
+                        className="w-full rounded-lg bg-white/3 border border-white/6 pl-8 pr-14 py-2 sm:py-1.5 text-base sm:text-xs text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-primary/40 focus:bg-white/6 transition-all"
                       />
                       {threadSearch ? (
                         <button
                           onClick={() => setThreadSearch("")}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-1 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-1 cursor-pointer min-h-9 min-w-9 flex items-center justify-center"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
                       ) : (
-                        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] font-mono text-muted-foreground/30 bg-white/[0.04] border border-white/[0.06] px-1 py-0.5 rounded">
+                        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[9px] font-mono text-muted-foreground/30 bg-white/4 border border-white/6 px-1 py-0.5 rounded">
                           /
                         </kbd>
                       )}
@@ -594,7 +592,7 @@ export function Sidebar({ shell }: Props) {
                             <span className="px-2.5 text-[11px] font-mono text-muted-foreground/50 uppercase tracking-wide">
                               {label}
                             </span>
-                            <div className="space-y-[1px]">
+                            <div className="space-y-px">
                               {groupThreads.map((tItem) => {
                                 const isCurrent =
                                   path === `/tutor/${tItem.id}` ||
@@ -608,7 +606,7 @@ export function Sidebar({ shell }: Props) {
                                     onTouchEnd={handleThreadTouchEnd}
                                     onTouchMove={handleThreadTouchEnd}
                                     onContextMenu={(e) => e.preventDefault()}
-                                    className={`group flex items-center justify-between rounded-xl px-3 py-2.5 sm:py-2 text-sm sm:text-xs transition-all relative select-none min-h-[40px] sm:min-h-0 ${
+                                    className={`group flex items-center justify-between rounded-xl px-3 py-2.5 sm:py-2 text-sm sm:text-xs transition-all relative select-none min-h-10 sm:min-h-0 ${
                                       isCurrent
                                         ? "bg-muted/70 text-foreground font-semibold shadow-xs border-l-2 border-primary pl-2"
                                         : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border-l-2 border-transparent"
@@ -656,7 +654,7 @@ export function Sidebar({ shell }: Props) {
 
                                     {/* Desktop quick actions on hover */}
                                     {renamingId !== tItem.id && (
-                                      <div className="hidden lg:flex items-center flex-shrink-0 gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="hidden lg:flex items-center shrink-0 gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
                                           onClick={(e) => {
                                             e.preventDefault();
@@ -695,7 +693,7 @@ export function Sidebar({ shell }: Props) {
             </div>
 
             {/* ── 4. Vercel Footer: User Profile Bar & Upgrade Chip ── */}
-            <div className="flex-shrink-0 border-t border-border/30 p-2.5 bg-sidebar/95 dark:bg-[#0f1117]/95 flex flex-col gap-2">
+            <div className="shrink-0 border-t border-border/30 p-2.5 bg-sidebar/95 dark:bg-[#0f1117]/95 flex flex-col gap-2">
               {/* Upgrade Banner for Free tier */}
               {currentPlan.toLowerCase() !== "pro" && (
                 <button
@@ -703,7 +701,7 @@ export function Sidebar({ shell }: Props) {
                     setSidebarOpen(false);
                     setShowPlans(true);
                   }}
-                  className="w-full flex items-center justify-between px-3.5 py-2 sm:py-1.5 rounded-xl border border-[#C96A3D]/30 bg-[#C96A3D]/10 hover:bg-[#C96A3D]/15 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold text-[#E28743] cursor-pointer group min-h-[42px] sm:min-h-0"
+                  className="w-full flex items-center justify-between px-3.5 py-2 sm:py-1.5 rounded-xl border border-[#C96A3D]/30 bg-[#C96A3D]/10 hover:bg-[#C96A3D]/15 active:scale-[0.99] transition-all text-sm sm:text-xs font-semibold text-[#E28743] cursor-pointer group min-h-10.5 sm:min-h-0"
                 >
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-[#E28743]" />
@@ -719,7 +717,7 @@ export function Sidebar({ shell }: Props) {
               <div className="w-full flex items-center gap-2">
                 <div className="flex-1 min-w-0">{renderUserMenu(false)}</div>
                 {user?.id && (
-                  <div className="flex-shrink-0 flex items-center justify-center p-1 rounded-xl border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
+                  <div className="shrink-0 flex items-center justify-center p-1 rounded-xl border border-white/6 hover:border-white/12 bg-white/2 hover:bg-white/5 transition-colors">
                     <NotificationBell userId={user.id} placement="top" />
                   </div>
                 )}

@@ -1,9 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { createClient } from "@supabase/supabase-js";
-import { randomUUID } from "node:crypto";
-
 import { z } from "zod";
+import {
+  supabaseAdmin,
+  authenticateRequest,
+  requireAuth,
+  sendTransactionalEmail,
+  welcomeEmail,
+} from "@/server/index";
 
 export const assignUserRole = createServerFn({ method: "POST" })
   .validator(
@@ -14,19 +18,7 @@ export const assignUserRole = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { sendTransactionalEmail, emailTemplate, welcomeEmail, verifyEmailTemplate } =
-      await import("@/server/email.server");
-    const request = getRequest();
-    let authResult;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-        cause: err,
-      });
-    }
+    const authResult = await requireAuth();
     const userId = authResult.userId;
     const { role, displayName, curriculum } = data;
 
@@ -110,8 +102,6 @@ export const checkEmailStatus = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
       .select("id, onboarding_completed")
@@ -129,3 +119,42 @@ export const checkEmailStatus = createServerFn({ method: "POST" })
     // Fully registered returning user
     return { status: "registered" as const };
   });
+
+export const consumeVerifyToken = createServerFn({ method: "GET" })
+  .validator(z.object({ token: z.string().min(1) }))
+  .handler(async ({ data }) => {
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("email_verify_token", data.token)
+      .maybeSingle();
+
+    if (!profile) return { success: false };
+
+    const { data: roleRow } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", profile.id)
+      .maybeSingle();
+
+    // Intentionally keep email_verify_token in place — this verification is
+    // informational only and never gates access, so it's safe (and necessary)
+    // to make the link idempotent.
+    await supabaseAdmin.from("profiles").update({ email_verified: true }).eq("id", profile.id);
+
+    return { success: true, role: roleRow?.role ?? "student" };
+  });
+
+export const checkSessionAuth = createServerFn({ method: "GET" }).handler(async () => {
+  const request = getRequest();
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return { authenticated: null as boolean | null };
+  }
+  try {
+    await authenticateRequest(request);
+    return { authenticated: true };
+  } catch {
+    return { authenticated: false };
+  }
+});

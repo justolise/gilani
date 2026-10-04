@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { supabaseAdmin } from "@/server/supabase";
-import { authenticateRequest } from "@/server/api-auth.server";
+import { supabaseAdmin, requireAdmin, authenticateRequest } from "@/server/index";
 import { z } from "zod";
 import type {
   Profile,
@@ -16,17 +15,8 @@ import type {
 
 // ─── Server Functions ──────────────────────────────────────────────────────────
 async function verifyAdmin(request: Request): Promise<string> {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) throw new Error("Unauthorized");
-  const authResult = await authenticateRequest(request);
-  const { data: roleCheck } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", authResult.userId)
-    .eq("role", "admin")
-    .single();
-  if (!roleCheck) throw new Error("Forbidden");
-  return authResult.userId;
+  const { userId } = await requireAdmin(request);
+  return userId;
 }
 
 export const listProfiles = createServerFn({ method: "GET" }).handler(async () => {

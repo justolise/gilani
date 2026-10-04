@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/server/supabase";
 import { getPlanLimits, TOPUP_TOKENS_PER_KES } from "@/shared/plans";
+import { log } from "@/server/logger";
 
 const MPESA_BASE =
   process.env.MPESA_ENV === "production"
@@ -10,26 +11,42 @@ const MPESA_BASE =
 // to avoid a redundant OAuth round-trip on every STK push / status query.
 // 60s safety margin prevents using a token about to expire mid-flight.
 let _mpesaToken: { token: string; expiresAt: number } | null = null;
+// In-flight deduplication: if a refresh is already in progress, reuse its promise
+// rather than sending a second OAuth request to Safaricom simultaneously.
+let _mpesaTokenRefreshPromise: Promise<string> | null = null;
 
 async function getMpesaToken(): Promise<string> {
   if (_mpesaToken && Date.now() < _mpesaToken.expiresAt - 60_000) {
     return _mpesaToken.token;
   }
 
-  const auth = Buffer.from(
-    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`,
-  ).toString("base64");
+  // If a refresh is already in flight, wait for it instead of making a duplicate call
+  if (_mpesaTokenRefreshPromise) {
+    return _mpesaTokenRefreshPromise;
+  }
 
-  const res = await fetch(`${MPESA_BASE}/oauth/v1/generate?grant_type=client_credentials`, {
-    headers: { Authorization: `Basic ${auth}` },
-  });
+  _mpesaTokenRefreshPromise = (async () => {
+    try {
+      const auth = Buffer.from(
+        `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`,
+      ).toString("base64");
 
-  const data = await res.json();
-  if (!data.access_token) throw new Error("Failed to get M-Pesa token");
+      const res = await fetch(`${MPESA_BASE}/oauth/v1/generate?grant_type=client_credentials`, {
+        headers: { Authorization: `Basic ${auth}` },
+      });
 
-  // Cache for 3600s (Safaricom default), with 60s safety buffer
-  _mpesaToken = { token: data.access_token, expiresAt: Date.now() + 3_600_000 };
-  return data.access_token;
+      const data = await res.json();
+      if (!data.access_token) throw new Error("Failed to get M-Pesa token");
+
+      // Cache for 3600s (Safaricom default), with 60s safety buffer
+      _mpesaToken = { token: data.access_token, expiresAt: Date.now() + 3_600_000 };
+      return data.access_token as string;
+    } finally {
+      _mpesaTokenRefreshPromise = null;
+    }
+  })();
+
+  return _mpesaTokenRefreshPromise;
 }
 
 export async function initiateSTKPush(
@@ -132,7 +149,7 @@ export async function upgradePlan(userId: string, plan: string, receipt: string)
 
   if (error) throw new Error(`Failed to upgrade plan: ${error.message}`);
 
-  console.log(`[M-Pesa] User ${userId} upgraded to ${plan} via receipt ${receipt}`);
+  log.info("[mpesa] plan_upgraded", { userId, plan, receipt });
 }
 
 export async function creditTopupTokens(userId: string, amount: number): Promise<number> {
@@ -148,7 +165,7 @@ export async function creditTopupTokens(userId: string, amount: number): Promise
 
   if (error) throw new Error(`Failed to credit tokens: ${error.message}`);
 
-  console.log(`[M-Pesa] Credited ${tokensToAdd} tokens to user ${userId} (KES ${amount})`);
+  log.info("[mpesa] tokens_credited", { userId, tokensToAdd, amount });
   return tokensToAdd;
 }
 

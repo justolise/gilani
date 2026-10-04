@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/server/supabase";
 import { upgradePlan, creditTopupTokens, verifyTransactionStatus } from "@/server/mpesa.server";
+import { TOPUP_TOKENS_PER_KES, getPlanLimits } from "@/shared/plans";
 import { z } from "zod";
 import { sendTransactionalEmail, mpesaReceiptEmail } from "@/server/email.server";
 import { sendSMS } from "@/server/sms.server";
@@ -146,17 +147,6 @@ export const Route = createFileRoute("/api/mpesa/callback")({
             console.error(`[M-Pesa Callback] Missing user_id for payment ${payment.id}`);
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
           }
-
-          const TOPUP_TOKENS_PER_KES = 1_000;
-          const getPlanLimits = (plan: string) => {
-            const PLANS: Record<string, { label: string; description: string }> = {
-              pro: {
-                label: "Pro Plan",
-                description: "Unlimited messages, quizzes, planner, and notes",
-              },
-            };
-            return PLANS[plan] ?? { label: plan, description: "" };
-          };
           const isTopup = payment.plan === "topup";
 
           if (isTopup) {
@@ -214,7 +204,7 @@ export const Route = createFileRoute("/api/mpesa/callback")({
                   ? `Hi ${profile.display_name ?? "there"},\n\nYour top-up of KES ${payment.amount} was received.\n\nTokens added: ${tokensAdded!.toLocaleString("en-KE")}\nReceipt: ${receipt}\nTokens never expire.\n\nThank you!\n\nsupport@gilaniai.site`
                   : `Hi ${profile.display_name ?? "there"},\n\nYour payment of KES ${payment.amount} was received.\n\nPlan: ${planLabel}\nReceipt: ${receipt}\nValid Until: ${expiryDate}\n\nThank you for using GilaniAI!\n\nsupport@gilaniai.site`,
               });
-              console.log(`[M-Pesa Callback] 📧 Receipt sent to ${profile.email}`);
+              log.info("[mpesa_callback] receipt_email_sent", { email: profile.email });
             }
           } catch (emailErr: any) {
             console.error("[M-Pesa Callback] Failed to send receipt email:", emailErr?.message);

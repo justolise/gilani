@@ -55,13 +55,12 @@ export function useEscalation(userId: string | null | undefined, threads: Thread
     }
     setEscalating(true);
     try {
-      if (!userId) throw new Error("Not logged in");
-      let reviewerId: string;
+      let reviewerId: string | null = null;
       try {
-        reviewerId = await lookupTeacherByEmail({ data: email.trim().toLowerCase() });
+        const result = await lookupTeacherByEmail({ data: email.trim().toLowerCase() });
+        reviewerId = result.id;
       } catch (err: any) {
         setEscalateError(err.message || "No teacher found with that email address.");
-        setEscalating(false);
         return;
       }
       const result = await createEscalationFn({
@@ -74,7 +73,6 @@ export function useEscalation(userId: string | null | undefined, threads: Thread
       });
       if (result.alreadyOpen) {
         toast.info("This conversation already has an open escalation.");
-        setEscalating(false);
         return;
       }
       await createEscalationNotification({

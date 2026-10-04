@@ -102,7 +102,7 @@ export function CompleteProfileForm({
 
         <div className="relative rounded-3xl border border-white/[0.08] bg-[#131722]/98 dark:bg-[#131722]/98 backdrop-blur-xl shadow-2xl overflow-hidden max-h-[calc(100dvh-2rem)] flex flex-col">
           {/* Top accent bar */}
-          <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 flex-shrink-0" />
+          <div className="h-1 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40 shrink-0" />
 
           <div className="overflow-y-auto p-5 sm:p-7 space-y-5">
             {/* Header */}
@@ -125,7 +125,7 @@ export function CompleteProfileForm({
             {/* Error banner if submission failed */}
             {errorMessage && (
               <div className="flex items-start gap-2.5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
-                <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">{errorMessage}</p>
               </div>
             )}

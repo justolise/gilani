@@ -57,11 +57,11 @@ export function useEscalationChatState(threadId?: string, userId?: string | null
       if (!userId) throw new Error("Not logged in");
       let reviewerId: string;
       try {
-        reviewerId = await lookupTeacherByEmail({ data: email.trim().toLowerCase() });
+        const teacher = await lookupTeacherByEmail({ data: email.trim().toLowerCase() });
+        reviewerId = teacher.id;
       } catch (err: any) {
         setEscalateEmailError(err.message || "No teacher found with that email address.");
-        setEscalating(false);
-        return;
+        return false;
       }
       const result = await createEscalationFn({
         data: {

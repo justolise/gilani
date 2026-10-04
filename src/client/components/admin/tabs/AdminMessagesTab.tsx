@@ -75,7 +75,7 @@ export function AdminMessagesTab({
                   <p className="text-xs text-muted-foreground mt-1 truncate">{m.message}</p>
                 )}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {formatDate(m.created_at)}

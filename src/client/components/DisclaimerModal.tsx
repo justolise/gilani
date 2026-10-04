@@ -168,7 +168,7 @@ export function DisclaimerModal() {
             <div className="space-y-3">
               {/* AI Limitations */}
               <div className="flex gap-3 bg-muted/30 border border-border/50 rounded-xl p-3">
-                <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold text-foreground">AI Limitations</p>
                   <p className="text-xs mt-0.5 leading-relaxed">
@@ -180,7 +180,7 @@ export function DisclaimerModal() {
 
               {/* Professional advice */}
               <div className="flex gap-3 bg-muted/30 border border-border/50 rounded-xl p-3">
-                <Shield className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <Shield className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold text-foreground">Educational Support Only</p>
                   <p className="text-xs mt-0.5 leading-relaxed">
@@ -193,7 +193,7 @@ export function DisclaimerModal() {
 
               {/* Safety */}
               <div className="flex gap-3 bg-muted/30 border border-border/50 rounded-xl p-3">
-                <Heart className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <Heart className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold text-foreground">Safety & Emergency Hotlines</p>
                   <p className="text-xs mt-0.5 leading-relaxed">
@@ -214,7 +214,7 @@ export function DisclaimerModal() {
             {/* Cookie Toggle */}
             <div className="flex items-start justify-between gap-4 bg-muted/20 border border-border/30 rounded-xl p-3">
               <div className="flex gap-3">
-                <Cookie className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <Cookie className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-foreground">
                     Allow Cookie & Storage Consent
@@ -227,7 +227,7 @@ export function DisclaimerModal() {
               </div>
               <button
                 onClick={() => setCookieConsent(!cookieConsent)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none shrink-0 ${
                   cookieConsent ? "bg-primary" : "bg-muted"
                 }`}
                 title="Toggle Cookies"
@@ -243,7 +243,7 @@ export function DisclaimerModal() {
             {/* Telemetry/Analytics Toggle */}
             <div className="flex items-start justify-between gap-4 bg-muted/20 border border-border/30 rounded-xl p-3">
               <div className="flex gap-3">
-                <BarChart className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <BarChart className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-foreground">
                     Allow Anonymous Usage Telemetry
@@ -256,7 +256,7 @@ export function DisclaimerModal() {
               </div>
               <button
                 onClick={() => setAnalyticsConsent(!analyticsConsent)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none flex-shrink-0 ${
+                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none shrink-0 ${
                   analyticsConsent ? "bg-primary" : "bg-muted"
                 }`}
                 title="Toggle Analytics"

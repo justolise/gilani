@@ -4,6 +4,7 @@ import { authenticateRequest } from "@/server/api-auth.server";
 import { initiateSTKPush } from "@/server/mpesa.server";
 import { supabaseAdmin } from "@/server/supabase";
 import { PLANS, TOPUP_MIN_KES } from "@/shared/plans";
+import { log } from "@/server/logger";
 import { z } from "zod";
 
 // CS-INJ-001: Validates Kenyan phone numbers: 07xx, 01xx, +2547xx, +2541xx, 2547xx
@@ -80,7 +81,7 @@ export const Route = createFileRoute("/api/mpesa/initiate")({
           }
           const { checkoutRequestId } = await initiateSTKPush(phone, amount, userId, plan);
 
-          await supabaseAdmin.from("payments").insert({
+          const { error: paymentInsertError } = await supabaseAdmin.from("payments").insert({
             user_id: userId,
             phone_number: phone,
             amount,
@@ -88,6 +89,19 @@ export const Route = createFileRoute("/api/mpesa/initiate")({
             checkout_request_id: checkoutRequestId,
             status: "pending",
           });
+
+          if (paymentInsertError) {
+            // STK push was already sent — log as critical so ops can reconcile manually
+            log.error("[mpesa_initiate] CRITICAL: STK push sent but payment record insert failed", {
+              checkoutRequestId,
+              userId,
+              plan,
+              amount,
+              error: paymentInsertError.message,
+            });
+            // Return success to user (they still got the phone prompt)
+            // but flag the issue — the callback handler may not find the record
+          }
 
           return new Response(
             JSON.stringify({
@@ -98,7 +112,7 @@ export const Route = createFileRoute("/api/mpesa/initiate")({
             { status: 200, headers: { "Content-Type": "application/json" } },
           );
         } catch (err: any) {
-          console.error("[M-Pesa Initiate]", err?.message);
+          log.error("[mpesa_initiate] failure", { error: err?.message });
           return new Response(
             JSON.stringify({ error: "Payment initiation failed. Please try again." }),
             {

@@ -7,3 +7,4 @@ export * from "./email/base.server";
 export * from "./email/auth-templates.server";
 export * from "./email/billing-templates.server";
 export * from "./email/notification-templates.server";
+export * from "./email/contact-templates.server";

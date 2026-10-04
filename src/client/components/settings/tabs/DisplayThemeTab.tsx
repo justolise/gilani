@@ -169,7 +169,7 @@ export function DisplayThemeTab({ settings }: Props) {
                 }`}
               >
                 <div
-                  className="w-5 h-5 rounded-full mt-0.5 flex-shrink-0 shadow-xs flex items-center justify-center transition-transform group-hover:scale-110"
+                  className="w-5 h-5 rounded-full mt-0.5 shrink-0 shadow-xs flex items-center justify-center transition-transform group-hover:scale-110"
                   style={{ backgroundColor: accent.color }}
                 >
                   {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}

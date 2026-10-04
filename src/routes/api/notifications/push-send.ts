@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
-import { supabaseAdmin } from "@/server/supabase";
-import { authenticateRequest } from "@/server/api-auth.server";
-import { sendPushNotification } from "@/server/push.server";
+import { supabaseAdmin, authenticateRequest, sendPushNotification } from "@/server/index";
 import type { PushPayload } from "@/server/push.server";
-import { createNotification } from "@/fns/tutor.server-fns";
 
 export const Route = createFileRoute("/api/notifications/push-send")({
   server: {
@@ -66,15 +63,18 @@ export const Route = createFileRoute("/api/notifications/push-send")({
           const sent = await sendPushNotification((profile as any).push_subscription, payload);
           // Persist so it shows up in the in-app notification bell/history
           // even if the push itself failed or the device was offline.
-          await createNotification({
-            userId: targetUserId,
-            title,
-            message,
-            type: "admin_push",
-            link: url || undefined,
-          }).catch((err: unknown) =>
-            console.error("[Push Send] Failed to persist notification:", err),
-          );
+          await (supabaseAdmin as any)
+            .from("notifications")
+            .insert({
+              user_id: targetUserId,
+              title,
+              message,
+              type: "admin_push",
+              link: url || null,
+            } as any)
+            .catch((err: unknown) =>
+              console.error("[Push Send] Failed to persist notification:", err),
+            );
 
           return new Response(JSON.stringify({ ok: sent }), {
             status: sent ? 200 : 500,

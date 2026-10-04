@@ -32,7 +32,7 @@ export function StudyContinuityCard({
         {latestThread && (
           <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 shadow-xs hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary flex-shrink-0">
+              <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
                 <History className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -48,7 +48,7 @@ export function StudyContinuityCard({
             <Link
               to="/tutor/$threadId"
               params={{ threadId: latestThread.id }}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/90 flex-shrink-0 px-3 py-2 min-h-[38px] rounded-lg bg-primary/10 hover:bg-primary/15 transition-all duration-150 active:scale-95"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/90 shrink-0 px-3 py-2 min-h-[38px] rounded-lg bg-primary/10 hover:bg-primary/15 transition-all duration-150 active:scale-95"
             >
               <span>Resume</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -60,7 +60,7 @@ export function StudyContinuityCard({
         {todayPlanTask && (
           <div className="flex items-center justify-between p-3.5 rounded-2xl border border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-emerald-500/35 shadow-xs hover:shadow-md transition-all duration-200">
             <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 flex-shrink-0">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 shrink-0">
                 <CalendarCheck className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ export function StudyContinuityCard({
                 const prompt = `Let's work on my scheduled study goal for ${todayPlanTask.item.subject}: "${todayPlanTask.item.topic}". The specific task is: "${todayPlanTask.item.task}". Please guide me through it step-by-step.`;
                 onStartPlanTask(prompt);
               }}
-              className={`inline-flex items-center gap-1.5 text-sm font-semibold flex-shrink-0 px-3 py-2 min-h-[38px] rounded-lg transition-colors ${
+              className={`inline-flex items-center gap-1.5 text-sm font-semibold shrink-0 px-3 py-2 min-h-[38px] rounded-lg transition-colors ${
                 disabled
                   ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground"
                   : "text-emerald-600 dark:text-emerald-400 hover:opacity-80 bg-emerald-500/10 hover:bg-emerald-500/15 cursor-pointer"

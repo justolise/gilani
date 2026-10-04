@@ -68,9 +68,9 @@ export function clearDraft(escalationId: string) {
 
 type ServerFns = {
   listEscalations: () => Promise<any[]>;
-  resolveEscalation: (args: { data: { id: string; expertAnswer: string } }) => Promise<void>;
+  resolveEscalation: (args: { data: { id: string; expertAnswer: string } }) => Promise<any>;
   getConversationMessages: (args: { data: { conversationId: string } }) => Promise<any[]>;
-  saveEscalationDraft: (args: { data: { id: string; draftAnswer: string } }) => Promise<void>;
+  saveEscalationDraft: (args: { data: { id: string; draftAnswer: string } }) => Promise<any>;
 };
 
 export function useTeacherEscalations(serverFns: ServerFns) {

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useEffect, useRef, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -149,7 +150,7 @@ export function ChatInput({
     if (input) {
       el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
     }
-  }, [input]);
+  }, [input, textareaRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -178,7 +179,7 @@ export function ChatInput({
         {/* Loading pill — shown while uploading / extracting text */}
         {isProcessingFile && (
           <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3 shadow-sm animate-in fade-in duration-300">
-            <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+            <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
               <Loader2 className="h-4 w-4 text-primary animate-spin" />
             </div>
             <div className="min-w-0 flex-1">
@@ -197,7 +198,7 @@ export function ChatInput({
         {attachedFile && !isProcessingFile && (
           <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-3 shadow-sm">
             {isImageAttachment && attachedFile.previewUrl ? (
-              <div className="flex-shrink-0 h-10 w-10 rounded-xl overflow-hidden border border-primary/20 bg-muted">
+              <div className="shrink-0 h-10 w-10 rounded-xl overflow-hidden border border-primary/20 bg-muted">
                 <img
                   src={attachedFile.previewUrl}
                   alt={attachedFile.name}
@@ -205,7 +206,7 @@ export function ChatInput({
                 />
               </div>
             ) : (
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                 {isImageAttachment ? (
                   <ImageIcon className="h-4 w-4 text-primary" />
                 ) : (
@@ -233,7 +234,7 @@ export function ChatInput({
             </div>
             <button
               onClick={onRemoveFile}
-              className="flex-shrink-0 rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive active:scale-90 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+              className="shrink-0 rounded-xl p-2 text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive active:scale-90 min-h-10 min-w-10 flex items-center justify-center cursor-pointer"
               title="Remove attachment"
               type="button"
             >
@@ -270,7 +271,7 @@ export function ChatInput({
                 type="button"
                 disabled={isDisabled}
                 aria-label="Add attachment or voice"
-                className={`flex-shrink-0 flex h-9 w-9 min-h-[44px] min-w-[44px] items-center justify-center rounded-2xl transition-all duration-200 cursor-pointer ${
+                className={`shrink-0 flex h-9 w-9 min-h-11 min-w-11 items-center justify-center rounded-2xl transition-all duration-200 cursor-pointer ${
                   isDisabled
                     ? "opacity-40 cursor-not-allowed pointer-events-none text-muted-foreground"
                     : isListening
@@ -294,7 +295,7 @@ export function ChatInput({
               {/* Upload Document / Image from gallery */}
               <DropdownMenuItem
                 asChild
-                className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
+                className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-11"
               >
                 <label
                   htmlFor={isDisabled ? undefined : "chat-file-input"}
@@ -309,7 +310,7 @@ export function ChatInput({
               {onScanClick && (
                 <DropdownMenuItem
                   onClick={onScanClick}
-                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
+                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-11"
                 >
                   <Camera className="h-4 w-4 text-muted-foreground mr-2.5" />
                   <span className="text-sm font-medium">Scan (Camera)</span>
@@ -320,7 +321,7 @@ export function ChatInput({
               {onVoiceClick && (
                 <DropdownMenuItem
                   onClick={onVoiceClick}
-                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-[44px]"
+                  className="cursor-pointer gap-2.5 p-2.5 rounded-xl min-h-11"
                 >
                   <Mic
                     className={`h-4 w-4 mr-2.5 ${isListening ? "text-red-500" : "text-muted-foreground"}`}
@@ -372,7 +373,7 @@ export function ChatInput({
             disabled={!isPending && (isDisabled || (!input.trim() && !attachedFile))}
             title={isPending ? "Stop generating" : "Send (Enter)"}
             aria-label={isPending ? "Stop generating" : "Send message"}
-            className={`flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 min-h-[44px] min-w-[44px] h-9 w-9 ${
+            className={`shrink-0 flex items-center justify-center rounded-full transition-all duration-200 min-h-11 min-w-11 h-9 w-9 ${
               isPending
                 ? "bg-transparent border-2 border-primary text-primary hover:bg-primary/10 active:scale-95 cursor-pointer"
                 : isDisabled || (!input.trim() && !attachedFile)

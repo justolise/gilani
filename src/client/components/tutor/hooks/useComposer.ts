@@ -151,12 +151,19 @@ export function useComposer() {
     };
     recognitionRef.current = recognition;
     setIsListening(true);
-    recognition.start();
+    try {
+      recognition.start();
+    } catch {
+      setIsListening(false);
+      recognitionRef.current = null;
+      toast.error("Could not start speech recognition. Please try again.");
+    }
   };
 
   useEffect(() => {
     return () => {
       recognitionRef.current?.stop();
+      revokePreview();
     };
   }, []);
 
@@ -232,11 +239,14 @@ export function useComposer() {
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await handleRawFile(file);
+    try {
+      const file = e.target.files?.[0];
+      if (file) {
+        await handleRawFile(file);
+      }
+    } finally {
+      e.target.value = "";
     }
-    e.target.value = "";
   };
 
   const onRemoveFile = () => {

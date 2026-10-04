@@ -1,9 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { withTimeout } from "@/shared/utils/async";
 import { sanitizeCurriculum } from "@/shared/utils/tutor-prompt";
+import {
+  supabaseAdmin,
+  requireAuth,
+  checkPlanRateLimit,
+  getPlanRateLimitStatus,
+} from "@/server/index";
 
 // Memory cache for deduplicating identical requests (5-min TTL)
 const plannerCache = new Map<string, { result: any; expiresAt: number }>();
@@ -50,19 +55,7 @@ export const generateStudyPlanFn = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     // Enforces both per-minute and plan-based daily quota (getPlanLimits().dailyPlanners)
     const rateLimit = await checkPlanRateLimit(userId, "planner");
@@ -169,6 +162,7 @@ export const generateStudyPlanFn = createServerFn({ method: "POST" })
     ].join("\n\n");
 
     const { generateObject } = await import("ai");
+    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
     const gateway = createGoogleAiProvider();
 
     let result;
@@ -226,19 +220,7 @@ export const toggleStudyPlanItemFn = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireAuth();
 
     const { data: plan, error: fetchError } = await supabaseAdmin
       .from("study_plans")
@@ -267,38 +249,23 @@ export const toggleStudyPlanItemFn = createServerFn({ method: "POST" })
 export const deleteStudyPlanFn = createServerFn({ method: "POST" })
   .validator(z.object({ planId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit, getPlanRateLimitStatus } =
-      await import("@/server/rate-limit.server");
-    const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-    const request = getRequest();
-    let authResult: Awaited<ReturnType<typeof authenticateRequest>>;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch {
-      throw new Error("Unauthorized");
-    }
+    const { userId } = await requireAuth();
+
     const { error } = await supabaseAdmin
       .from("study_plans")
       .delete()
       .eq("id", data.planId)
-      .eq("user_id", authResult.userId);
+      .eq("user_id", userId);
     if (error) throw error;
     return { success: true };
   });
 
 // ─── Planner form options + weak-topic preview (for display before generating) ───
 export const getPlannerFormOptionsFn = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/server/supabase");
-  const { authenticateRequest } = await import("@/server/api-auth.server");
-  const { checkPlanRateLimit, getPlanRateLimitStatus } = await import("@/server/rate-limit.server");
-  const { createGoogleAiProvider } = await import("@/server/ai-gateway.server");
-  const request = getRequest();
   let userId: string | null = null;
   try {
-    const authResult = await authenticateRequest(request);
-    userId = authResult.userId;
+    const auth = await requireAuth();
+    userId = auth.userId;
   } catch {
     // Unauthenticated — return safe defaults
   }

@@ -384,6 +384,7 @@ export function useSettings(user: any, serverFns: SettingsServerFns) {
       handleProfileSave(undefined, true);
     }, 750);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialLoaded,
     displayName,

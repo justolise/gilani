@@ -90,7 +90,7 @@ export function PlanUsageTab({ settings }: Props) {
                     key={feat}
                     className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
                   >
-                    <span className="w-1 h-1 rounded-full bg-primary/60 flex-shrink-0" />
+                    <span className="w-1 h-1 rounded-full bg-primary/60 shrink-0" />
                     {feat}
                   </li>
                 ))}

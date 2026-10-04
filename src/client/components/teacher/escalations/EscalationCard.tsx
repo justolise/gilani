@@ -44,7 +44,7 @@ export function EscalationCard({
         className="w-full flex items-center justify-between gap-3 p-4 sm:p-5 text-left hover:bg-muted/30 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="flex-shrink-0 h-9 w-9 rounded-full overflow-hidden border border-border bg-background flex items-center justify-center shadow-inner">
+          <div className="shrink-0 h-9 w-9 rounded-full overflow-hidden border border-border bg-background flex items-center justify-center shadow-inner">
             {esc.student_avatar ? (
               esc.student_avatar.startsWith("preset:") ? (
                 <span className="font-serif text-xs font-bold text-primary capitalize">
@@ -90,7 +90,7 @@ export function EscalationCard({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span
             className={`hidden sm:inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${isOpen ? "border-border bg-muted text-muted-foreground" : "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"}`}
           >

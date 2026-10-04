@@ -87,7 +87,7 @@ export function PedagogicalActions({
               }`}
             >
               <div
-                className={`p-2.5 rounded-xl border flex-shrink-0 transition-transform duration-200 ${
+                className={`p-2.5 rounded-xl border shrink-0 transition-transform duration-200 ${
                   disabled ? "grayscale opacity-60" : "group-hover:scale-110"
                 } ${action.colorClass}`}
               >

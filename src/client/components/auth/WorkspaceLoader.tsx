@@ -44,7 +44,7 @@ export function WorkspaceLoader() {
                 }`}
               >
                 <div
-                  className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
                     done
                       ? "bg-[#C96A3D] text-white"
                       : active

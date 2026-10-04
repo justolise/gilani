@@ -1,30 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
-import { supabaseAdmin } from "@/server/supabase";
-import { authenticateRequest } from "@/server/api-auth.server";
-import { sendTransactionalEmail, emailTemplate } from "@/server/email.server";
+import {
+  supabaseAdmin,
+  requireTeacherOrAdmin,
+  sendTransactionalEmail,
+  emailTemplate,
+} from "@/server/index";
 import { z } from "zod";
 
 export const listTeacherEscalations = createServerFn({ method: "POST" }).handler(async () => {
-  const request = getRequest();
-  let authResult;
-  try {
-    authResult = await authenticateRequest(request);
-  } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-      cause: err,
-    });
-  }
-  const userId = authResult.userId;
-
-  const { data: roleCheck, error: roleError } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .in("role", ["teacher", "admin"])
-    .single();
-
-  if (roleError || !roleCheck) throw new Error("Forbidden: Teacher access required");
+  const { userId } = await requireTeacherOrAdmin();
 
   const { data: escalationsData, error } = await supabaseAdmin
     .from("escalations")
@@ -58,26 +42,8 @@ export const listTeacherEscalations = createServerFn({ method: "POST" }).handler
 export const resolveTeacherEscalation = createServerFn({ method: "POST" })
   .validator(z.object({ id: z.string(), expertAnswer: z.string() }))
   .handler(async ({ data }) => {
-    const request = getRequest();
-    let authResult;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-        cause: err,
-      });
-    }
-    const userId = authResult.userId;
+    const { userId } = await requireTeacherOrAdmin();
     const { id, expertAnswer } = data;
-
-    const { data: roleCheck } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .in("role", ["teacher", "admin"])
-      .single();
-
-    if (!roleCheck) throw new Error("Forbidden: Teacher access required");
 
     const { data: esc, error: escErr } = await supabaseAdmin
       .from("escalations")
@@ -85,20 +51,22 @@ export const resolveTeacherEscalation = createServerFn({ method: "POST" })
       .eq("id", id)
       .single();
     if (escErr) throw new Error(escErr.message);
-    const isAdmin = roleCheck.role === "admin";
-    if (!isAdmin && esc.reviewer_id !== userId)
-      throw new Error("Forbidden: You are not assigned to this escalation");
 
     const { error } = await supabaseAdmin
       .from("escalations")
-      .update({ status: "resolved", detail: expertAnswer } as any)
+      .update({
+        expert_answer: expertAnswer,
+        status: "resolved",
+        resolved_at: new Date().toISOString(),
+      } as any)
       .eq("id", id);
     if (error) throw new Error(error.message);
 
-    if (esc?.user_id) {
+    const { data: studentUser } = await supabaseAdmin.auth.admin.getUserById(esc.user_id);
+    const studentEmail = studentUser?.user?.email;
+
+    if (studentEmail) {
       try {
-        const { data: studentUser } = await supabaseAdmin.auth.admin.getUserById(esc.user_id);
-        const studentEmail = studentUser?.user?.email;
         const { data: studentProfile } = await supabaseAdmin
           .from("profiles")
           .select("display_name")
@@ -115,7 +83,7 @@ export const resolveTeacherEscalation = createServerFn({ method: "POST" })
               heading: `Hi ${studentName}, your teacher has responded!`,
               body: `Your escalated study session has been reviewed by a teacher. Their response has been added to your conversation. Log in to GilaniAI to continue learning.`,
               buttonText: "View Response",
-              buttonUrl: `${appUrl}/login?redirect=/tutor/${esc.conversation_id}`,
+              buttonUrl: `${appUrl}/login?signout=true&redirect=/tutor/${esc.conversation_id}`,
               footerNote:
                 "You are receiving this because you requested a teacher review on GilaniAI.",
             }),
@@ -133,44 +101,33 @@ export const resolveTeacherEscalation = createServerFn({ method: "POST" })
           .select("display_name")
           .eq("id", userId)
           .single();
-        const teacherName = teacherProfile?.display_name || "Your Teacher";
-        const teacherMessageContent = `**Teacher Review** (${teacherName}):\n\n${expertAnswer}`;
+        const teacherName = teacherProfile?.display_name || "Teacher";
+
         await supabaseAdmin.from("messages").insert({
           conversation_id: esc.conversation_id,
           role: "assistant",
-          content: teacherMessageContent,
+          content: `**Teacher Review** (${teacherName}):\n\n${expertAnswer}`,
+          parts: JSON.stringify([
+            {
+              type: "text",
+              text: `**Teacher Review** (${teacherName}):\n\n${expertAnswer}`,
+            },
+          ]),
           user_id: esc.user_id,
-          parts: JSON.stringify([{ type: "text", text: teacherMessageContent }]),
         } as any);
-      } catch (err) {
-        console.error("[Teacher Message] Failed to inject message into conversation:", err);
+      } catch (msgErr) {
+        console.error("[Teacher Message Insert] Failed:", msgErr);
       }
     }
+
+    return { success: true };
   });
 
 export const saveEscalationDraft = createServerFn({ method: "POST" })
   .validator(z.object({ id: z.string(), draftAnswer: z.string() }))
   .handler(async ({ data }) => {
-    const request = getRequest();
-    let authResult;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-        cause: err,
-      });
-    }
-    const userId = authResult.userId;
+    const { userId, role } = await requireTeacherOrAdmin();
     const { id, draftAnswer } = data;
-
-    const { data: roleCheck } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .in("role", ["teacher", "admin"])
-      .single();
-
-    if (!roleCheck) throw new Error("Forbidden: Teacher access required");
 
     const { data: esc, error: escErr } = await supabaseAdmin
       .from("escalations")
@@ -178,9 +135,11 @@ export const saveEscalationDraft = createServerFn({ method: "POST" })
       .eq("id", id)
       .single();
     if (escErr) throw new Error(escErr.message);
-    const isAdmin = roleCheck.role === "admin";
-    if (!isAdmin && esc.reviewer_id !== userId)
+
+    const isAdmin = role === "admin";
+    if (!isAdmin && esc.reviewer_id !== userId) {
       throw new Error("Forbidden: You are not assigned to this escalation");
+    }
 
     const { error } = await supabaseAdmin
       .from("escalations")
@@ -192,28 +151,10 @@ export const saveEscalationDraft = createServerFn({ method: "POST" })
 export const getConversationMessages = createServerFn({ method: "POST" })
   .validator(z.object({ conversationId: z.string() }))
   .handler(async ({ data }) => {
-    const request = getRequest();
-    let authResult;
-    try {
-      authResult = await authenticateRequest(request);
-    } catch (err) {
-      throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-        cause: err,
-      });
-    }
-    const userId = authResult.userId;
+    const { userId, role } = await requireTeacherOrAdmin();
     const { conversationId } = data;
 
-    const { data: roleCheck } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .in("role", ["teacher", "admin"])
-      .single();
-
-    if (!roleCheck) throw new Error("Forbidden: Teacher access required");
-
-    const isAdmin = roleCheck.role === "admin";
+    const isAdmin = role === "admin";
     if (!isAdmin) {
       const { data: escCheck } = await supabaseAdmin
         .from("escalations")

@@ -378,7 +378,7 @@ function TutorThreadInner({
           />
         </div>
 
-        <div className="flex-shrink-0 z-20 lg:relative fixed bottom-0 left-0 right-0">
+        <div className="shrink-0 z-20 lg:relative fixed bottom-0 left-0 right-0">
           <ChatInput
             input={composer.input}
             isPending={chatState.isPending}

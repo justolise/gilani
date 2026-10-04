@@ -18,7 +18,7 @@ export async function persistUserMessage({
   if (lastMessage?.role === "user" && !isRetry) {
     const rawText = extractText(lastMessage);
     const userText = sanitizeUntrustedInput(rawText.slice(0, 10_000));
-    await supabaseAdmin.from("messages").insert({
+    const { error: insertError } = await supabaseAdmin.from("messages").insert({
       conversation_id: threadId,
       role: "user",
       content: (userText || null) as any,
@@ -32,6 +32,12 @@ export async function persistUserMessage({
           }
         : {}),
     } as any);
+    if (insertError) {
+      console.error("[persistence] Failed to persist user message:", insertError.message, {
+        threadId,
+        userId,
+      });
+    }
   } else if (isRetry) {
     const { data: lastMsg } = await supabaseAdmin
       .from("messages")
@@ -41,7 +47,16 @@ export async function persistUserMessage({
       .limit(1)
       .maybeSingle();
     if (lastMsg?.role === "assistant") {
-      await supabaseAdmin.from("messages").delete().eq("id", lastMsg.id);
+      const { error: deleteError } = await supabaseAdmin
+        .from("messages")
+        .delete()
+        .eq("id", lastMsg.id);
+      if (deleteError) {
+        console.error(
+          "[persistence] Failed to delete last assistant message for retry:",
+          deleteError.message,
+        );
+      }
     }
   }
 }

@@ -44,7 +44,7 @@ export default function Pricing() {
             <ul className="flex-1 space-y-4 mb-10 relative z-10">
               {free.features.map((f) => (
                 <li key={f} className="flex items-center gap-3 text-sm text-[#d4d4d8]">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs shadow-inner">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs shadow-inner">
                     ✓
                   </span>
                   {f}
@@ -93,7 +93,7 @@ export default function Pricing() {
                   key={f}
                   className={`flex items-center gap-3 text-sm ${i === 0 ? "text-[#9ca3af]" : "text-white font-medium"}`}
                 >
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#C96A3D] to-[#E28743] flex items-center justify-center text-white text-xs shadow-lg shadow-[#C96A3D]/30">
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#C96A3D] to-[#E28743] flex items-center justify-center text-white text-xs shadow-lg shadow-[#C96A3D]/30">
                     ✓
                   </span>
                   {f}

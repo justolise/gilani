@@ -1,26 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { authenticateRequest } from "@/server/api-auth.server";
-import { supabaseAdmin } from "@/server/supabase";
+import { supabaseAdmin, requireAuth, checkPlanRateLimit } from "@/server/index";
+import { chunkText } from "@/server/notes/chunk-text";
+import { embedChunk } from "@/server/notes/embed-chunk.server";
+import { summarizeChunk } from "@/server/notes/summarize-chunk.server";
+import { finalizeSummary } from "@/server/notes/finalize-summary.server";
 
 // Vercel Hobby's serverless functions have a hard, non-configurable 10s
-// execution limit. There's no background job/queue infrastructure in this
-// app, so the notes pipeline is split into several small client-orchestrated
+// execution limit. The notes pipeline is split into several small client-orchestrated
 // steps (create -> per-chunk process -> finalize) that each comfortably fit
 // inside that ceiling, rather than one long synchronous request.
 const MAX_RAW_TEXT_LENGTH = 16_000;
-
-async function getAuthedUserId(request: Request): Promise<string> {
-  try {
-    const authResult = await authenticateRequest(request);
-    return authResult.userId;
-  } catch (err) {
-    throw new Error(err instanceof Response ? (await err.json()).error : "Unauthorized", {
-      cause: err,
-    });
-  }
-}
 
 async function assertOwnsNote(noteId: string, userId: string): Promise<void> {
   const { data: note } = await supabaseAdmin
@@ -46,15 +36,7 @@ export const createNote = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
 
     const rateLimit = await checkPlanRateLimit(userId, "notes");
     if (!rateLimit.allowed) {
@@ -94,8 +76,7 @@ export const createNote = createServerFn({ method: "POST" })
 
 /**
  * Step 2 (called once per chunk, in sequence, by the client): embeds and
- * stores one chunk for RAG, and produces a partial summary for it. Each
- * call is independent and fast enough to fit the 10s ceiling on its own.
+ * stores one chunk for RAG, and produces a partial summary for it.
  */
 export const processNoteChunk = createServerFn({ method: "POST" })
   .validator(
@@ -107,15 +88,7 @@ export const processNoteChunk = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
     await assertOwnsNote(data.noteId, userId);
 
     const { content, chunkIndex, totalChunks, noteId } = data;
@@ -136,8 +109,6 @@ export const processNoteChunk = createServerFn({ method: "POST" })
         embedding: `[${embedding.join(",")}]`,
       });
       if (chunkError) {
-        // Non-fatal — the note can still show its summary even if RAG
-        // retrieval for this particular chunk is degraded.
         console.error(`[Notes] Failed to store chunk ${chunkIndex}:`, chunkError.message);
       }
     }
@@ -146,9 +117,8 @@ export const processNoteChunk = createServerFn({ method: "POST" })
   });
 
 /**
- * Step 3: merges all partial summaries (collected client-side across the
- * processNoteChunk calls) into one cohesive final summary, and marks the
- * note ready.
+ * Step 3: merges all partial summaries into one cohesive final summary,
+ * and marks the note ready.
  */
 export const finalizeNote = createServerFn({ method: "POST" })
   .validator(
@@ -159,15 +129,7 @@ export const finalizeNote = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
     await assertOwnsNote(data.noteId, userId);
 
     try {
@@ -193,21 +155,12 @@ export const finalizeNote = createServerFn({ method: "POST" })
   });
 
 /**
- * Called by the client if processing is abandoned (e.g. repeated chunk
- * failures) so the note doesn't linger stuck in "processing" forever.
+ * Called by the client if processing is abandoned so the note doesn't linger stuck in "processing".
  */
 export const markNoteFailed = createServerFn({ method: "POST" })
   .validator(z.object({ noteId: z.string().uuid(), errorMessage: z.string().max(500) }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
     await assertOwnsNote(data.noteId, userId);
 
     await supabaseAdmin
@@ -221,15 +174,7 @@ export const markNoteFailed = createServerFn({ method: "POST" })
 export const deleteNote = createServerFn({ method: "POST" })
   .validator(z.object({ noteId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
     await assertOwnsNote(data.noteId, userId);
 
     await supabaseAdmin.from("note_chunks").delete().eq("note_id", data.noteId);
@@ -239,23 +184,12 @@ export const deleteNote = createServerFn({ method: "POST" })
   });
 
 /**
- * Restarts processing for a failed note using its already-stored raw_text —
- * no re-upload needed. Clears any partial chunks from the failed attempt
- * first to avoid duplicates, then returns fresh chunks for the client to
- * drive through processNoteChunk/finalizeNote again.
+ * Restarts processing for a failed note using its already-stored raw_text.
  */
 export const retryNote = createServerFn({ method: "POST" })
   .validator(z.object({ noteId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/server/supabase");
-    const { authenticateRequest } = await import("@/server/api-auth.server");
-    const { checkPlanRateLimit } = await import("@/server/rate-limit.server");
-    const { chunkText } = await import("@/server/notes/chunk-text");
-    const { embedChunk } = await import("@/server/notes/embed-chunk.server");
-    const { summarizeChunk } = await import("@/server/notes/summarize-chunk.server");
-    const { finalizeSummary } = await import("@/server/notes/finalize-summary.server");
-    const request = getRequest();
-    const userId = await getAuthedUserId(request);
+    const { userId } = await requireAuth();
 
     const { data: note } = await supabaseAdmin
       .from("notes")

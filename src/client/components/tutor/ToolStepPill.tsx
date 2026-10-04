@@ -29,15 +29,15 @@ export function ToolStepPill({ toolName, isDone, className = "" }: ToolStepPillP
           aria-hidden="true"
         />
       )}
-      <ToolIcon className="h-3.5 w-3.5 flex-shrink-0 opacity-85 relative z-10" />
+      <ToolIcon className="h-3.5 w-3.5 shrink-0 opacity-85 relative z-10" />
       <span className="relative z-10">{displayName}</span>
       {isDone ? (
         <Check
-          className="h-3 w-3 flex-shrink-0 text-emerald-600 dark:text-emerald-400 relative z-10"
+          className="h-3 w-3 shrink-0 text-emerald-600 dark:text-emerald-400 relative z-10"
           strokeWidth={2.5}
         />
       ) : (
-        <Loader2 className="h-3 w-3 flex-shrink-0 animate-spin text-amber-600 dark:text-amber-400 relative z-10" />
+        <Loader2 className="h-3 w-3 shrink-0 animate-spin text-amber-600 dark:text-amber-400 relative z-10" />
       )}
     </div>
   );

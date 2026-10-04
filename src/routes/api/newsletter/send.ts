@@ -59,12 +59,13 @@ export const Route = createFileRoute("/api/newsletter/send")({
             });
           }
 
-          // Send in batches of 10
+          // Send in batches of 10 — allSettled so one bad address doesn't abort the batch
           const batchSize = 10;
           let sent = 0;
+          let failed = 0;
           for (let i = 0; i < subscribers.length; i += batchSize) {
             const batch = subscribers.slice(i, i + batchSize);
-            await Promise.all(
+            const results = await Promise.allSettled(
               batch.map((sub) =>
                 sendTransactionalEmail({
                   to: sub.email,
@@ -75,13 +76,25 @@ export const Route = createFileRoute("/api/newsletter/send")({
                 }),
               ),
             );
-            sent += batch.length;
+            for (const r of results) {
+              if (r.status === "fulfilled") sent++;
+              else {
+                failed++;
+                console.error(
+                  "[Newsletter Send] Failed to send to subscriber:",
+                  r.reason?.message ?? r.reason,
+                );
+              }
+            }
           }
 
-          return new Response(JSON.stringify({ success: true, sent, total: subscribers.length }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ success: true, sent, failed, total: subscribers.length }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
         } catch (err: any) {
           console.error("[Newsletter Send]", err?.message);
           return new Response(

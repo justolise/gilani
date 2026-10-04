@@ -294,7 +294,7 @@ export function FunctionGraph({ spec }: { spec: GraphSpec }) {
             className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground"
           >
             <span
-              className="h-2.5 w-2.5 rounded-full inline-block flex-shrink-0"
+              className="h-2.5 w-2.5 rounded-full inline-block shrink-0"
               style={{ background: c.error ? "#999" : c.color }}
             />
             {c.error ? (
