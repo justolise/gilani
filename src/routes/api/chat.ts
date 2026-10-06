@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
+import type {} from "@tanstack/react-start";
 import { streamText, isStepCount } from "ai";
 import { z } from "zod";
 import { supabaseAdmin } from "@/server/supabase";
 import { authenticateRequest } from "@/server/api-auth.server";
 import { STATIC_SYSTEM_PROMPT, sanitizeCurriculum } from "@/shared/utils/tutor-prompt";
 import { checkPlanRateLimit } from "@/server/rate-limit.server";
-import { createGoogleAiProvider } from "@/server/ai-gateway.server";
+import { createGoogleAiProvider, checkPromptGuard } from "@/server/ai-gateway.server";
 import {
   getCachedProfile,
   setCachedProfile,
@@ -116,7 +117,14 @@ export const Route = createFileRoute("/api/chat")({
             "gemini-2.5-pro",
             "llama-3.3-70b-versatile",
             "llama-3.1-8b-instant",
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "meta-llama/llama-prompt-guard-2-22m",
             "gpt-4.1-mini",
+            "deepseek-chat",
+            "deepseek-reasoner",
+            "deepseek/deepseek-chat",
+            "deepseek/deepseek-reasoner",
           ]);
           const rawModel = request.headers.get("x-model-id") || "";
           const requestedModel = ALLOWED_MODELS.has(rawModel) ? rawModel : "gemini-2.5-flash";
@@ -134,6 +142,29 @@ export const Route = createFileRoute("/api/chat")({
           // ─── Database Checks ─────────────────────────────────────────────
           const lastMessage = messages?.[messages.length - 1];
           const latestMessageContent = extractText(lastMessage);
+
+          // ─── Prompt Safety Guard (Groq meta-llama/llama-prompt-guard-2-22m) ────────
+          if (latestMessageContent) {
+            const guard = await checkPromptGuard(latestMessageContent);
+            if (!guard.isSafe) {
+              log.warn("[chat] prompt_attack_blocked", {
+                userId,
+                threadId,
+                score: guard.score,
+              });
+              return new Response(
+                JSON.stringify({
+                  error:
+                    "Your message was flagged by safety guardrails (potential prompt injection or jailbreak attempt). Please rephrase your study question.",
+                }),
+                {
+                  status: 400,
+                  headers: { "Content-Type": "application/json" },
+                },
+              );
+            }
+          }
+
           const initialTitle =
             latestMessageContent
               .replace(/<[^>]+>/g, "")

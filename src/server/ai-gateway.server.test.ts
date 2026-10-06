@@ -101,3 +101,89 @@ describe("retryable error classification", () => {
     expect(isRetryable({ message: "invalid JSON payload" })).toBe(false);
   });
 });
+
+// ─── checkPromptGuard ─────────────────────────────────────────────────────────
+
+describe("checkPromptGuard", () => {
+  it("returns safe when prompt is empty", async () => {
+    const { checkPromptGuard } = await import("./ai-gateway.server");
+    const result = await checkPromptGuard("");
+    expect(result.isSafe).toBe(true);
+    expect(result.score).toBe(0);
+    expect(result.flagged).toBe(false);
+  });
+
+  it("returns safe when prompt is only whitespace", async () => {
+    const { checkPromptGuard } = await import("./ai-gateway.server");
+    const result = await checkPromptGuard("   ");
+    expect(result.isSafe).toBe(true);
+    expect(result.score).toBe(0);
+  });
+});
+
+// ─── Groq fallback in createGoogleAiProvider ──────────────────────────────────
+
+describe("createGoogleAiProvider with Groq fallback", () => {
+  it("initializes successfully when GROQ_API_KEY is present", async () => {
+    const originalGemini = process.env.GEMINI_API_KEY;
+    const originalGroq = process.env.GROQ_API_KEY;
+    try {
+      delete process.env.GEMINI_API_KEY;
+      delete process.env.LOVABLE_API_KEY;
+      process.env.GROQ_API_KEY = "gsk_test_key";
+
+      const { createGoogleAiProvider } = await import("./ai-gateway.server");
+      const gateway = createGoogleAiProvider();
+
+      expect(gateway).toBeDefined();
+      expect(typeof gateway.chatModel).toBe("function");
+
+      const chatModel = gateway.chatModel();
+      expect(chatModel).toBeDefined();
+
+      const promptGuardModel = gateway.chatModel("meta-llama/llama-prompt-guard-2-22m");
+      expect(promptGuardModel).toBeDefined();
+    } finally {
+      if (originalGemini) process.env.GEMINI_API_KEY = originalGemini;
+      if (originalGroq) process.env.GROQ_API_KEY = originalGroq;
+      else delete process.env.GROQ_API_KEY;
+    }
+  });
+});
+
+// ─── DeepSeek fallback in createGoogleAiProvider ──────────────────────────────
+
+describe("createGoogleAiProvider with DeepSeek fallback", () => {
+  it("initializes successfully when DEEPSEEK_API_KEY is present", async () => {
+    const originalGemini = process.env.GEMINI_API_KEY;
+    const originalGroq = process.env.GROQ_API_KEY;
+    const originalDeepseek = process.env.DEEPSEEK_API_KEY;
+    try {
+      delete process.env.GEMINI_API_KEY;
+      delete process.env.LOVABLE_API_KEY;
+      delete process.env.GROQ_API_KEY;
+      process.env.DEEPSEEK_API_KEY = "sk-test-deepseek-key";
+
+      const { createGoogleAiProvider } = await import("./ai-gateway.server");
+      const gateway = createGoogleAiProvider();
+
+      expect(gateway).toBeDefined();
+      expect(typeof gateway.chatModel).toBe("function");
+
+      const chatModel = gateway.chatModel();
+      expect(chatModel).toBeDefined();
+
+      const reasonerModel = gateway.chatModel("deepseek-reasoner");
+      expect(reasonerModel).toBeDefined();
+
+      const deepseekModels = gateway.getAllChatModels("deepseek-chat", "deepseek");
+      expect(deepseekModels).toHaveLength(1);
+      expect(deepseekModels[0].name).toBe("deepseek");
+    } finally {
+      if (originalGemini) process.env.GEMINI_API_KEY = originalGemini;
+      if (originalGroq) process.env.GROQ_API_KEY = originalGroq;
+      if (originalDeepseek) process.env.DEEPSEEK_API_KEY = originalDeepseek;
+      else delete process.env.DEEPSEEK_API_KEY;
+    }
+  });
+});

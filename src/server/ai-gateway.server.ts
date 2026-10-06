@@ -86,37 +86,104 @@ export function truncateMessages(
   return [...systemMessages, ...kept, ...mustKeep];
 }
 
+const stripQuotes = (str: string): string => {
+  let s = str.trim();
+  if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
+  else if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
+  return s;
+};
+
+/**
+ * Checks a prompt for prompt injection or jailbreak attacks using Groq's
+ * `meta-llama/llama-prompt-guard-2-22m` classifier model.
+ *
+ * Returns:
+ * - isSafe: boolean (true if benign, false if attack score >= threshold)
+ * - score: number (probability between 0.0 and 1.0)
+ * - flagged: boolean
+ */
+export async function checkPromptGuard(
+  promptText: string,
+  threshold = 0.85,
+): Promise<{ isSafe: boolean; score: number; flagged: boolean }> {
+  const groqKey = stripQuotes(process.env.GROQ_API_KEY || "");
+  if (!groqKey || !promptText || !promptText.trim()) {
+    return { isSafe: true, score: 0, flagged: false };
+  }
+
+  try {
+    // Truncate to first 1800 characters (~450 tokens) to comfortably fit within 512-token context window
+    const truncatedPrompt = promptText.trim().slice(0, 1800);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${groqKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-prompt-guard-2-22m",
+        messages: [{ role: "user", content: truncatedPrompt }],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.warn(`[Prompt Guard] Groq returned status ${res.status}: ${res.statusText}`);
+      return { isSafe: true, score: 0, flagged: false };
+    }
+
+    const data: any = await res.json();
+    const rawContent = data?.choices?.[0]?.message?.content ?? "";
+    const score = parseFloat(rawContent.trim());
+
+    if (isNaN(score)) {
+      console.warn(`[Prompt Guard] Received non-numeric classifier output: "${rawContent}"`);
+      return { isSafe: true, score: 0, flagged: false };
+    }
+
+    const flagged = score >= threshold;
+    return {
+      isSafe: !flagged,
+      score,
+      flagged,
+    };
+  } catch (err: any) {
+    console.warn("[Prompt Guard] Check skipped due to error:", err?.message ?? err);
+    return { isSafe: true, score: 0, flagged: false };
+  }
+}
+
 /**
  * Creates an AI provider dynamically selecting available providers from env keys.
- * Priority: Gemini > Groq > OpenAI > Mistral
+ * Priority: Gemini > Groq > DeepSeek > OpenAI > Mistral
  */
 export const createGoogleAiProvider = (apiKey?: string) => {
-  const stripQuotes = (str: string): string => {
-    let s = str.trim();
-    if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
-    else if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
-    return s;
-  };
-
   const geminiKey = stripQuotes(
     apiKey || process.env.GEMINI_API_KEY || process.env.LOVABLE_API_KEY || "",
   );
   const groqKey = stripQuotes(process.env.GROQ_API_KEY || "");
+  const deepseekKey = stripQuotes(process.env.DEEPSEEK_API_KEY || "");
   const openaiKey = stripQuotes(process.env.OPENAI_API_KEY || "");
   const mistralKey = stripQuotes(process.env.MISTRAL_API_KEY || "");
 
   const isValidGeminiKey = geminiKey && geminiKey.trim() !== "";
 
-  const activeProviders: ("openai" | "groq" | "google" | "mistral")[] = [];
+  const activeProviders: ("openai" | "groq" | "google" | "mistral" | "deepseek")[] = [];
   if (isValidGeminiKey) activeProviders.push("google");
   if (groqKey) activeProviders.push("groq");
+  if (deepseekKey) activeProviders.push("deepseek");
   if (openaiKey) activeProviders.push("openai");
   if (mistralKey) activeProviders.push("mistral");
 
   if (activeProviders.length === 0) {
     throw new Error(
       "[AI Gateway] No AI provider API key configured. " +
-        "Set at least one of: GEMINI_API_KEY, GROQ_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY.",
+        "Set at least one of: GEMINI_API_KEY, GROQ_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY, MISTRAL_API_KEY.",
     );
   }
 
@@ -143,11 +210,54 @@ export const createGoogleAiProvider = (apiKey?: string) => {
       return {
         name: "groq" as const,
         chatModel: (modelId?: string) => {
+          if (
+            modelId === "meta-llama/llama-prompt-guard-2-22m" ||
+            modelId === "groq/meta-llama/llama-prompt-guard-2-22m"
+          ) {
+            return groq.chatModel("meta-llama/llama-prompt-guard-2-22m");
+          }
+          const isExplicit =
+            modelId &&
+            !modelId.includes("gemini") &&
+            !modelId.includes("google") &&
+            (modelId.startsWith("openai/") ||
+              modelId.startsWith("canopylabs/") ||
+              modelId.startsWith("meta-llama/") ||
+              modelId.startsWith("deepseek-r1") ||
+              modelId.startsWith("groq/"));
+          if (isExplicit) {
+            return groq.chatModel(modelId.replace(/^groq\//, ""));
+          }
+          // Default Groq fallback: Primary gpt-oss-120b, with fallback to gpt-oss-20b
+          return createFallback({
+            models: [
+              groq.chatModel("openai/gpt-oss-120b"),
+              groq.chatModel("openai/gpt-oss-20b"),
+            ] as any,
+            onError: (err: any, failedModelId: string) => {
+              console.warn(
+                `[AI Gateway Groq] Model ${failedModelId} failed. Trying next Groq model... Reason:`,
+                err?.message ?? err,
+              );
+            },
+          });
+        },
+      };
+    }
+    if (providerName === "deepseek") {
+      const deepseek = createOpenAICompatible({
+        name: "deepseek",
+        baseURL: "https://api.deepseek.com",
+        apiKey: deepseekKey,
+      });
+      return {
+        name: "deepseek" as const,
+        chatModel: (modelId?: string) => {
           const cleanModelId =
             modelId && !modelId.includes("gemini") && !modelId.includes("google")
-              ? modelId.replace(/^groq\//, "")
-              : "llama-3.1-8b-instant";
-          return groq.chatModel(cleanModelId);
+              ? modelId.replace(/^deepseek\//, "")
+              : "deepseek-chat";
+          return deepseek.chatModel(cleanModelId);
         },
       };
     }
@@ -206,7 +316,10 @@ export const createGoogleAiProvider = (apiKey?: string) => {
         },
       });
     },
-    getAllChatModels: (modelId?: string, onlyProvider?: "openai" | "groq" | "google" | "mistral") =>
+    getAllChatModels: (
+      modelId?: string,
+      onlyProvider?: "openai" | "groq" | "google" | "mistral" | "deepseek",
+    ) =>
       instantiatedProviders
         .filter((p) => !onlyProvider || p.name === onlyProvider)
         .map((p) => ({ model: p.chatModel(modelId), name: p.name })),
