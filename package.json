@@ -24,9 +24,9 @@
     "@ai-sdk/google": "^4.0.39",
     "@ai-sdk/openai-compatible": "^3.0.28",
     "@ai-sdk/react": "^4.0.61",
-    "@capacitor/android": "^8.5.0",
-    "@capacitor/app": "^8.1.1",
-    "@capacitor/core": "^8.5.0",
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.2",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/playfair-display": "^5.2.8",
@@ -57,7 +57,7 @@
     "dotenv": "^17.4.2",
     "jspdf": "^4.2.1",
     "jsxgraph": "^1.12.2",
-    "katex": "^0.18.4",
+    "katex": "^0.18.10",
     "lucide-react": "^1.31.0",
     "mermaid": "^11.15.0",
     "prop-types": "^15.8.1",
@@ -82,7 +82,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.0",
+    "@capacitor/cli": "^8.5.2",
     "@eslint/js": "^10.0.1",
     "@lovable.dev/vite-tanstack-config": "^2.4.0",
     "@tailwindcss/typography": "^0.5.20",
@@ -127,6 +127,11 @@
     "undici": "^7.30.0",
     "xcode": {
       "uuid": "^11.1.1"
-    }
+    },
+    "katex": "$katex",
+    "postcss-selector-parser": "^7.1.6",
+    "seroval": "^1.6.8",
+    "shell-quote": "^1.12.0",
+    "source-map-js": "^1.2.2"
   }
 }
