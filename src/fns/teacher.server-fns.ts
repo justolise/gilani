@@ -42,7 +42,7 @@ export const listTeacherEscalations = createServerFn({ method: "POST" }).handler
 export const resolveTeacherEscalation = createServerFn({ method: "POST" })
   .validator(z.object({ id: z.string(), expertAnswer: z.string() }))
   .handler(async ({ data }) => {
-    const { userId } = await requireTeacherOrAdmin();
+    const { userId, role } = await requireTeacherOrAdmin();
     const { id, expertAnswer } = data;
 
     const { data: esc, error: escErr } = await supabaseAdmin
@@ -51,6 +51,11 @@ export const resolveTeacherEscalation = createServerFn({ method: "POST" })
       .eq("id", id)
       .single();
     if (escErr) throw new Error(escErr.message);
+
+    const isAdmin = role === "admin";
+    if (!isAdmin && esc.reviewer_id !== userId) {
+      throw new Error("Forbidden: You are not assigned to this escalation");
+    }
 
     const { error } = await supabaseAdmin
       .from("escalations")

@@ -181,6 +181,45 @@ export const deleteAccount = createServerFn({ method: "POST" })
       throw new Error("Admin accounts cannot be self-deleted. Transfer ownership first.");
     }
 
+    // Verify that the user has genuinely re-authenticated or provided a valid OTP
+    const req = await import("@tanstack/react-start/server").then((m) => m.getRequest());
+    const token = req.headers.get("authorization")?.replace("Bearer ", "");
+    let isReauthenticated = false;
+
+    if (token) {
+      try {
+        const parts = token.split(".");
+        if (parts.length >= 2) {
+          const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf-8"));
+          const reauthAt = payload.reauthenticated_at
+            ? Number(payload.reauthenticated_at) * 1000
+            : 0;
+          if (reauthAt && Date.now() - reauthAt < 10 * 60 * 1000) {
+            isReauthenticated = true;
+          }
+        }
+      } catch {
+        // Invalid JWT format
+      }
+    }
+
+    if (!isReauthenticated && user.email) {
+      const { error: verifyErr } = await supabaseAdmin.auth.verifyOtp({
+        email: user.email,
+        token: cleanOtp,
+        type: "reauthentication" as any,
+      });
+      if (!verifyErr) {
+        isReauthenticated = true;
+      }
+    }
+
+    if (!isReauthenticated) {
+      throw new Error(
+        "Invalid or expired verification code. Please re-authenticate to delete your account.",
+      );
+    }
+
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (error) {
       throw new Error(error.message || "Failed to delete account. Please contact support.");

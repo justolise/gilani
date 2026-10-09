@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
 import { supabaseAdmin } from "@/server/supabase";
 import { log } from "@/server/logger";
+import crypto from "node:crypto";
 
 /**
  * GET /api/mpesa/stuck-payments-check
@@ -19,9 +20,17 @@ export const Route = createFileRoute("/api/mpesa/stuck-payments-check")({
         const request = getRequest();
 
         // Only allow calls from Vercel cron (or manual via CRON_SECRET header)
-        const authHeader = request.headers.get("authorization");
-        const cronSecret = process.env.CRON_SECRET;
-        if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        // Must fail closed if CRON_SECRET is not set
+        const authHeader = request.headers.get("authorization") || "";
+        const cronSecret = process.env.CRON_SECRET || "";
+        const expectedAuth = cronSecret ? `Bearer ${cronSecret}` : "";
+
+        if (
+          !cronSecret ||
+          !authHeader ||
+          authHeader.length !== expectedAuth.length ||
+          !crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expectedAuth))
+        ) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },

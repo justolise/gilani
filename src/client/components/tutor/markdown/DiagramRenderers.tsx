@@ -185,9 +185,13 @@ export function MermaidDiagram({ code, isStreaming }: { code: string; isStreamin
     import("mermaid")
       .then((m) => m.default.render(id, processedCode))
       .then(({ svg }) => {
-        setSvgContent(svg);
+        const sanitizedSvg = DOMPurify.sanitize(svg, {
+          USE_PROFILES: { svg: true },
+          ADD_TAGS: ["style"],
+        });
+        setSvgContent(sanitizedSvg);
         if (ref.current) {
-          ref.current.innerHTML = svg;
+          ref.current.innerHTML = sanitizedSvg;
         }
         setIsLoading(false);
       })

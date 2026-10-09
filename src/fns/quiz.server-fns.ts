@@ -256,29 +256,44 @@ export const submitQuizAttemptFn = createServerFn({ method: "POST" })
 
     const { data: quiz, error: quizError } = await supabaseAdmin
       .from("quizzes")
-      .select("id, user_id")
+      .select("id, user_id, questions")
       .eq("id", data.quizId)
       .maybeSingle();
     if (quizError || !quiz || quiz.user_id !== userId) {
       throw new Error("Quiz not found");
     }
 
-    const correctCount = data.answers.filter((a) => a.correct).length;
-    const score = Math.round((correctCount / Math.max(1, data.answers.length)) * 100);
+    const storedQuestions: any[] = Array.isArray(quiz.questions) ? (quiz.questions as any[]) : [];
+    const questionMap = new Map<string, any>(storedQuestions.map((q) => [q.id, q]));
+
+    // Authoritatively evaluate correctness on server rather than trusting client boolean
+    const evaluatedAnswers = data.answers.map((a) => {
+      const q = questionMap.get(a.questionId);
+      const isCorrect = q ? q.correctIndex === a.selectedIndex : false;
+      const topic = a.topic || q?.topic || "";
+      return {
+        ...a,
+        correct: isCorrect,
+        topic,
+      };
+    });
+
+    const correctCount = evaluatedAnswers.filter((a) => a.correct).length;
+    const score = Math.round((correctCount / Math.max(1, evaluatedAnswers.length)) * 100);
     const weakTopics = Array.from(
-      new Set(data.answers.filter((a) => !a.correct && a.topic).map((a) => a.topic as string)),
+      new Set(evaluatedAnswers.filter((a) => !a.correct && a.topic).map((a) => a.topic as string)),
     );
 
     const { error } = await supabaseAdmin.from("quiz_attempts").insert({
       quiz_id: data.quizId,
       user_id: userId,
-      answers: data.answers as any,
+      answers: evaluatedAnswers as any,
       score,
       weak_topics: weakTopics as any,
     });
     if (error) throw error;
 
-    return { score, correctCount, total: data.answers.length, weakTopics };
+    return { score, correctCount, total: evaluatedAnswers.length, weakTopics };
   });
 
 // ─── Quiz form options (plan-derived, sourced from the user's Supabase profile) ───

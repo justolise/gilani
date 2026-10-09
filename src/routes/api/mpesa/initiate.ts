@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { authenticateRequest } from "@/server/api-auth.server";
 import { initiateSTKPush } from "@/server/mpesa.server";
 import { supabaseAdmin } from "@/server/supabase";
+import { checkRateLimit } from "@/server/rate-limit.server";
 import { PLANS, TOPUP_MIN_KES } from "@/shared/plans";
 import { log } from "@/server/logger";
 import { z } from "zod";
@@ -27,6 +28,22 @@ export const Route = createFileRoute("/api/mpesa/initiate")({
           }
 
           const { userId } = authResult;
+
+          // Rate limit: max 5 STK push requests per 5 minutes per user
+          const rl = await checkRateLimit(`${userId}:mpesa_stk:5m`, {
+            max: 5,
+            windowMs: 300_000,
+          });
+          if (!rl.allowed) {
+            const waitSecs = Math.ceil(rl.retryAfterMs / 1000);
+            return new Response(
+              JSON.stringify({
+                error: `Too many payment requests. Please wait ${waitSecs}s before initiating again.`,
+              }),
+              { status: 429, headers: { "Content-Type": "application/json" } },
+            );
+          }
+
           const body = await request.json().catch(() => ({}));
           const {
             phone,

@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRequest } from "@tanstack/react-start/server";
-import { authenticateRequest } from "@/server/api-auth.server";
+import { authenticateRequest, requireRole } from "@/server/api-auth.server";
 
 /**
  * GET /api/mpesa/sandbox-curl?checkoutRequestId=<id>
  *
  * Returns the curl command to simulate a Safaricom STK callback for sandbox testing.
  * The callback secret is read from server env and never exposed to the client bundle.
- * Requires a valid user session — prevents abuse.
+ * Requires admin privileges — prevents unauthorized secret disclosure.
  */
 export const Route = createFileRoute("/api/mpesa/sandbox-curl")({
   server: {
@@ -24,10 +24,19 @@ export const Route = createFileRoute("/api/mpesa/sandbox-curl")({
             });
           }
 
-          // Require authentication — this endpoint exposes the callback URL structure
+          // Require admin authentication — this endpoint exposes the callback secret
+          let authResult;
           try {
-            await authenticateRequest(request);
-          } catch {
+            authResult = await authenticateRequest(request);
+            const isAdmin = await requireRole(authResult.userId, "admin");
+            if (!isAdmin) {
+              return new Response(JSON.stringify({ error: "Forbidden: Admin access required" }), {
+                status: 403,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+          } catch (authErr) {
+            if (authErr instanceof Response) return authErr;
             return new Response(JSON.stringify({ error: "Unauthorized" }), {
               status: 401,
               headers: { "Content-Type": "application/json" },

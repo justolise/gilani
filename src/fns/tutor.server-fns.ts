@@ -48,16 +48,31 @@ export const renameThreadFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { userId } = await requireAuth();
 
-    const { error } = await supabaseAdmin.from("conversations").upsert(
-      {
+    const { data: existing } = await supabaseAdmin
+      .from("conversations")
+      .select("id, user_id")
+      .eq("id", data.threadId)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.user_id !== userId) {
+        throw new Error("Forbidden: You do not own this conversation");
+      }
+      const { error } = await supabaseAdmin
+        .from("conversations")
+        .update({ title: data.title, updated_at: new Date().toISOString() })
+        .eq("id", data.threadId)
+        .eq("user_id", userId);
+      if (error) throw error;
+    } else {
+      const { error } = await supabaseAdmin.from("conversations").insert({
         id: data.threadId,
         user_id: userId,
         title: data.title,
-      },
-      { onConflict: "id" },
-    );
+      });
+      if (error) throw error;
+    }
 
-    if (error) throw error;
     return { success: true };
   });
 
@@ -92,14 +107,27 @@ export const generateThreadTitleFn = createServerFn({ method: "POST" })
     // Save directly to the database if threadId and authenticated user exist
     if (threadId && authUserId) {
       try {
-        await supabaseAdmin.from("conversations").upsert(
-          {
+        const { data: existing } = await supabaseAdmin
+          .from("conversations")
+          .select("id, user_id")
+          .eq("id", threadId)
+          .maybeSingle();
+
+        if (existing) {
+          if (existing.user_id === authUserId) {
+            await supabaseAdmin
+              .from("conversations")
+              .update({ title, updated_at: new Date().toISOString() })
+              .eq("id", threadId)
+              .eq("user_id", authUserId);
+          }
+        } else {
+          await supabaseAdmin.from("conversations").insert({
             id: threadId,
             user_id: authUserId,
             title,
-          },
-          { onConflict: "id" },
-        );
+          });
+        }
       } catch (dbErr) {
         console.error("[Title Gen] Failed to persist title:", dbErr);
       }

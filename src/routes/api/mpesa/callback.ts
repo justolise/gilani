@@ -138,11 +138,22 @@ export const Route = createFileRoute("/api/mpesa/callback")({
           const receipt =
             items.find((i: any) => i.Name === "MpesaReceiptNumber")?.Value ?? "UNKNOWN";
 
-          // Mark payment complete
-          await supabaseAdmin
+          // Mark payment complete atomically — only credit if status was still 'pending'
+          const { data: updatedPayment, error: updateError } = await supabaseAdmin
             .from("payments")
             .update({ status: "completed", mpesa_receipt: receipt })
-            .eq("checkout_request_id", checkoutRequestId);
+            .eq("checkout_request_id", checkoutRequestId)
+            .eq("status", "pending")
+            .select()
+            .maybeSingle();
+
+          if (updateError || !updatedPayment) {
+            log.warn("[mpesa_callback] duplicate_or_concurrent_callback_ignored", {
+              checkoutRequestId,
+            });
+            return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });
+          }
+
           if (!payment.user_id) {
             console.error(`[M-Pesa Callback] Missing user_id for payment ${payment.id}`);
             return new Response(JSON.stringify({ ResultCode: 0 }), { status: 200 });

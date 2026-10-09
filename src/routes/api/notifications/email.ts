@@ -18,9 +18,24 @@ export const Route = createFileRoute("/api/notifications/email")({
       POST: async () => {
         try {
           const request = getRequest();
-          // We can allow either authenticated user OR service role (cron/webhooks)
-          // For simplicity here, we assume it's called by an authenticated admin or teacher
+          // Require teacher or admin role to prevent unauthorized users sending arbitrary emails
           const authResult = await authenticateRequest(request);
+          const { data: roleCheck } = await supabaseAdmin
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", authResult.userId)
+            .in("role", ["teacher", "admin"])
+            .maybeSingle();
+
+          if (!roleCheck) {
+            return new Response(
+              JSON.stringify({ error: "Forbidden: Teacher or Admin access required" }),
+              {
+                status: 403,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
 
           const body = await request.json().catch(() => ({}));
           const { type, targetUserId, payload } = body as {
@@ -77,13 +92,24 @@ export const Route = createFileRoute("/api/notifications/email")({
           let subject = "";
 
           if (type === "teacher_reply") {
+            const appUrl = process.env.APP_URL || "https://gilaniai.site";
+            let safeThreadUrl = `${appUrl}/tutor`;
+            if (typeof payload.threadUrl === "string") {
+              const trimmed = payload.threadUrl.trim();
+              if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+                safeThreadUrl = `${appUrl}${trimmed}`;
+              } else if (trimmed.startsWith(appUrl)) {
+                safeThreadUrl = trimmed;
+              }
+            }
+
             subject = `New reply from ${payload.teacherName}`;
             html = teacherReplyEmailTemplate({
               studentName: profile.display_name || email.split("@")[0],
               teacherName: payload.teacherName,
               threadTitle: payload.threadTitle,
               previewText: payload.previewText,
-              threadUrl: payload.threadUrl,
+              threadUrl: safeThreadUrl,
             });
           } else if (type === "study_reminder") {
             subject = "Your AI tutor is waiting! 📚";

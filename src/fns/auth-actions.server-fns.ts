@@ -102,6 +102,23 @@ export const checkEmailStatus = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    // Rate limit email checks: max 15 requests per minute per IP
+    const request = getRequest();
+    const ip =
+      request.headers.get("cf-connecting-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+
+    const { data: rlAllowed } = await supabaseAdmin.rpc("upsert_rate_limit", {
+      p_key: `check_email:${ip}`,
+      p_max: 15,
+      p_reset_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    if (rlAllowed === false) {
+      throw new Error("Too many email verification requests. Please slow down.");
+    }
+
     const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
       .select("id, onboarding_completed")

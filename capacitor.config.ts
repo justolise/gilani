@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: ".output/public",
   server: {
     url: "https://gilaniai.site",
-    cleartext: true,
+    cleartext: false,
   },
   plugins: {
     SystemBars: {
