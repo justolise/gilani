@@ -83,7 +83,7 @@ export function PedagogicalActions({
               className={`group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 text-left animate-in fade-in slide-in-from-bottom-2 duration-300 ${
                 disabled
                   ? "border-border/40 bg-card/40 opacity-50 cursor-not-allowed shadow-none"
-                  : "border-border/60 bg-card/60 hover:bg-card/90 backdrop-blur-sm hover:border-primary/35 hover:-translate-y-1 shadow-xs hover:shadow-lg active:scale-[0.99] cursor-pointer"
+                  : "glass-card hover:-translate-y-1 shadow-xs hover:shadow-lg interactive-scale focus-ring cursor-pointer"
               }`}
             >
               <div

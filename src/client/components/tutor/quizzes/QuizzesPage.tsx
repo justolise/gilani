@@ -10,6 +10,7 @@ import { generateQuizFn, getQuizFormOptionsFn, deleteQuizFn } from "@/fns/quiz.s
 import { ConfirmDialog } from "@/client/components/shared/ConfirmDialog";
 import { QuizAddModal } from "./QuizAddModal";
 import { QuizCard } from "./QuizCard";
+import { QuizzesSkeleton } from "./QuizzesSkeleton";
 
 const PAGE_SIZE = 10;
 
@@ -141,13 +142,22 @@ export function QuizzesPage() {
 
   if (loading && quizzes.length === 0)
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col bg-background">
         <AppHeader
           title="Practice Quizzes"
-          subtitle="Test your recall and master difficult topics"
+          subtitle="Loading practice quizzes…"
+          actions={
+            <button
+              disabled
+              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium min-h-[44px] opacity-75 cursor-not-allowed"
+            >
+              <Plus className="h-4 w-4" />
+              New Quiz
+            </button>
+          }
         />
-        <div className="flex-1 flex items-center justify-center">
-          <GilaniLoader />
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <QuizzesSkeleton />
         </div>
       </div>
     );

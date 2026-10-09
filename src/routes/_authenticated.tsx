@@ -10,6 +10,7 @@ import { useAuthedShell } from "@/client/components/layout/hooks/useAuthedShell"
 import { Sidebar } from "@/client/components/layout/Sidebar";
 import { MobileBottomNav } from "@/client/components/layout/MobileBottomNav";
 import { AppGuideModal } from "@/client/components/guide/AppGuideModal";
+import { CommandPalette } from "@/client/components/layout/CommandPalette";
 import { I18nProvider } from "@/client/i18n/I18nContext";
 import { CompleteProfileForm } from "@/client/components/auth/CompleteProfileForm";
 import { assignUserRole, checkSessionAuth } from "@/fns/auth-actions.server-fns";
@@ -105,6 +106,7 @@ function AuthedShell() {
         <div className="fixed inset-0 flex h-dvh w-full flex-col overflow-hidden overscroll-none lg:flex-row bg-background text-foreground pt-(--safe-top,0px) pl-(--safe-left,0px) pr-(--safe-right,0px)">
           <DisclaimerModal />
           <AppGuideModal />
+          <CommandPalette userId={shell.user?.id} />
           {needsProfileSetup && (
             <CompleteProfileForm
               initialName={shell.user?.user_metadata?.full_name || ""}

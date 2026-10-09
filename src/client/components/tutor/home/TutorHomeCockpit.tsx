@@ -101,7 +101,7 @@ export function TutorHomeCockpit({
           </button>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-foreground animate-in fade-in slide-in-from-bottom-4 duration-400 delay-100">
+        <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-foreground text-gradient-scholarly animate-in fade-in slide-in-from-bottom-4 duration-400 delay-100">
           {greeting}
         </h1>
 

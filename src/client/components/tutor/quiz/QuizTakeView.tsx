@@ -71,6 +71,23 @@ export default function QuizTakeView({ quizId }: { quizId: string }) {
     setStreak((s) => (correct ? s + 1 : 0));
   };
 
+  useEffect(() => {
+    if (!hasAnsweredCurrent || showResult) return;
+
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [hasAnsweredCurrent, showResult, currentIndex, activeQuestions.length]);
+
   const handleNext = async () => {
     if (currentIndex + 1 < activeQuestions.length) {
       setCurrentIndex((i) => i + 1);
@@ -211,9 +228,12 @@ export default function QuizTakeView({ quizId }: { quizId: string }) {
               {hasAnsweredCurrent && (
                 <button
                   onClick={handleNext}
-                  className="mt-6 w-full bg-primary text-primary-foreground px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
+                  className="mt-6 w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
                 >
-                  {currentIndex + 1 < activeQuestions.length ? "Next Question" : "See Results"}
+                  <span>
+                    {currentIndex + 1 < activeQuestions.length ? "Next Question" : "See Results"}
+                  </span>
+                  <span className="text-xs font-mono opacity-80">(↵ Enter)</span>
                 </button>
               )}
             </>

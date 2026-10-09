@@ -1015,3 +1015,45 @@ html.text-lg {
 .interactive-scale:active {
   transform: scale(0.97);
 }
+
+/* ── Scholarly Typography & Depth Layering ───────────────────────── */
+.text-gradient-scholarly {
+  background: linear-gradient(135deg, var(--foreground) 35%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 60%, transparent);
+  outline-offset: 2px;
+}
+
+.card-elevated {
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+}
+
+:is(.dark) .card-elevated {
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Score Progress Ring Animation ────────────────────────────────── */
+@keyframes score-ring-progress {
+  from {
+    stroke-dashoffset: 283;
+  }
+  to {
+    stroke-dashoffset: var(--target-offset, 0);
+  }
+}
+
+.score-ring-circle {
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

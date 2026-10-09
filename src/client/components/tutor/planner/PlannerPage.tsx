@@ -18,6 +18,7 @@ import { ConfirmDialog } from "@/client/components/shared/ConfirmDialog";
 import { PlannerWeekView } from "@/client/components/tutor/planner/PlannerWeekView";
 import { PlannerItemRow } from "@/client/components/tutor/planner/PlannerItemRow";
 import { PlannerAddModal } from "@/client/components/tutor/planner/PlannerAddModal";
+import { PlannerSkeleton } from "./PlannerSkeleton";
 
 function getPlanItems(plan: any): StudyPlanItem[] {
   if (!plan) return [];
@@ -199,10 +200,22 @@ export function PlannerPage() {
 
   if (loading)
     return (
-      <div className="h-full flex flex-col">
-        <AppHeader title="Study Planner" subtitle="Organize your sessions and track goals" />
-        <div className="flex-1 flex items-center justify-center">
-          <GilaniLoader />
+      <div className="h-full flex flex-col bg-background">
+        <AppHeader
+          title="Study Planner"
+          subtitle="Loading your study schedules…"
+          actions={
+            <button
+              disabled
+              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium min-h-[44px] opacity-75 cursor-not-allowed"
+            >
+              <Plus className="h-4 w-4" />
+              New Plan
+            </button>
+          }
+        />
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <PlannerSkeleton />
         </div>
       </div>
     );

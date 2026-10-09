@@ -11,6 +11,7 @@ import { AppHeader } from "@/client/components/layout/AppHeader";
 import { NoteCard, type NoteCardData } from "@/client/components/notes/NoteCard";
 import { NoteUploadModal } from "@/client/components/notes/NoteUploadModal";
 import { ConfirmDialog } from "@/client/components/shared/ConfirmDialog";
+import { DocumentsSkeleton } from "@/client/components/notes/DocumentsSkeleton";
 
 export const Route = createFileRoute("/_authenticated/tutor/documents")({
   component: DocumentsRoute,
@@ -121,10 +122,21 @@ function DocumentsRoute() {
 
   if (loading)
     return (
-      <div className="h-full flex flex-col">
-        <AppHeader title="My Documents" subtitle="Study materials uploaded to the AI" />
-        <div className="flex-1 flex items-center justify-center">
-          <GilaniLoader />
+      <div className="h-full flex flex-col bg-background">
+        <AppHeader
+          title="My Documents"
+          subtitle="Loading your study materials…"
+          actions={
+            <button
+              disabled
+              className="flex items-center justify-center gap-2 rounded-xl bg-primary/60 px-4 py-2 text-sm font-semibold text-primary-foreground min-h-[44px] opacity-75 cursor-not-allowed"
+            >
+              <UploadCloud className="h-4 w-4" /> Upload Notes
+            </button>
+          }
+        />
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <DocumentsSkeleton />
         </div>
       </div>
     );

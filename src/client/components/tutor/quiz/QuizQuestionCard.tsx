@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { setPendingMessage } from "@/shared/utils/pending-message";
+import { Sparkles } from "lucide-react";
 import { Lightbulb } from "lucide-react";
 import { QuizOptionButton, type QuizOptionState } from "./QuizOptionButton";
 import { MarkdownRenderer } from "@/client/components/tutor/MarkdownRenderer";
@@ -19,12 +22,37 @@ export function QuizQuestionCard({
   mode = "practice",
 }: QuizQuestionCardProps) {
   const [selected, setSelected] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const handleSelect = (index: number) => {
     if (selected !== null) return;
     setSelected(index);
     onAnswer(index, index === question.correctIndex);
   };
+
+  useEffect(() => {
+    if (selected !== null) return;
+
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+
+      const key = e.key.toLowerCase();
+      let chosen: number | null = null;
+      if (key === "1" || key === "a") chosen = 0;
+      else if (key === "2" || key === "b") chosen = 1;
+      else if (key === "3" || key === "c") chosen = 2;
+      else if (key === "4" || key === "d") chosen = 3;
+
+      if (chosen !== null && chosen < question.options.length) {
+        e.preventDefault();
+        handleSelect(chosen);
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [selected, question.options.length]);
 
   const getState = (index: number): QuizOptionState => {
     if (mode === "test") {
@@ -70,9 +98,29 @@ export function QuizQuestionCard({
               : "bg-amber-500/10 border-amber-500/30"
           }`}
         >
-          <div className="flex items-center gap-2 mb-2 font-semibold text-sm text-foreground">
-            <Lightbulb className="h-4 w-4" />
-            {isCorrect ? "Correct! Here's why:" : "Not quite — here's the explanation:"}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+              <Lightbulb className="h-4 w-4" />
+              {isCorrect ? "Correct! Here's why:" : "Not quite — here's the explanation:"}
+            </div>
+            {!isCorrect && (
+              <button
+                type="button"
+                onClick={() => {
+                  const prompt = `I am practicing a quiz question: "${question.question}". I answered "${question.options[selected]}" but the correct answer is "${question.options[question.correctIndex]}". Why is my answer incorrect, and how should I think through this concept?`;
+                  const id = crypto.randomUUID();
+                  setPendingMessage(id, {
+                    finalMessage: prompt,
+                    titleSeedText: `Quiz: ${question.question.slice(0, 30)}`,
+                  });
+                  navigate({ to: "/tutor/$threadId", params: { threadId: id } } as any);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-xs self-start sm:self-auto"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Ask AI Tutor to Explain</span>
+              </button>
+            )}
           </div>
           <div className="text-sm text-foreground/90">
             <MarkdownRenderer content={question.explanation} />

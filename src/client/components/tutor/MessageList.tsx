@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useEffect, useCallback, useMemo, useState } from "react";
 import * as Sentry from "@sentry/react";
 import { MessageBubble } from "./MessageBubble";
 import { EmptyState } from "./EmptyState";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw, ArrowDown } from "lucide-react";
 import { hasPendingMessage, peekPendingMessage } from "@/shared/utils/pending-message";
 import { formatToolInProgressLabel } from "./tool-metadata";
 
@@ -83,6 +83,7 @@ export const MessageList = React.memo(function MessageList({
   const innerRef = useRef<HTMLDivElement>(null);
   const isAutoScrollingRef = useRef(true);
   const lastMessageCountRef = useRef(0);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
   const isPendingRef = useRef(isPending);
   isPendingRef.current = isPending;
   const activeAssistantKeyRef = useRef<string | null>(null);
@@ -289,6 +290,7 @@ export const MessageList = React.memo(function MessageList({
       const distanceFromBottom =
         container.scrollHeight - container.scrollTop - container.clientHeight;
       isAutoScrollingRef.current = distanceFromBottom < 100;
+      setShowScrollBottom(distanceFromBottom > 160);
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
@@ -425,6 +427,27 @@ export const MessageList = React.memo(function MessageList({
 
         {/* Scroll anchor */}
         <div ref={messagesEndRef} aria-hidden="true" />
+
+        {/* Floating Scroll to Bottom pill */}
+        {showScrollBottom && (
+          <div className="sticky bottom-4 inset-x-0 flex justify-center z-20 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <button
+              type="button"
+              onClick={() => {
+                const container = scrollContainerRef.current;
+                if (container) {
+                  container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+                  isAutoScrollingRef.current = true;
+                  setShowScrollBottom(false);
+                }
+              }}
+              className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-primary/25 hover:bg-primary/95 transition-all text-xs font-semibold active:scale-95 cursor-pointer border border-primary/20 backdrop-blur-md"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+              <span>{isPending ? "New response below" : "Scroll to bottom"}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

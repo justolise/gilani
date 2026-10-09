@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   FileText,
@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/client/components/ui/dropdown-menu";
+import { SlashCommandMenu, SLASH_COMMANDS, type SlashCommand } from "./SlashCommandMenu";
 import {
   UsageBanners,
   useRateLimitCountdown,
@@ -142,6 +143,42 @@ export function ChatInput({
     attachedFile?.mimeType?.startsWith("image/") || attachedFile?.previewUrl
   );
 
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashIndex, setSlashIndex] = useState(0);
+
+  const isTypingSlash = useMemo(() => {
+    return input.startsWith("/") && !input.includes(" ") && input.length <= 15;
+  }, [input]);
+
+  const activeSlashOpen = isTypingSlash && slashMenuOpen;
+
+  useEffect(() => {
+    if (isTypingSlash) {
+      setSlashMenuOpen(true);
+    } else {
+      setSlashMenuOpen(false);
+    }
+  }, [isTypingSlash]);
+
+  const filteredCommands = useMemo(() => {
+    const q = input.replace(/^\//, "").toLowerCase().trim();
+    return SLASH_COMMANDS.filter(
+      (cmd) => cmd.key.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q),
+    );
+  }, [input]);
+
+  const handleSelectSlash = (cmd: SlashCommand) => {
+    onInputChange({ target: { value: cmd.promptPrefix } } as any);
+    setSlashMenuOpen(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.selectionStart = cmd.promptPrefix.length;
+        textareaRef.current.selectionEnd = cmd.promptPrefix.length;
+      }
+    }, 10);
+  };
+
   // Auto-grow textarea: reset to auto, then set to scrollHeight capped at ~5 rows (160px)
   useEffect(() => {
     const el = textareaRef.current;
@@ -153,6 +190,32 @@ export function ChatInput({
   }, [input, textareaRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (activeSlashOpen && filteredCommands.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashIndex((i) => (i + 1) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashIndex((i) => (i - 1 + filteredCommands.length) % filteredCommands.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        const chosen = filteredCommands[slashIndex];
+        if (chosen) {
+          handleSelectSlash(chosen);
+          return;
+        }
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSlashMenuOpen(false);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (isDisabled) return;
@@ -162,7 +225,16 @@ export function ChatInput({
 
   return (
     <div className="px-3 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-2 sm:px-6 sm:pb-6 relative z-10 w-full transition-all">
-      <div className="lg:max-w-3xl lg:mx-auto">
+      <div className="lg:max-w-3xl lg:mx-auto relative">
+        {activeSlashOpen && (
+          <SlashCommandMenu
+            filter={input}
+            selectedIndex={slashIndex}
+            setSelectedIndex={setSlashIndex}
+            onSelect={handleSelectSlash}
+            onClose={() => setSlashMenuOpen(false)}
+          />
+        )}
         {/* Shared Usage & Error Banners */}
         <UsageBanners
           chatError={chatError}

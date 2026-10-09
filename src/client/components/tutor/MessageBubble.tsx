@@ -317,7 +317,7 @@ export const MessageBubble = memo(function MessageBubble({
         <div
           className={`${
             isUser
-              ? "px-4 py-3 bg-muted/70 text-foreground rounded-2xl rounded-tr-md shadow-sm border border-border/30"
+              ? "px-4 py-3 bg-primary/10 border border-primary/20 text-foreground rounded-2xl rounded-tr-sm shadow-xs"
               : "px-0 py-1 bg-transparent text-foreground"
           } text-base leading-relaxed relative transition-colors duration-200`}
         >
