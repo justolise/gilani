@@ -77,7 +77,7 @@ export function TutorHomeCockpit({
   }, [activeInput]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-start px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-[calc(13rem+env(safe-area-inset-bottom,0px))] lg:pb-28">
+    <div className="w-full flex flex-col items-center justify-start px-4 sm:px-6 py-6 sm:py-8 gap-6 sm:gap-8 max-w-4xl mx-auto animate-in fade-in duration-300 pb-[calc(20rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(18rem+env(safe-area-inset-bottom,0px))] lg:pb-36">
       {/* Academic Header & Curriculum Indicator */}
       <div className="flex flex-col items-center text-center space-y-2.5 max-w-xl">
         <div className="flex flex-wrap items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-300">
@@ -94,7 +94,7 @@ export function TutorHomeCockpit({
           <button
             type="button"
             onClick={openAppGuide}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card/80 hover:bg-muted text-foreground/80 hover:text-foreground text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs min-h-[32px]"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card/80 hover:bg-muted text-foreground/80 hover:text-foreground text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs min-h-8"
           >
             <HelpCircle className="w-3.5 h-3.5 text-primary" />
             <span>App Guide</span>
@@ -155,6 +155,12 @@ export function TutorHomeCockpit({
           }
           onPromptClick(prompt);
         }}
+      />
+
+      {/* Bottom clearance spacer ensuring prompts scroll fully past the floating ChatInput */}
+      <div
+        className="h-28 sm:h-24 lg:h-16 w-full shrink-0 pointer-events-none"
+        aria-hidden="true"
       />
     </div>
   );

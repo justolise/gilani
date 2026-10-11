@@ -99,7 +99,7 @@ export function PullToRefresh({ onRefresh, children, className = "" }: PullToRef
       {/* Scrollable content */}
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto"
+        className="h-full overflow-y-auto overscroll-y-contain"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
