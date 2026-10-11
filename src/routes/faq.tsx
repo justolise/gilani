@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, MessageCircle, HelpCircle } from "lucide-react";
 import { LegalHeader, LegalFooter } from "@/client/components/LegalLayout";
 
 export const Route = createFileRoute("/faq")({
@@ -54,7 +54,7 @@ const FAQS = [
       },
       {
         q: "Can I use GilaniAI on my phone?",
-        a: "Yes. GilaniAI is a Progressive Web App (PWA) — it works on any browser on Android or iPhone. You can install it to your home screen for an app-like experience.",
+        a: "Yes. GilaniAI is a Progressive Web App (PWA) — it works smoothly on any modern browser on Android or iPhone. You can also install it to your home screen for an app-like experience.",
       },
     ],
   },
@@ -88,61 +88,7 @@ const FAQS = [
       },
       {
         q: "What data does GilaniAI collect?",
-        a: "We collect your name, email address, and your study sessions. We never sell your data to third parties or use it for advertising. See our Privacy Policy for full details.",
-      },
-      {
-        q: "Who can see my study sessions?",
-        a: "Only you can see your study sessions by default. If you escalate a session to a teacher, that teacher and GilaniAI admins can view the escalated conversation.",
-      },
-      {
-        q: "Can I delete my account and data?",
-        a: "Yes. You have full self-service control. You can permanently delete your account and all associated study data at any time from your account Settings under the Consent & Security tab (Danger Zone). Alternatively, you can contact us at support@gilaniai.site.",
-      },
-    ],
-  },
-  {
-    category: "Teachers & Schools",
-    items: [
-      {
-        q: "Can teachers use GilaniAI?",
-        a: "Yes. Teachers have a dedicated portal where they can view and respond to escalated student sessions. Register and select 'Teacher' as your role during signup.",
-      },
-      {
-        q: "Can schools use GilaniAI?",
-        a: "Yes. We welcome partnerships with schools. Contact us at support@gilaniai.site to discuss school-wide access and teacher onboarding.",
-      },
-      {
-        q: "How do teachers get notified of escalations?",
-        a: "When a student escalates a session, registered teachers receive an email notification. If assigned to a specific teacher, only that teacher is notified.",
-      },
-    ],
-  },
-  {
-    category: "Technical",
-    items: [
-      {
-        q: "Which browsers does GilaniAI support?",
-        a: "GilaniAI works best on Chrome, Edge, Firefox, and Safari. Keep your browser updated for the best experience.",
-      },
-      {
-        q: "Does GilaniAI work offline?",
-        a: "GilaniAI requires an internet connection to generate AI responses. However, as a PWA, some parts of the interface may load from cache when offline.",
-      },
-      {
-        q: "I signed up but haven't received my verification code (OTP). What should I do?",
-        a: "Verification codes usually arrive in under a minute. Check your spam or promotions folder. If it hasn't arrived, click 'Resend' on the login screen after the cooldown countdown, or use 'Continue with Google' for instantaneous sign-in.",
-      },
-      {
-        q: "Why is the AI response slow sometimes?",
-        a: "Response speed depends on your internet connection and current server load. During peak hours responses may take a few extra seconds. If responses are consistently slow, try refreshing the page or switching to a faster network.",
-      },
-      {
-        q: "How do I install GilaniAI as an app on my phone?",
-        a: "Open GilaniAI in Chrome (Android) or Safari (iPhone), tap the share or menu icon, then select 'Add to Home Screen'. The app will install and open like a native app — no App Store needed.",
-      },
-      {
-        q: "Can I use GilaniAI on a tablet or laptop?",
-        a: "Yes. GilaniAI is fully responsive and works on any screen size — smartphones, tablets, and desktops all work without any extra setup.",
+        a: "We only collect information necessary to deliver tutoring — your account email/name, uploaded study notes, quiz responses, and chat transcripts. We never sell your data.",
       },
     ],
   },
@@ -151,23 +97,15 @@ const FAQS = [
     items: [
       {
         q: "Which curricula does GilaniAI support?",
-        a: "GilaniAI is curriculum-agnostic and supports any curriculum including KCSE, CBC, Cambridge IGCSE, Edexcel IGCSE, the Canadian curriculum, and more. Simply tell the AI your curriculum and subject when you start a session.",
+        a: "GilaniAI is curriculum-agnostic and supports KCSE, CBC, Cambridge IGCSE, Edexcel IGCSE, Canadian curriculum, and more. Simply specify your syllabus and grade in the tutor.",
       },
       {
         q: "Which subjects does GilaniAI cover?",
-        a: "GilaniAI covers all major academic subjects — Mathematics, Physics, Chemistry, Biology, English, History, Geography, Business Studies, Computer Science, and many more. If a subject is taught in school, the AI can help with it.",
+        a: "GilaniAI covers all major academic subjects — Mathematics, Physics, Chemistry, Biology, English, History, Geography, Business Studies, Computer Science, and more.",
       },
       {
         q: "Can GilaniAI help me with exam revision?",
-        a: "Absolutely. GilaniAI can generate topic-specific practice questions, quiz you on past paper formats, summarise your notes into revision cards, and build a personalised study schedule around your exam dates.",
-      },
-      {
-        q: "Can GilaniAI help with university-level content?",
-        a: "GilaniAI is primarily designed for secondary school students, but the AI can handle university-level concepts in many subjects. Results will vary depending on the complexity and specialisation of the topic.",
-      },
-      {
-        q: "Does GilaniAI support languages other than English?",
-        a: "GilaniAI's interface is in English, but the AI can understand and respond in Swahili and several other languages. Just write to it in your preferred language and it will do its best to assist.",
+        a: "Absolutely. GilaniAI generates targeted practice questions, quizzes on past paper formats, summarises long chapters into revision flashcards, and builds calendar study schedules.",
       },
     ],
   },
@@ -176,31 +114,19 @@ const FAQS = [
     items: [
       {
         q: "What is included in the free plan?",
-        a: "The free plan gives you access to the AI tutor chat, teacher escalation, and the core study tools with a daily message limit. It's a great way to experience GilaniAI before upgrading.",
+        a: "The free plan gives you access to the AI tutor chat, teacher escalation, and core study tools with a generous daily message quota.",
       },
       {
         q: "What extra do I get on the Pro plan?",
-        a: "The Pro plan unlocks higher daily message limits, priority teacher escalation, and access to advanced study features. It's designed for students who use GilaniAI as their primary revision tool.",
+        a: "The Pro plan unlocks higher daily quotas, priority teacher escalation, and full access to advanced document tools.",
       },
       {
         q: "How much does the Pro plan cost?",
-        a: "Pro is priced at KES 500 per month. We occasionally offer discounted rates for longer-term subscriptions — check the Pricing section on the homepage for the latest offers.",
+        a: "Pro is priced at KES 500 per month. Flexible top-up packages starting from KES 10 are also available directly via M-Pesa.",
       },
       {
         q: "What payment methods are accepted?",
-        a: "We accept M-Pesa, debit/credit cards, and other local payment options. Payment is handled securely and your card details are never stored on our servers.",
-      },
-      {
-        q: "How do I upgrade to Pro?",
-        a: "Go to your account settings inside GilaniAI and select 'Upgrade to Pro'. You'll be guided through the payment steps. Upgrade takes effect immediately after payment is confirmed.",
-      },
-      {
-        q: "Can I cancel my Pro subscription?",
-        a: "Yes. You can cancel at any time from your account settings. You'll retain Pro access until the end of your current billing period and won't be charged again after that.",
-      },
-      {
-        q: "Do you offer discounts for students or schools?",
-        a: "Yes. We offer school-wide pricing for institutions that want to provide GilaniAI to all their students. Contact us at support@gilaniai.site to discuss school plans and bulk pricing.",
+        a: "We support Safaricom M-Pesa with instant automated activation.",
       },
     ],
   },
@@ -236,22 +162,29 @@ function FAQItem({ q, a }: { q: string; a: string }) {
       ref={itemRef}
       id={slug}
       className={`border rounded-2xl overflow-hidden transition-all duration-200 scroll-mt-24 ${
-        open ? "border-[#C96A3D]/30 bg-[#131722]" : "border-white/[0.08] bg-[#131722]"
+        open
+          ? "border-primary/40 bg-card shadow-sm"
+          : "border-border/60 bg-card/60 hover:border-border hover:bg-card"
       }`}
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4.5 text-left hover:bg-white/2 transition-colors gap-4"
+        className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors gap-4 cursor-pointer"
+        aria-expanded={open}
       >
-        <span className="font-semibold text-sm text-white">{q}</span>
-        {open ? (
-          <ChevronUp className="h-4 w-4 text-[#E28743] flex-shrink-0" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-[#6b7280] flex-shrink-0" />
-        )}
+        <span className="font-semibold text-sm sm:text-[15px] text-foreground leading-snug">
+          {q}
+        </span>
+        <div
+          className={`h-7 w-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+            open ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
       </button>
       {open && (
-        <div className="px-5 pb-5 pt-3 text-sm text-[#9ca3af] leading-relaxed border-t border-white/[0.08] bg-[#0f1117]/50">
+        <div className="px-5 pb-5 pt-2 text-sm text-muted-foreground leading-relaxed border-t border-border/40 bg-muted/10">
           {a}
         </div>
       )}
@@ -276,41 +209,41 @@ function FAQPage() {
   const filtered = activeCategory ? FAQS.filter((f) => f.category === activeCategory) : FAQS;
 
   return (
-    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: FAQ_JSON_LD }} />
       <LegalHeader backTo={"/" as any} backLabel="Back to home" />
 
       {/* Hero */}
-      <div className="relative overflow-hidden border-b border-white/[0.08] py-12 sm:py-20 text-center">
+      <div className="relative overflow-hidden border-b border-border/60 py-14 sm:py-20 text-center bg-card/20">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.08),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.12),transparent_70%)]" />
         </div>
         <div className="relative max-w-xl mx-auto px-4 sm:px-6 space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-4 py-2 text-xs font-semibold text-[#E28743] mb-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary mb-1 shadow-sm">
             <Sparkles className="h-3.5 w-3.5" />
             Support Center
           </div>
-          <h1 className="font-serif text-3xl sm:text-5xl font-black text-white">
+          <h1 className="text-3xl sm:text-5xl font-black text-foreground font-display tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-sm text-[#9ca3af] leading-relaxed">
-            Everything you need to know about GilaniAI. Can't find your answer?{" "}
-            <Link to={"/contact" as any} className="text-[#E28743] font-semibold hover:underline">
-              Contact us.
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Everything you need to know about GilaniAI. Can&apos;t find your question?{" "}
+            <Link to={"/contact" as any} className="text-primary font-semibold hover:underline">
+              Contact our team.
             </Link>
           </p>
         </div>
       </div>
 
-      <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-8 py-10 sm:py-16 space-y-10">
+      <main className="grow max-w-4xl mx-auto w-full px-4 sm:px-8 py-10 sm:py-16 space-y-10">
         {/* Category filter */}
         <div className="flex flex-wrap gap-2 justify-center">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
+            className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               !activeCategory
-                ? "bg-[#C96A3D] text-white shadow-md shadow-[#C96A3D]/25"
-                : "border border-white/[0.08] text-[#9ca3af] hover:text-white hover:bg-white/4"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
             All Questions
@@ -319,10 +252,10 @@ function FAQPage() {
             <button
               key={category}
               onClick={() => setActiveCategory(category === activeCategory ? null : category)}
-              className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
+              className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
                 activeCategory === category
-                  ? "bg-[#C96A3D] text-white shadow-md shadow-[#C96A3D]/25"
-                  : "border border-white/[0.08] text-[#9ca3af] hover:text-white hover:bg-white/4"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  : "border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
               {category}
@@ -330,10 +263,10 @@ function FAQPage() {
           ))}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-10">
           {filtered.map(({ category, items }) => (
             <div key={category} className="space-y-4">
-              <h2 className="font-mono text-[10px] uppercase tracking-widest text-[#E28743] font-bold">
+              <h2 className="font-mono text-xs uppercase tracking-widest text-primary font-bold">
                 {category}
               </h2>
               <div className="space-y-3">
@@ -345,18 +278,24 @@ function FAQPage() {
           ))}
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-[#131722] p-8 text-center space-y-4">
-          <h3 className="font-serif text-xl font-bold text-white">Still have questions?</h3>
-          <p className="text-sm text-[#9ca3af] max-w-md mx-auto">
-            Our support team is happy to help. Reach out and we will get back to you within 24
-            hours.
+        <div className="rounded-3xl border border-border/60 bg-card/60 p-8 text-center space-y-4 shadow-sm backdrop-blur-md">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto">
+            <HelpCircle className="h-6 w-6" />
+          </div>
+          <h3 className="text-xl font-bold text-foreground font-display">Still have questions?</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+            Our support and academic mentoring teams are always here to help you get the most out of
+            your revision.
           </p>
-          <Link
-            to={"/contact" as any}
-            className="inline-flex items-center gap-2 rounded-full bg-[#C96A3D] px-6 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#E28743] transition-all shadow-[0_0_20px_rgba(201,106,61,0.3)]"
-          >
-            Contact support
-          </Link>
+          <div className="pt-2">
+            <Link
+              to={"/contact" as any}
+              className="inline-flex items-center gap-2 rounded-2xl bg-primary px-7 py-3 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Contact Support
+            </Link>
+          </div>
         </div>
       </main>
 

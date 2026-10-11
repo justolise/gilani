@@ -237,7 +237,7 @@ export const MessageList = React.memo(function MessageList({
         isAutoScrollingRef.current = true;
       });
     });
-  }, [messagesLoading, scrollToBottom]);
+  }, [messages.length, messagesLoading, scrollToBottom]);
 
   // Auto-scroll during streaming with ResizeObserver
   useEffect(() => {
@@ -303,8 +303,8 @@ export const MessageList = React.memo(function MessageList({
       role="log"
       aria-label="Chat messages"
       aria-live="polite"
-      className={`flex-1 min-h-0 overflow-y-auto px-2 py-3 sm:px-5 sm:py-6 ${
-        isRateLimited ? "pb-80" : "pb-56"
+      className={`flex-1 min-h-0 overflow-y-auto px-2 py-4 sm:px-6 sm:py-6 ${
+        isRateLimited ? "pb-72" : "pb-48 lg:pb-36"
       }`}
     >
       <div
@@ -314,13 +314,15 @@ export const MessageList = React.memo(function MessageList({
         {/* Loading state */}
         {effectiveLoading && (
           <div
-            className="flex flex-col items-center justify-center h-full gap-3"
+            className="flex flex-col items-center justify-center h-full gap-3 py-16"
             role="status"
             aria-label="Loading messages"
           >
-            <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 shadow-xs">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
+            </div>
             <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest">
-              Loading messages…
+              Loading study session…
             </p>
           </div>
         )}
@@ -328,10 +330,10 @@ export const MessageList = React.memo(function MessageList({
         {/* Error state */}
         {messagesLoadError && (
           <div
-            className="mx-auto max-w-xl rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-xs text-destructive"
+            className="mx-auto max-w-xl rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-xs text-destructive shadow-xs"
             role="alert"
           >
-            <p>{messagesLoadError}</p>
+            <p className="font-medium">{messagesLoadError}</p>
           </div>
         )}
 
@@ -402,20 +404,22 @@ export const MessageList = React.memo(function MessageList({
           })}
 
         {chatError && !isRateLimited && (
-          <div className="mx-auto my-4 w-full max-w-xl rounded-2xl border border-destructive/20 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2">
+          <div className="mx-auto my-4 w-full max-w-xl rounded-2xl border border-destructive/25 bg-destructive/5 dark:bg-destructive/10 dark:border-destructive/30 p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2">
             <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 text-destructive dark:text-red-400 mt-0.5 shrink-0" />
-              <div className="space-y-1">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-destructive/15 text-destructive dark:text-red-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div className="space-y-1.5 flex-1">
                 <h4 className="text-xs font-semibold text-destructive dark:text-red-300">
                   Temporary Connection Pause
                 </h4>
-                <p className="text-xs text-destructive/80 dark:text-red-400/85 leading-relaxed">
-                  Don't worry — your study session is completely safe! We just had a brief hiccup
+                <p className="text-xs text-destructive/85 dark:text-red-400/85 leading-relaxed">
+                  Don't worry — your study notes and progress are safe! We had a momentary hiccup
                   connecting to the tutor.
                 </p>
                 <button
                   onClick={onReload}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-destructive px-3.5 py-2 text-xs font-bold text-white hover:bg-destructive/90 active:scale-95 transition-all cursor-pointer shadow-xs min-h-[44px]"
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl bg-destructive px-3.5 py-2 text-xs font-semibold text-white hover:bg-destructive/90 active:scale-95 transition-all cursor-pointer shadow-xs min-h-9.5"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   Try Again
@@ -428,7 +432,7 @@ export const MessageList = React.memo(function MessageList({
         {/* Scroll anchor */}
         <div ref={messagesEndRef} aria-hidden="true" />
 
-        {/* Floating Scroll to Bottom pill */}
+        {/* Floating Scroll to Bottom pill (Claude Style) */}
         {showScrollBottom && (
           <div className="sticky bottom-4 inset-x-0 flex justify-center z-20 pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-200">
             <button
@@ -441,9 +445,9 @@ export const MessageList = React.memo(function MessageList({
                   setShowScrollBottom(false);
                 }
               }}
-              className="pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-primary/25 hover:bg-primary/95 transition-all text-xs font-semibold active:scale-95 cursor-pointer border border-primary/20 backdrop-blur-md"
+              className="pointer-events-auto inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/95 dark:bg-card/90 text-foreground shadow-lg hover:shadow-xl hover:border-primary/40 transition-all text-xs font-medium active:scale-95 cursor-pointer border border-border/80 backdrop-blur-md group"
             >
-              <ArrowDown className="h-3.5 w-3.5" />
+              <ArrowDown className="h-3.5 w-3.5 text-primary group-hover:translate-y-0.5 transition-transform" />
               <span>{isPending ? "New response below" : "Scroll to bottom"}</span>
             </button>
           </div>

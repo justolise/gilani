@@ -122,7 +122,7 @@ function DiagramLightbox({
             >
               <RotateCcw className="h-4 w-4" />
             </button>
-            <div className="h-4 w-[1px] bg-border mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
             <button
               type="button"
               onClick={onClose}

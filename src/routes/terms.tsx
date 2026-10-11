@@ -17,16 +17,20 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       <LegalHeader />
-      <LegalHero label="Legal" title="Terms of Service" subtitle="Last updated: June 2025" />
-      <main className="flex-grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
-        <div className="space-y-8">
+      <LegalHero
+        label="Terms & Policy"
+        title="Terms of Service"
+        subtitle="Last updated: June 2025"
+      />
+      <main className="grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
+        <div className="space-y-8 rounded-3xl border border-border/60 bg-card/60 p-6 sm:p-10 backdrop-blur-md shadow-sm">
           <Section title="1. Acceptance of Terms">
             <p>
-              By accessing or using GilaniAI ("the Service"), you agree to be bound by these Terms
-              of Service. If you do not agree, please do not use the Service. These Terms apply to
-              all users, including students, teachers, and administrators.
+              By accessing or using GilaniAI (&quot;the Service&quot;), you agree to be bound by
+              these Terms of Service. If you do not agree, please do not use the Service. These
+              Terms apply to all users, including students, teachers, and administrators.
             </p>
           </Section>
           <Section title="2. Description of Service">
@@ -101,22 +105,21 @@ function TermsPage() {
           </Section>
           <Section title="9. Termination">
             <p>
-              We reserve the right to suspend or terminate accounts that violate these Terms or
-              abuse the AI system. You may close your account at any time by contacting support.
+              We may suspend or terminate your account if you violate these Terms or if your conduct
+              compromises the security, integrity or educational purpose of the Service.
             </p>
           </Section>
-          <Section title="10. Changes to Terms">
+          <Section title="10. Governing Law">
             <p>
-              We may update these Terms periodically. Continued use of the Service after changes
-              constitutes acceptance. We will notify registered users of significant changes via
-              email.
+              These Terms are governed by and construed in accordance with the laws of Kenya.
+              Disputes arising from these Terms will be subject to the exclusive jurisdiction of the
+              courts of Kenya.
             </p>
           </Section>
           <Section title="11. Contact">
             <p>
-              For questions about these Terms, contact us at{" "}
-              <a href="mailto:support@gilaniai.site">support@gilaniai.site</a> or write to GilaniAI,
-              Nairobi, Kenya.
+              Questions about these Terms should be sent to{" "}
+              <a href="mailto:support@gilaniai.site">support@gilaniai.site</a>.
             </p>
           </Section>
         </div>

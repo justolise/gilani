@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/client/supabase";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
-import { Plus, Brain, Search } from "lucide-react";
+import { Plus, Brain, Search, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { AppHeader } from "@/client/components/layout/AppHeader";
@@ -19,7 +19,7 @@ export function QuizzesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [topic, setTopic] = useState("");
-  const [difficulty, setDifficulty] = useState("mixed");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard" | "mixed">("mixed");
   const [questionCount, setQuestionCount] = useState(8);
   const [generating, setGenerating] = useState(false);
   const [search, setSearch] = useState("");
@@ -46,7 +46,7 @@ export function QuizzesPage() {
         const quizzesMaxToday = (opts as any).quizzesMaxToday as number;
         setFormOptions({ maxQuestions, difficulties, quizzesUsedToday, quizzesMaxToday });
         if (!difficulties.includes(difficulty)) {
-          setDifficulty(difficulties[difficulties.length - 1] || "medium");
+          setDifficulty((difficulties[difficulties.length - 1] as any) || "medium");
         }
         if (questionCount > maxQuestions) {
           setQuestionCount(maxQuestions);
@@ -55,7 +55,7 @@ export function QuizzesPage() {
         console.error("Failed to load quiz options:", err);
       }
     })();
-  }, []);
+  }, [difficulty, questionCount]);
 
   const fetchQuizzes = async (searchTerm: string, page: number, append: boolean) => {
     try {
@@ -103,6 +103,32 @@ export function QuizzesPage() {
     fetchQuizzes(search, Math.floor(quizzes.length / PAGE_SIZE), true);
   };
 
+  const handleGenerate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!topic.trim()) {
+      toast.error("Please enter a topic");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const quiz = await generateQuizFn({
+        data: {
+          topic: topic.trim(),
+          difficulty,
+          questionCount,
+        },
+      });
+      setShowForm(false);
+      setTopic("");
+      toast.success("Quiz generated! Good luck!");
+      navigate({ to: `/tutor/quizzes/${quiz.id}` as any });
+    } catch (err: any) {
+      toast.error(friendlyError(err, "Failed to generate quiz."));
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const onConfirmDelete = async () => {
     if (!confirmDeleteId) return;
     const id = confirmDeleteId;
@@ -113,30 +139,9 @@ export function QuizzesPage() {
       setQuizzes((prev) => prev.filter((q) => q.id !== id));
       toast.success("Quiz deleted");
     } catch (err: any) {
-      toast.error(friendlyError(err, "Couldn't delete this quiz. Please try again."));
+      toast.error(friendlyError(err, "Failed to delete quiz."));
     } finally {
       setDeletingId(null);
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (!topic.trim()) {
-      toast.error("Please enter a topic to quiz yourself on");
-      return;
-    }
-    setGenerating(true);
-    try {
-      const result = await generateQuizFn({
-        data: { topic: topic.trim(), difficulty: difficulty as any, questionCount },
-      } as any);
-      toast.success("Quiz ready!");
-      setShowForm(false);
-      setTopic("");
-      navigate({ to: "/tutor/quizzes/$quizId", params: { quizId: (result as any).quizId } });
-    } catch (err: any) {
-      toast.error(friendlyError(err, "Couldn't generate your quiz. Please try again."));
-    } finally {
-      setGenerating(false);
     }
   };
 
@@ -149,47 +154,49 @@ export function QuizzesPage() {
           actions={
             <button
               disabled
-              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium min-h-[44px] opacity-75 cursor-not-allowed"
+              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-2xl text-sm font-semibold min-h-11 opacity-75 cursor-not-allowed"
             >
               <Plus className="h-4 w-4" />
               New Quiz
             </button>
           }
         />
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <QuizzesSkeleton />
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            <QuizzesSkeleton />
+          </div>
         </div>
       </div>
     );
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background text-foreground">
       <AppHeader
         title="Practice Quizzes"
         subtitle={
           quizzes.length > 0
             ? `${quizzes.length} quiz${quizzes.length !== 1 ? "zes" : ""}`
-            : "Test your recall"
+            : "Active recall practice"
         }
         actions={
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shadow-xs hover:bg-primary/90 transition-all active:scale-95 cursor-pointer min-h-11"
           >
             <Plus className="h-4 w-4" />
-            New Quiz
+            <span>New Quiz</span>
           </button>
         }
       />
-      <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-5xl mx-auto space-y-6">
           <QuizAddModal
             show={showForm}
             onClose={() => setShowForm(false)}
             topic={topic}
             onTopicChange={setTopic}
             difficulty={difficulty}
-            onDifficultyChange={setDifficulty}
+            onDifficultyChange={(val) => setDifficulty(val as any)}
             questionCount={questionCount}
             onQuestionCountChange={setQuestionCount}
             generating={generating}
@@ -198,36 +205,40 @@ export function QuizzesPage() {
           />
 
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search quizzes by topic..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              placeholder="Search quizzes by syllabus subject or topic..."
+              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-border/70 bg-card/70 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all backdrop-blur-md shadow-xs"
             />
           </div>
 
           {quizzes.length === 0 && !showForm ? (
-            <div className="text-center py-16 px-4">
-              <Brain className="h-12 w-12 text-primary/40 mx-auto mb-3" />
-              <h3 className="font-serif text-xl text-foreground font-semibold mb-2">
-                No practice quizzes yet
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-                Generate an AI-powered quiz on any topic to test yourself with instant grading and
-                explanations.
-              </p>
+            <div className="flex flex-col items-center justify-center p-8 sm:p-14 text-center border border-dashed border-border/70 rounded-3xl bg-card/30 mt-6 space-y-4">
+              <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                <Brain className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground font-display">
+                  No practice quizzes yet
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1 leading-relaxed">
+                  Generate adaptive, syllabus-aligned questions on any subject. Practice with
+                  immediate feedback and detailed step-by-step explanations.
+                </p>
+              </div>
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold shadow-md hover:bg-primary/90 transition-all active:scale-95 cursor-pointer"
               >
-                <Plus className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" />
                 Generate your first quiz
               </button>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4.5">
                 {quizzes.map((quiz) => (
                   <QuizCard
                     key={quiz.id}
@@ -243,9 +254,9 @@ export function QuizzesPage() {
                   <button
                     onClick={onLoadMore}
                     disabled={loadingMore}
-                    className="px-5 py-2.5 rounded-xl border border-border bg-card text-xs font-semibold hover:bg-muted transition-colors disabled:opacity-50 cursor-pointer min-h-[44px]"
+                    className="px-6 py-2.5 rounded-2xl border border-border/70 bg-card text-xs sm:text-sm font-semibold text-muted-foreground hover:border-primary/40 hover:text-foreground transition-all disabled:opacity-50 cursor-pointer min-h-11"
                   >
-                    {loadingMore ? "Loading more…" : "Load more quizzes"}
+                    {loadingMore ? "Loading more quizzes…" : "Load more quizzes"}
                   </button>
                 </div>
               )}

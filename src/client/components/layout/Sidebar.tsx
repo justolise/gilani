@@ -174,9 +174,9 @@ export function Sidebar({ shell }: Props) {
         className={`
           fixed inset-y-0 left-0 z-50
           flex flex-col
-          border-r border-sidebar-border/80
-          bg-sidebar/98 dark:bg-[#0f1117]/98 backdrop-blur-2xl
-          shadow-2xl lg:shadow-[2px_0_16px_rgba(0,0,0,0.08)]
+          border-r border-sidebar-border/70
+          bg-sidebar/95 backdrop-blur-2xl
+          shadow-2xl lg:shadow-[2px_0_16px_rgba(0,0,0,0.06)]
           overflow-hidden
           transition-[transform,width] duration-250 ease-out
           lg:translate-x-0 lg:static lg:h-dvh

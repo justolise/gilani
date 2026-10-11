@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cookie } from "lucide-react";
+import { Cookie, X } from "lucide-react";
 import { getClientCookie, setClientCookie } from "@/shared/utils/cookies";
 
 const CONSENT_KEY = "gilani_cookie_consent";
@@ -14,7 +14,9 @@ export function CookieBanner() {
     const existingCookie = getClientCookie(CONSENT_KEY);
     const existingLocal = localStorage.getItem(CONSENT_KEY);
     if (existingCookie === null && existingLocal === null) {
-      setVisible(true);
+      // Small delay to avoid layout jank on first paint
+      const t = setTimeout(() => setVisible(true), 1200);
+      return () => clearTimeout(t);
     }
   }, []);
 
@@ -30,31 +32,53 @@ export function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 border-t border-border/60 bg-card/95 backdrop-blur-md px-4 py-4 sm:px-6 animate-in slide-in-from-bottom duration-300">
-      <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
-          <Cookie className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-          <p>
-            We use cookies for essential site functionality and, with your consent, anonymous usage
-            analytics to improve GilaniAI. See our{" "}
-            <a href="/privacy" className="underline hover:text-foreground">
-              Privacy Policy
-            </a>
-            .
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
+    <div className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:bottom-5 sm:left-5 sm:right-auto sm:max-w-sm z-9998 animate-in slide-in-from-bottom-4 duration-300">
+      <div className="rounded-2xl border border-white/8 bg-[#10141f]/95 backdrop-blur-2xl shadow-[0_16px_48px_rgba(0,0,0,0.6)] p-4 sm:p-5">
+        {/* Top accent */}
+        <div className="absolute top-0 left-8 right-8 h-px bg-linear-to-r from-transparent via-[#d4754a]/40 to-transparent rounded-full" />
+
+        <div className="flex items-start gap-3">
+          <div className="shrink-0 w-8 h-8 rounded-xl bg-[#d4754a]/15 border border-[#d4754a]/20 flex items-center justify-center">
+            <Cookie className="h-4 w-4 text-[#e8924a]" />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-white/90 mb-1">Cookie Preferences</p>
+            <p className="text-xs text-white/40 leading-relaxed">
+              We use cookies for essential functionality and anonymous analytics to improve
+              GilaniAI.{" "}
+              <a
+                href="/privacy"
+                className="text-[#e8924a] hover:underline font-medium"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Privacy Policy
+              </a>
+            </p>
+          </div>
+
           <button
             onClick={() => setChoice(false)}
-            className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted/40 transition-colors"
+            className="shrink-0 p-1 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/6 transition-all cursor-pointer"
+            aria-label="Reject cookies and close"
           >
-            Reject
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => setChoice(false)}
+            className="flex-1 rounded-xl border border-white/8 bg-white/4 px-4 py-2 text-xs font-semibold text-white/50 hover:bg-white/[0.07] hover:text-white/70 transition-all cursor-pointer active:scale-[0.98]"
+          >
+            Necessary only
           </button>
           <button
             onClick={() => setChoice(true)}
-            className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="flex-1 rounded-xl bg-[#d4754a] px-4 py-2 text-xs font-bold text-white hover:bg-[#e8924a] transition-all shadow-[0_2px_12px_rgba(212,117,74,0.3)] hover:shadow-[0_4px_16px_rgba(212,117,74,0.45)] cursor-pointer active:scale-[0.98]"
           >
-            Accept
+            Accept All
           </button>
         </div>
       </div>

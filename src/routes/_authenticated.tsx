@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { supabase } from "@/client/supabase";
 import { LayoutContext } from "@/client/contexts/layout-context";
 import { DisclaimerModal } from "@/client/components/DisclaimerModal";
@@ -67,26 +68,36 @@ function AuthedShell() {
 
   if (timedOut) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-4">
-        <p className="text-sm text-muted-foreground text-center">
-          Authentication is taking longer than expected…
-        </p>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => window.location.reload()}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
-          >
-            Refresh
-          </button>
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = "/login";
-            }}
-            className="rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
-          >
-            Sign In Again
-          </button>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center text-center p-8 rounded-3xl border border-border/70 bg-card/60 shadow-xl backdrop-blur-md max-w-sm space-y-4">
+          <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+            <RefreshCw className="h-6 w-6 animate-spin" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-foreground font-display">
+              Authentication Timeout
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Verifying your session is taking longer than usual. Please refresh or sign in again.
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5 w-full pt-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="flex-1 rounded-2xl bg-primary py-2.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-xs cursor-pointer active:scale-95"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/login";
+              }}
+              className="flex-1 rounded-2xl border border-border bg-card py-2.5 text-xs font-semibold text-foreground hover:bg-muted transition-all cursor-pointer active:scale-95"
+            >
+              Sign In Again
+            </button>
+          </div>
         </div>
       </div>
     );

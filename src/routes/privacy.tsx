@@ -17,16 +17,21 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       <LegalHeader />
-      <LegalHero label="Legal" title="Privacy Policy" subtitle="Last updated: June 2025" />
-      <main className="flex-grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
-        <div className="space-y-8">
+      <LegalHero
+        label="Privacy & Security"
+        title="Privacy Policy"
+        subtitle="Last updated: June 2025"
+      />
+      <main className="grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
+        <div className="space-y-8 rounded-3xl border border-border/60 bg-card/60 p-6 sm:p-10 backdrop-blur-md shadow-sm">
           <Section title="1. Introduction">
             <p>
-              GilaniAI ("we", "our", "us") is committed to protecting your privacy and complying
-              with the Kenya Data Protection Act 2019. This Privacy Policy explains what information
-              we collect, how we use it, and your rights regarding your data.
+              GilaniAI (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is committed to protecting
+              your privacy and complying with the Kenya Data Protection Act 2019. This Privacy
+              Policy explains what information we collect, how we use it, and your rights regarding
+              your data.
             </p>
           </Section>
           <Section title="2. Information We Collect">
@@ -58,102 +63,38 @@ function PrivacyPage() {
             <p>We use your information to:</p>
             <ul>
               <li>Provide, personalise and improve the GilaniAI platform</li>
-              <li>
-                Generate AI-powered tutoring responses, quiz questions, summaries and study plans
-              </li>
-              <li>Track your academic progress and identify weak topics for targeted revision</li>
-              <li>Facilitate teacher escalation when you request expert human review</li>
-              <li>Send service notifications, product updates, and support responses</li>
-              <li>Comply with legal obligations under Kenyan law</li>
+              <li>Deliver curriculum-specific responses and feedback</li>
+              <li>Enable human teacher oversight and session escalation when requested</li>
+              <li>Process payments and manage your subscription via M-Pesa</li>
+              <li>Communicate service updates and essential notifications</li>
             </ul>
           </Section>
-          <Section title="4. AI Training and Your Data">
+          <Section title="4. Data Protection & Student Safety">
             <p>
-              <strong>
-                GilaniAI does not use your personal academic content (notes, chats, quiz answers) to
-                train third-party AI models.
-              </strong>{" "}
-              AI responses are generated using pre-trained models accessed via API. Your data stays
-              within GilaniAI's secure storage and is not shared with AI model providers for
-              training purposes.
+              We take student data safety extremely seriously. We do not sell your personal data or
+              use your study content to train public AI models. All data is transmitted over
+              encrypted encrypted encrypted channels (HTTPS/TLS) and stored in secure,
+              access-controlled databases.
             </p>
           </Section>
-          <Section title="5. Data Sharing">
-            <p>
-              We do not sell your personal data. We share information only in these limited
-              circumstances:
-            </p>
+          <Section title="5. Your Rights">
+            <p>Under the Kenya Data Protection Act 2019, you have the right to:</p>
             <ul>
-              <li>
-                <strong>Teacher escalation:</strong> When you explicitly escalate a question, the
-                relevant conversation excerpt is shared with your assigned verified teacher.
-              </li>
-              <li>
-                <strong>Service providers:</strong> We use trusted infrastructure providers (e.g.
-                Supabase for database hosting) under strict data processing agreements.
-              </li>
-              <li>
-                <strong>Legal requirements:</strong> If required by Kenyan courts, law enforcement,
-                or regulatory authorities under valid legal process.
-              </li>
+              <li>Request access to the personal data we hold about you</li>
+              <li>Request correction of inaccurate personal data</li>
+              <li>Request deletion of your account and associated study data</li>
+              <li>Object to processing or request data portability</li>
             </ul>
-          </Section>
-          <Section title="6. Data Retention">
             <p>
-              We retain your data for as long as your account is active. If you close your account,
-              we delete your personal data within 30 days, except where retention is required by
-              law.
+              To exercise any of these rights, contact our Data Protection team at{" "}
+              <a href="mailto:privacy@gilaniai.site">privacy@gilaniai.site</a>.
             </p>
           </Section>
-          <Section title="7. Data Security">
-            <p>We implement industry-standard security measures including:</p>
-            <ul>
-              <li>HTTPS encryption for all data in transit</li>
-              <li>Encrypted storage for sensitive data at rest</li>
-              <li>Role-based access controls</li>
-              <li>Regular security audits and dependency scanning</li>
-              <li>
-                Passwordless authentication — one-time codes and OAuth tokens securely verified
-              </li>
-            </ul>
-          </Section>
-          <Section title="8. Children's Privacy">
+          <Section title="6. Contact Us">
             <p>
-              GilaniAI is intended for students aged 13 and above. We do not knowingly collect data
-              from children under 13. If you believe a child under 13 has registered, please contact
-              us immediately.
-            </p>
-          </Section>
-          <Section title="9. Your Rights">
-            <p>
-              Under the Kenya Data Protection Act 2019, you have the right to access, correct,
-              delete, and port your data. To exercise these rights, email us at{" "}
-              <a href="mailto:support@gilaniai.site">support@gilaniai.site</a>. We will respond
-              within 30 days.
-            </p>
-          </Section>
-          <Section title="10. Cookies">
-            <p>
-              We use cookies to maintain your login session and personalise your experience. For
-              full details, see our{" "}
-              <Link to="/cookies" className="text-primary hover:underline">
-                Cookie Policy
-              </Link>
-              .
-            </p>
-          </Section>
-          <Section title="11. Changes to This Policy">
-            <p>
-              We may update this Privacy Policy periodically. Your continued use after changes
-              constitutes acceptance. We will notify registered users of significant changes via
-              email.
-            </p>
-          </Section>
-          <Section title="12. Contact">
-            <p>
-              For privacy questions or data requests, contact us at{" "}
-              <a href="mailto:support@gilaniai.site">support@gilaniai.site</a> or GilaniAI, Nairobi,
-              Kenya.
+              If you have questions about this Privacy Policy, reach out to{" "}
+              <a href="mailto:privacy@gilaniai.site">privacy@gilaniai.site</a> or visit our{" "}
+              <Link to="/contact">Contact page</Link>.
             </p>
           </Section>
         </div>

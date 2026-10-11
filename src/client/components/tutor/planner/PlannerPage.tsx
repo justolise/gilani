@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/client/supabase";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
-import { Plus, ChevronDown, ChevronUp, Trash2, LayoutList, LayoutGrid, Clock } from "lucide-react";
+import {
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  LayoutList,
+  LayoutGrid,
+  Clock,
+  Calendar,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/shared/utils/async";
 import { AppHeader } from "@/client/components/layout/AppHeader";
@@ -106,93 +116,71 @@ export function PlannerPage() {
     })();
   }, []);
 
-  const handleGenerate = async ({
-    examName,
-    examDate,
-    subjects,
-    hoursPerDay,
-  }: {
+  const handleGenerate = async (data: {
     examName: string;
     examDate?: string;
     subjects: string;
     hoursPerDay: number;
-  }): Promise<void> => {
-    if (!examName.trim()) {
-      toast.error("Please enter an exam or goal name.");
-      return;
-    }
-    if (!subjects.trim()) {
-      toast.error("Please list the subjects/topics to cover.");
-      return;
-    }
+  }) => {
     setGenerating(true);
     try {
-      await generateStudyPlanFn({
-        data: {
-          examName: examName.trim(),
-          examDate: examDate || undefined,
-          subjects: subjects.trim(),
-          hoursPerDay,
-        },
-      } as any);
-      toast.success("Study plan ready!");
+      const newPlan = await generateStudyPlanFn({ data });
       setShowForm(false);
-      await fetchPlans();
+      setPlans((prev) => [newPlan, ...prev]);
+      setExpanded(newPlan.id);
+      toast.success("Study plan generated!");
     } catch (err: any) {
-      toast.error(friendlyError(err, "Couldn't generate your study plan. Please try again."));
+      toast.error(friendlyError(err, "Failed to generate study plan."));
     } finally {
       setGenerating(false);
     }
   };
 
-  const startFocusSession = (planId: string, itemId: string, durationMinutes: number) => {
-    setActiveTask({ planId, itemId });
-    setTimerOpen(true);
-  };
-
-  const handleStudyComplete = async () => {
-    if (!activeTask) return;
-    const { planId, itemId } = activeTask;
-    const plan = plans.find((p) => p.id === planId);
-    const item = getPlanItems(plan).find((it: StudyPlanItem) => it.id === itemId);
-    if (item && !item.completed) {
-      await handleToggleItem(planId, itemId);
-      toast.success("Focus session complete — task marked done!", {
-        action: { label: "Undo", onClick: () => handleToggleItem(planId, itemId) },
-      });
-    }
-  };
-
   const handleToggleItem = async (planId: string, itemId: string) => {
-    setPlans((prev) =>
-      prev.map((p) =>
-        p.id === planId
-          ? {
-              ...p,
-              items: getPlanItems(p).map((it) =>
-                it.id === itemId ? { ...it, completed: !it.completed } : it,
-              ),
-            }
-          : p,
-      ),
-    );
     try {
-      await toggleStudyPlanItemFn({ data: { planId, itemId } } as any);
-    } catch {
-      toast.error("Failed to update task — reverting.");
+      const plan = plans.find((p) => p.id === planId);
+      if (!plan) return;
+      const items = getPlanItems(plan);
+      const target = items.find((i) => i.id === itemId);
+      if (!target) return;
+
+      const newCompleted = !target.completed;
+
+      // Optimistic update
+      setPlans((prev) =>
+        prev.map((p) => {
+          if (p.id !== planId) return p;
+          const currentItems = getPlanItems(p);
+          const updated = currentItems.map((item) =>
+            item.id === itemId ? { ...item, completed: newCompleted } : item,
+          );
+          return { ...p, items: updated };
+        }),
+      );
+
+      await toggleStudyPlanItemFn({
+        data: {
+          planId,
+          itemId,
+        },
+      });
+    } catch (err: any) {
+      toast.error(friendlyError(err, "Failed to update task."));
       fetchPlans();
     }
   };
 
-  const handleDeletePlan = async (planId: string) => {
-    setDeletingId(planId);
+  const onConfirmDelete = async () => {
+    if (!confirmDeleteId) return;
+    const id = confirmDeleteId;
+    setDeletingId(id);
     setConfirmDeleteId(null);
     try {
-      await deleteStudyPlanFn({ data: { planId } } as any);
-      setPlans((prev) => prev.filter((p) => p.id !== planId));
-      toast.success("Plan deleted");
+      await deleteStudyPlanFn({ data: { planId: id } });
+      setPlans((prev) => prev.filter((p) => p.id !== id));
+      toast.success("Study plan deleted");
     } catch (err: any) {
-      toast.error(err.message || "Failed to delete plan");
+      toast.error(friendlyError(err, "Failed to delete plan."));
     } finally {
       setDeletingId(null);
     }
@@ -203,44 +191,46 @@ export function PlannerPage() {
       <div className="h-full flex flex-col bg-background">
         <AppHeader
           title="Study Planner"
-          subtitle="Loading your study schedules…"
+          subtitle="Loading your revision schedules…"
           actions={
             <button
               disabled
-              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium min-h-[44px] opacity-75 cursor-not-allowed"
+              className="flex items-center justify-center gap-2 bg-primary/60 text-primary-foreground px-4 py-2 rounded-2xl text-sm font-semibold min-h-11 opacity-75 cursor-not-allowed"
             >
               <Plus className="h-4 w-4" />
               New Plan
             </button>
           }
         />
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <PlannerSkeleton />
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            <PlannerSkeleton />
+          </div>
         </div>
       </div>
     );
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background text-foreground">
       <AppHeader
         title="Study Planner"
         subtitle={
           plans.length > 0
-            ? `${plans.length} plan${plans.length !== 1 ? "s" : ""}`
-            : "Organize your goals"
+            ? `${plans.length} active schedule${plans.length !== 1 ? "s" : ""}`
+            : "Organize your revision"
         }
         actions={
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
+            className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold shadow-xs hover:bg-primary/90 transition-all active:scale-95 cursor-pointer min-h-11"
           >
             <Plus className="h-4 w-4" />
-            New Plan
+            <span>New Plan</span>
           </button>
         }
       />
-      <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-5xl mx-auto space-y-6">
           {showForm && (
             <PlannerAddModal
               formOptions={formOptions}
@@ -251,19 +241,24 @@ export function PlannerPage() {
           )}
 
           {plans.length === 0 && !showForm ? (
-            <div className="text-center py-16 px-4">
-              <h3 className="font-serif text-xl text-foreground font-semibold mb-2">
-                No study plans yet
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-                Tell us your exam date and subjects, and we'll generate a personalized, day-by-day
-                study plan.
-              </p>
+            <div className="flex flex-col items-center justify-center p-8 sm:p-14 text-center border border-dashed border-border/70 rounded-3xl bg-card/30 mt-6 space-y-4">
+              <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                <Calendar className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground font-display">
+                  No study plans yet
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1 leading-relaxed">
+                  Enter your syllabus exam date, subjects, and daily study hours. GilaniAI will
+                  construct an adaptive, day-by-day revision roadmap.
+                </p>
+              </div>
               <button
                 onClick={() => setShowForm(true)}
-                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer min-h-[44px]"
+                className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-2xl text-xs sm:text-sm font-bold shadow-md hover:bg-primary/90 transition-all active:scale-95 cursor-pointer"
               >
-                <Plus className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" />
                 Create your first plan
               </button>
             </div>
@@ -280,29 +275,31 @@ export function PlannerPage() {
               return (
                 <div
                   key={plan.id}
-                  className="border border-border bg-card rounded-2xl shadow-xs overflow-hidden transition-all"
+                  className="rounded-3xl border border-border/70 bg-card/70 shadow-xs overflow-hidden transition-all duration-200"
                 >
                   <div
                     onClick={() => setExpanded(isExpanded ? null : plan.id)}
-                    className="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
+                    className="p-5 sm:p-6 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
                   >
-                    <div className="flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-foreground truncate">{planTitle}</h4>
+                    <div className="flex-1 min-w-0 pr-4 space-y-2">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h4 className="text-base sm:text-lg font-bold text-foreground font-display truncate">
+                          {planTitle}
+                        </h4>
                         {plan.exam_date && (
-                          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
+                          <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 shrink-0">
                             Exam: {plan.exam_date}
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 mt-2">
-                        <div className="flex-1 max-w-48 h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 max-w-56 h-2 rounded-full bg-muted overflow-hidden">
                           <div
                             className="h-full bg-primary rounded-full transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
-                        <span className="text-xs text-muted-foreground font-mono">
+                        <span className="text-xs text-muted-foreground font-mono font-medium">
                           {completedCount}/{items.length} tasks ({Math.round(progress)}%)
                         </span>
                       </div>
@@ -316,79 +313,87 @@ export function PlannerPage() {
                           setConfirmDeleteId(plan.id);
                         }}
                         disabled={deletingId === plan.id}
-                        className="p-2 rounded-lg text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="p-2 rounded-xl text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer min-h-11 min-w-11 flex items-center justify-center"
                         title="Delete plan"
                         aria-label="Delete plan"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                      {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                      )}
+                      <div className="p-2 rounded-xl text-muted-foreground">
+                        {isExpanded ? (
+                          <ChevronUp className="h-5 w-5 text-primary" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-border p-4 sm:p-5 space-y-4 bg-muted/10">
-                      {plan.overview && (
-                        <div className="text-xs text-muted-foreground prose prose-sm dark:prose-invert max-w-none bg-background/50 p-3 rounded-xl border border-border/50">
-                          <MarkdownRenderer content={plan.overview} />
+                    <div className="p-5 sm:p-6 border-t border-border/50 bg-muted/10 space-y-6 animate-in fade-in duration-200">
+                      {/* View mode toggle */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-wider">
+                          Revision Schedule
+                        </span>
+                        <div className="flex rounded-xl border border-border/70 bg-card p-0.5 text-xs font-medium">
+                          <button
+                            type="button"
+                            onClick={() => setViewMode("list")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                              viewMode === "list"
+                                ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <LayoutList className="h-3.5 w-3.5" />
+                            List
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setViewMode("week")}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                              viewMode === "week"
+                                ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <LayoutGrid className="h-3.5 w-3.5" />
+                            Week
+                          </button>
                         </div>
-                      )}
-
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("list")}
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                            viewMode === "list"
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <LayoutList className="h-3.5 w-3.5" />
-                          List
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setViewMode("week")}
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
-                            viewMode === "week"
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <LayoutGrid className="h-3.5 w-3.5" />
-                          Week
-                        </button>
                       </div>
 
                       {viewMode === "week" ? (
                         <PlannerWeekView
                           items={items}
                           onToggleItem={(itemId) => handleToggleItem(plan.id, itemId)}
-                          onStartFocus={(itemId, duration) =>
-                            startFocusSession(plan.id, itemId, duration)
-                          }
+                          onStartFocus={(itemId) => {
+                            setActiveTask({ planId: plan.id, itemId });
+                            setTimerOpen(true);
+                          }}
                         />
                       ) : (
-                        <div className="space-y-4">
-                          {sortedDates.map((date) => (
-                            <div key={date} className="space-y-2.5">
-                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                <Clock className="h-3 w-3" />
-                                {formatPlanDate(date)}
-                              </h4>
-                              <div className="space-y-2">
-                                {grouped[date].map((item) => (
+                        <div className="space-y-6">
+                          {sortedDates.map((dateKey) => (
+                            <div key={dateKey} className="space-y-2.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-foreground font-mono">
+                                  {formatPlanDate(dateKey)}
+                                </span>
+                                <div className="h-px flex-1 bg-border/40" />
+                              </div>
+                              <div className="grid gap-2">
+                                {grouped[dateKey].map((item) => (
                                   <PlannerItemRow
                                     key={item.id}
                                     planId={plan.id}
                                     item={item}
-                                    onToggleItem={handleToggleItem}
-                                    onStartFocusSession={startFocusSession}
+                                    onToggleItem={(pId, itId) => handleToggleItem(pId, itId)}
+                                    onStartFocusSession={(pId, itId) => {
+                                      setActiveTask({ planId: pId, itemId: itId });
+                                      setTimerOpen(true);
+                                    }}
                                   />
                                 ))}
                               </div>
@@ -405,30 +410,17 @@ export function PlannerPage() {
         </div>
       </div>
 
-      <PomodoroTimer
-        open={timerOpen}
-        onOpenChange={setTimerOpen}
-        showTrigger={false}
-        initialMinutes={
-          activeTask
-            ? getPlanItems(plans.find((p) => p.id === activeTask.planId)).find(
-                (it: StudyPlanItem) => it.id === activeTask.itemId,
-              )?.durationMinutes
-            : undefined
-        }
-        onStudyComplete={handleStudyComplete}
-      />
-
       {confirmDeleteId && (
         <ConfirmDialog
           title="Delete this study plan?"
-          description="This will permanently remove the plan and all its tasks, including completion history. This can't be undone."
-          confirmLabel="Delete"
-          busy={deletingId === confirmDeleteId}
-          onConfirm={() => handleDeletePlan(confirmDeleteId)}
+          description="This will permanently remove the revision schedule and all tracked task completions. This action cannot be undone."
+          confirmLabel="Delete Plan"
+          onConfirm={onConfirmDelete}
           onCancel={() => setConfirmDeleteId(null)}
         />
       )}
+
+      <PomodoroTimer open={timerOpen} onOpenChange={setTimerOpen} showTrigger={false} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   Trash2,
   GraduationCap,
   FileDown,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/client/supabase";
@@ -166,87 +167,47 @@ export const MessageBubble = memo(function MessageBubble({
       }
     }
 
-    // 3. Fallback to DB persisted thinking-steps if no live tools detected
-    if (toolMap.size === 0 && steps.length > 0) {
-      for (const s of steps) {
-        if (s.type === "tool-call") {
-          const id = s.toolCallId || s.toolName;
-          const hasResult = steps.some(
-            (r: any) =>
-              r.type === "tool-result" && (r.toolCallId === id || r.toolName === s.toolName),
-          );
-          toolMap.set(id, {
-            toolName: s.toolName,
-            isDone: hasResult,
-          });
-        }
-      }
-    }
-
-    const toolStepsList = Array.from(toolMap.entries()).map(([id, data]) => ({
-      id,
-      toolName: data.toolName,
-      isDone: data.isDone,
-    }));
-
-    const directReasoning = Array.isArray(m.parts)
-      ? (m.parts as any[])
-          .filter((p: any) => p.type === "reasoning" && (p.text?.trim() || p.reasoning?.trim()))
-          .map((p: any) => ({
-            type: "reasoning",
-            text: (p.text || p.reasoning || "").trim(),
-          }))
-      : [];
-    const persistedReasoning = steps.filter((s: any) => s.type === "reasoning" && s.text?.trim());
-    const reasoningSteps = persistedReasoning.length > 0 ? persistedReasoning : directReasoning;
-
     return {
-      reasoningSteps,
-      toolSteps: toolStepsList,
+      reasoningSteps: steps,
+      toolSteps: Array.from(toolMap.entries()).map(([id, t]) => ({
+        id,
+        toolName: t.toolName,
+        isDone: t.isDone,
+      })),
     };
   }, [m.parts, m.toolInvocations]);
 
   const isStreamActive = isPending && isLast;
-  const [typewriterFinished, setTypewriterFinished] = useState(!isStreamActive);
+  const hasActiveTool = toolSteps.some((s) => !s.isDone);
+  const activeToolStep = toolSteps.find((s) => !s.isDone);
 
+  // Typewriter completion tracking
+  const [typewriterFinished, setTypewriterFinished] = useState(!isStreamActive);
   useEffect(() => {
     if (isStreamActive) {
       setTypewriterFinished(false);
+    } else {
+      setTypewriterFinished(true);
     }
   }, [isStreamActive]);
 
-  const activeToolStep = useMemo(() => {
-    return toolSteps.find((s) => !s.isDone);
-  }, [toolSteps]);
-
-  const hasActiveTool = Boolean(activeToolStep);
-
+  // Midstream stall detection: if stream is active but no new text has arrived in 750ms
   const [isStalled, setIsStalled] = useState(false);
-  const lastTextRef = useRef<string>("");
-  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const lastTextRef = useRef(displayText);
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Single consolidated stall-detection effect.
-  // When stream ends, immediately clear isStalled and cancel any pending timer.
-  // While streaming, restart the 750ms timer on every text change.
   useEffect(() => {
-    // Always clear any pending timer first.
-    if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
-    stallTimerRef.current = undefined;
-
     if (!isStreamActive) {
-      // Stream just finished — ensure stall indicator is gone.
       setIsStalled(false);
+      if (stallTimerRef.current) clearTimeout(stallTimerRef.current);
       return;
     }
 
-    // Stream is active. If text changed, clear stall and restart the timer.
     if (displayText !== lastTextRef.current) {
       lastTextRef.current = displayText;
       setIsStalled(false);
     }
 
-    // (Re)start a 750ms inactivity timer. If text keeps arriving the effect
-    // will re-run before the timer fires, restarting it each time.
     stallTimerRef.current = setTimeout(() => setIsStalled(true), 750);
 
     return () => {
@@ -260,7 +221,7 @@ export const MessageBubble = memo(function MessageBubble({
   const handleCopy = () => {
     navigator.clipboard.writeText(displayText);
     setCopied(true);
-    toast.success("Copied!");
+    toast.success("Copied to clipboard!");
 
     if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     copyTimeoutRef.current = setTimeout(() => setCopied(false), 1800);
@@ -279,7 +240,7 @@ export const MessageBubble = memo(function MessageBubble({
     onVote?.(m.id, newVote);
 
     if (newVote !== null) {
-      toast.success(newVote === 1 ? "Thanks for the feedback! 👍" : "Noted — we'll improve. 👎");
+      toast.success(newVote === 1 ? "Thanks for your feedback! 👍" : "Noted — we'll improve! 👎");
     }
 
     setVoting(true);
@@ -307,31 +268,161 @@ export const MessageBubble = memo(function MessageBubble({
     }
   };
 
+  const formattedTime = m.createdAt
+    ? new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  /* ──────────────────────────────────────────────────────────
+     USER BUBBLE (Claude-Style Clean Floating Card)
+  ────────────────────────────────────────────────────────── */
+  if (isUser) {
+    return (
+      <div className="flex w-full group py-2 sm:py-3 justify-end animate-in fade-in duration-200">
+        <div className="flex flex-col items-end max-w-[86%] sm:max-w-[75%] gap-1.5">
+          <div className="px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl rounded-tr-md bg-muted/70 dark:bg-muted/40 border border-border/70 dark:border-border/50 text-foreground text-[15px] sm:text-base leading-relaxed shadow-xs transition-colors">
+            {attachmentName && <BubbleAttachment attachmentName={attachmentName} />}
+            <div className="flex flex-col gap-1">
+              <span className="whitespace-pre-wrap font-sans text-foreground wrap-break-word select-text">
+                {collapsed && displayText.length > COLLAPSE_THRESHOLD
+                  ? displayText.slice(0, COLLAPSE_THRESHOLD) + "…"
+                  : displayText}
+              </span>
+              {displayText.length > COLLAPSE_THRESHOLD && (
+                <button
+                  onClick={() => setCollapsed((p) => !p)}
+                  className="self-start text-xs font-semibold text-primary hover:underline underline-offset-2 transition-colors cursor-pointer mt-1"
+                  aria-expanded={!collapsed}
+                >
+                  {collapsed ? "Show more" : "Show less"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* User Bubble Subtle Action Row (Claude-Style) */}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150 px-1 text-xs text-muted-foreground">
+            {formattedTime && (
+              <span className="font-mono text-[10px] text-muted-foreground/60 mr-1.5 select-none">
+                {formattedTime}
+              </span>
+            )}
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center p-1 rounded-md hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              title="Copy prompt"
+              aria-label="Copy prompt"
+            >
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-green-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+            </button>
+            {onEditRequest && (
+              <button
+                onClick={isRateLimited ? undefined : () => onEditRequest(displayText)}
+                disabled={isRateLimited}
+                className={`inline-flex items-center p-1 rounded-md transition-colors ${
+                  isRateLimited
+                    ? "opacity-40 cursor-not-allowed text-muted-foreground/50"
+                    : "hover:bg-muted hover:text-foreground cursor-pointer"
+                }`}
+                title={isRateLimited ? "Rate limit reached" : "Edit prompt"}
+                aria-label="Edit prompt"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(m.id)}
+                className="inline-flex items-center p-1 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+                title="Delete message"
+                aria-label="Delete message"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     ASSISTANT BUBBLE (Claude-Style Roomy Editorial Flow)
+  ────────────────────────────────────────────────────────── */
   return (
-    <div className={`flex w-full group py-3 sm:py-4 ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`flex flex-col relative ${
-          isUser ? "max-w-[88%] sm:max-w-[72%]" : "w-full px-3 sm:px-6"
-        }`}
-      >
-        <div
-          className={`${
-            isUser
-              ? "px-4 py-3 bg-primary/10 border border-primary/20 text-foreground rounded-2xl rounded-tr-sm shadow-xs"
-              : "px-0 py-1 bg-transparent text-foreground"
-          } text-base leading-relaxed relative transition-colors duration-200`}
-        >
-          {!isUser ? (
-            <div className="flex flex-col w-full">
-              {/* Initial thinking/tool indicator — shown before first text arrives.
-                  Uses opacity fade-out (not unmount) so layout doesn't shift. */}
-              {isStreamActive && !showBubbleCard && (
-                <div className="py-1">
-                  {toolSteps.length > 0 && (
-                    <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-200">
-                      {toolSteps.map((step) => (
-                        <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
-                      ))}
+    <div className="flex w-full group py-3 sm:py-5 justify-start animate-in fade-in duration-250">
+      <div className="flex flex-col w-full max-w-4xl mx-auto px-1 sm:px-4">
+        {/* Assistant Header: Monogram Avatar + Name + Tutor badge */}
+        <div className="flex items-center gap-2.5 mb-2.5 select-none">
+          <div className="h-7 w-7 rounded-xl bg-primary/10 border border-primary/20 text-primary font-display font-bold flex items-center justify-center text-xs shadow-xs">
+            G
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-foreground tracking-tight">GilaniAI</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70 px-1.5 py-0.5 rounded-full bg-muted/60">
+              Tutor
+            </span>
+          </div>
+          {formattedTime && (
+            <span className="font-mono text-[10px] text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+              {formattedTime}
+            </span>
+          )}
+        </div>
+
+        {/* Content Body */}
+        <div className="text-[15px] sm:text-base leading-relaxed text-foreground relative pl-0.5">
+          {/* Initial thinking / tool indicator — shown before first chunk of text */}
+          {isStreamActive && !showBubbleCard && (
+            <div className="py-1">
+              {toolSteps.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2 animate-in fade-in duration-200">
+                  {toolSteps.map((step) => (
+                    <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
+                  ))}
+                </div>
+              )}
+              <ThinkingSweep
+                label={
+                  pauseLabel ||
+                  (hasActiveTool && activeToolStep
+                    ? formatToolInProgressLabel(activeToolStep.toolName)
+                    : undefined)
+                }
+              />
+            </div>
+          )}
+
+          {/* Content area: Thinking Panel + Markdown */}
+          {showBubbleCard && (
+            <div className="prose-ai relative">
+              {/* Claude-Style Thinking Process Drawer */}
+              <BubbleThinkingPanel reasoningSteps={reasoningSteps} />
+
+              <SmoothMarkdownRenderer
+                content={displayText}
+                isStreaming={isStreamActive}
+                onAnimationComplete={() => setTypewriterFinished(true)}
+                className={
+                  (isStreamActive || !typewriterFinished) && !pauseLabel && !isStalled
+                    ? "transition-opacity duration-200 streaming-cursor"
+                    : "transition-opacity duration-200"
+                }
+              />
+
+              {/* Midstream pause / thinking indicator */}
+              {isStreamActive && (pauseLabel || isStalled || hasActiveTool) && (
+                <div className="mt-3 flex flex-col gap-1.5 animate-in fade-in duration-250">
+                  {hasActiveTool && activeToolStep && (
+                    <div className="flex items-center gap-2">
+                      <ToolStepPill
+                        key={`midstream-${activeToolStep.id}`}
+                        toolName={activeToolStep.toolName}
+                        isDone={false}
+                      />
                     </div>
                   )}
                   <ThinkingSweep
@@ -345,275 +436,144 @@ export const MessageBubble = memo(function MessageBubble({
                 </div>
               )}
 
-              {/* Content area — always rendered when text exists */}
-              {showBubbleCard && (
-                <div className="prose-ai relative">
-                  <BubbleThinkingPanel reasoningSteps={reasoningSteps} />
-
-                  <SmoothMarkdownRenderer
-                    content={displayText}
-                    isStreaming={isStreamActive}
-                    onAnimationComplete={() => setTypewriterFinished(true)}
-                    className={
-                      (isStreamActive || !typewriterFinished) && !pauseLabel && !isStalled
-                        ? "transition-opacity duration-200 streaming-cursor"
-                        : "transition-opacity duration-200"
-                    }
-                  />
-
-                  {/* Midstream pause indicator: shown when AI stops mid-response to think/use a tool */}
-                  {isStreamActive && (pauseLabel || isStalled || hasActiveTool) && (
-                    <div className="mt-2 flex flex-col gap-1.5 animate-in fade-in duration-250">
-                      {hasActiveTool && activeToolStep && (
-                        <div className="flex items-center gap-2">
-                          <ToolStepPill
-                            key={`midstream-${activeToolStep.id}`}
-                            toolName={activeToolStep.toolName}
-                            isDone={false}
-                          />
-                        </div>
-                      )}
-                      <ThinkingSweep
-                        label={
-                          pauseLabel ||
-                          (hasActiveTool && activeToolStep
-                            ? formatToolInProgressLabel(activeToolStep.toolName)
-                            : undefined)
-                        }
-                      />
-                    </div>
-                  )}
-
-                  {/* Completed tool pills */}
-                  {toolSteps.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {toolSteps
-                        .filter((step) => !isStreamActive || step.isDone)
-                        .map((step) => (
-                          <ToolStepPill
-                            key={step.id}
-                            toolName={step.toolName}
-                            isDone={step.isDone}
-                          />
-                        ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Empty response fallback (stream done, no content) */}
-              {!isStreamActive && !showBubbleCard && toolSteps.length === 0 && (
-                <span className="text-xs text-muted-foreground italic mt-1">
-                  No response generated. Please resend your question.
-                </span>
-              )}
-
-              {/* Footer: action buttons + persistent G badge (only when finished and settled) */}
-              {showBubbleCard && !isStreamActive && typewriterFinished && (
-                <div className="flex flex-col gap-1.5 mt-2 animate-in fade-in duration-300">
-                  <div className="flex items-center gap-1.5 sm:gap-1 transition-opacity duration-200 flex-wrap">
-                    <button
-                      onClick={handleCopy}
-                      className="inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center"
-                      title="Copy message"
-                      aria-label="Copy message"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-green-500" />
-                          <span className="text-green-500 animate-in fade-in duration-150">
-                            Copied!
-                          </span>
-                        </>
-                      ) : (
-                        <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                      )}
-                    </button>
-
-                    {isLast && (
-                      <button
-                        onClick={isRateLimited ? undefined : onReload}
-                        disabled={isRateLimited}
-                        className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
-                          isRateLimited
-                            ? "opacity-40 cursor-not-allowed text-muted-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
-                        }`}
-                        title={isRateLimited ? "Rate limit reached" : "Retry response"}
-                        aria-label="Retry response"
-                      >
-                        <RefreshCw className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                      </button>
-                    )}
-
-                    <span className="w-px h-4 bg-border/70 mx-1 hidden sm:block" />
-
-                    <button
-                      onClick={() => handleVote(1)}
-                      disabled={voting}
-                      className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-all duration-150 px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer active:scale-110 min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
-                        vote === 1 ? "text-green-500" : "text-muted-foreground hover:text-green-500"
-                      }`}
-                      title="Helpful response"
-                      aria-label="Mark as helpful"
-                    >
-                      <ThumbsUp
-                        className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${vote === 1 ? "fill-current" : ""}`}
-                      />
-                    </button>
-
-                    <button
-                      onClick={() => handleVote(-1)}
-                      disabled={voting}
-                      className={`inline-flex items-center gap-1 text-sm sm:text-xs font-medium transition-all duration-150 px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer active:scale-110 min-h-[38px] min-w-[38px] sm:min-h-0 sm:min-w-0 justify-center ${
-                        vote === -1
-                          ? "text-destructive"
-                          : "text-muted-foreground hover:text-destructive"
-                      }`}
-                      title="Not helpful — we'll improve"
-                      aria-label="Mark as not helpful"
-                    >
-                      <ThumbsDown
-                        className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${vote === -1 ? "fill-current" : ""}`}
-                      />
-                    </button>
-
-                    {onEscalate && (
-                      <>
-                        <span className="w-px h-4 bg-border/70 mx-1 hidden sm:block" />
-                        <button
-                          onClick={onEscalate}
-                          disabled={
-                            escalating ||
-                            escalationStatus === "open" ||
-                            escalationStatus === "in_review"
-                          }
-                          className={`inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg cursor-pointer min-h-[38px] sm:min-h-0 justify-center ${
-                            escalationStatus === "resolved"
-                              ? "text-emerald-500 hover:bg-emerald-500/10"
-                              : escalationStatus === "in_review" || escalationStatus === "open"
-                                ? "text-amber-500 hover:bg-amber-500/10"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                          }`}
-                          title={
-                            escalationStatus === "resolved"
-                              ? "Teacher answered"
-                              : escalationStatus === "in_review" || escalationStatus === "open"
-                                ? "Under teacher review"
-                                : "Ask a teacher to review this explanation"
-                          }
-                          aria-label="Escalate to Teacher"
-                        >
-                          <GraduationCap className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                          <span className="hidden sm:inline">
-                            {escalationStatus === "resolved"
-                              ? "Teacher Answered"
-                              : escalationStatus === "in_review" || escalationStatus === "open"
-                                ? "Under Review"
-                                : "Ask Teacher"}
-                          </span>
-                        </button>
-                      </>
-                    )}
-
-                    {onExportPDF && (
-                      <button
-                        onClick={onExportPDF}
-                        className="inline-flex items-center gap-1.5 text-sm sm:text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-muted cursor-pointer min-h-[38px] sm:min-h-0 justify-center"
-                        title="Export this conversation as PDF"
-                        aria-label="Export conversation as PDF"
-                      >
-                        <FileDown className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-                        <span className="hidden sm:inline">PDF</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {isLast && (
-                    <div className="flex items-center pt-1">
-                      <span className="text-xs font-semibold text-primary select-none">
-                        GilaniAI
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
-            /* User message */
-            <div className="flex flex-col gap-1.5">
-              <BubbleAttachment attachmentName={attachmentName} />
-              <div className="flex flex-col gap-1">
-                <span className="whitespace-pre-wrap text-foreground font-medium">
-                  {collapsed && displayText.length > COLLAPSE_THRESHOLD
-                    ? displayText.slice(0, COLLAPSE_THRESHOLD) + "…"
-                    : displayText}
-                </span>
-                {displayText.length > COLLAPSE_THRESHOLD && (
-                  <button
-                    onClick={() => setCollapsed((p) => !p)}
-                    className="self-start text-xs font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors cursor-pointer"
-                    aria-expanded={!collapsed}
-                  >
-                    {collapsed ? "Show more" : "Show less"}
-                  </button>
-                )}
-              </div>
-
-              {!isStreamActive && (
-                <div className="flex items-center gap-1 mt-1.5 transition-opacity duration-200 justify-end">
-                  <button
-                    onClick={handleCopy}
-                    className="inline-flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted cursor-pointer"
-                    title="Copy message"
-                    aria-label="Copy message"
-                  >
-                    {copied ? (
-                      <Check className="h-3.5 w-3.5 text-green-500" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                  </button>
-                  {onEditRequest && (
-                    <button
-                      onClick={isRateLimited ? undefined : () => onEditRequest(displayText)}
-                      disabled={isRateLimited}
-                      className={`inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md ${
-                        isRateLimited
-                          ? "opacity-40 cursor-not-allowed text-muted-foreground/50"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
-                      }`}
-                      title={isRateLimited ? "Rate limit reached" : "Edit message"}
-                      aria-label="Edit message"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      onClick={() => onDelete(m.id)}
-                      className="inline-flex items-center text-xs font-medium transition-colors px-2 py-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted cursor-pointer"
-                      title="Delete message"
-                      aria-label="Delete message"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  )}
+              {/* Completed tool pills */}
+              {toolSteps.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {toolSteps
+                    .filter((step) => !isStreamActive || step.isDone)
+                    .map((step) => (
+                      <ToolStepPill key={step.id} toolName={step.toolName} isDone={step.isDone} />
+                    ))}
                 </div>
               )}
             </div>
           )}
-        </div>
 
-        {/* Hover timestamp */}
-        <div
-          className={`absolute -bottom-2 ${
-            isUser ? "right-2" : "left-3 sm:left-8"
-          } opacity-0 group-hover:opacity-100 transition-opacity duration-200 font-mono text-xs text-muted-foreground bg-background/90 backdrop-blur-xs border border-border/60 px-1.5 py-0.5 rounded shadow-xs pointer-events-none z-10`}
-        >
-          {m.createdAt
-            ? new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-            : "Just now"}
+          {/* Empty response fallback */}
+          {!isStreamActive && !showBubbleCard && toolSteps.length === 0 && (
+            <span className="text-xs text-muted-foreground italic mt-1 block">
+              No response generated. Please retry your question.
+            </span>
+          )}
+
+          {/* Claude-Style Action Toolbar Underneath Response */}
+          {showBubbleCard && !isStreamActive && typewriterFinished && (
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-3 pt-1 border-t border-border/20 text-muted-foreground flex-wrap animate-in fade-in duration-250">
+              <button
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg hover:bg-muted cursor-pointer"
+                title="Copy response"
+                aria-label="Copy response"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-green-500" />
+                    <span className="text-green-500 font-medium">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+
+              {isLast && (
+                <button
+                  onClick={isRateLimited ? undefined : onReload}
+                  disabled={isRateLimited}
+                  className={`inline-flex items-center gap-1 text-xs font-medium transition-colors px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg ${
+                    isRateLimited
+                      ? "opacity-40 cursor-not-allowed text-muted-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+                  }`}
+                  title={isRateLimited ? "Rate limit reached" : "Retry response"}
+                  aria-label="Retry response"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Retry</span>
+                </button>
+              )}
+
+              <span className="w-px h-3.5 bg-border/60 mx-1 hidden sm:block" />
+
+              <button
+                onClick={() => handleVote(1)}
+                disabled={voting}
+                className={`inline-flex items-center p-1.5 rounded-lg transition-all duration-150 hover:bg-muted cursor-pointer active:scale-110 ${
+                  vote === 1
+                    ? "text-green-500 bg-green-500/10"
+                    : "text-muted-foreground hover:text-green-500"
+                }`}
+                title="Helpful response"
+                aria-label="Mark as helpful"
+              >
+                <ThumbsUp className={`h-3.5 w-3.5 ${vote === 1 ? "fill-current" : ""}`} />
+              </button>
+
+              <button
+                onClick={() => handleVote(-1)}
+                disabled={voting}
+                className={`inline-flex items-center p-1.5 rounded-lg transition-all duration-150 hover:bg-muted cursor-pointer active:scale-110 ${
+                  vote === -1
+                    ? "text-destructive bg-destructive/10"
+                    : "text-muted-foreground hover:text-destructive"
+                }`}
+                title="Not helpful"
+                aria-label="Mark as not helpful"
+              >
+                <ThumbsDown className={`h-3.5 w-3.5 ${vote === -1 ? "fill-current" : ""}`} />
+              </button>
+
+              {onEscalate && (
+                <>
+                  <span className="w-px h-3.5 bg-border/60 mx-1 hidden sm:block" />
+                  <button
+                    onClick={onEscalate}
+                    disabled={
+                      escalating || escalationStatus === "open" || escalationStatus === "in_review"
+                    }
+                    className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg cursor-pointer ${
+                      escalationStatus === "resolved"
+                        ? "text-emerald-500 hover:bg-emerald-500/10"
+                        : escalationStatus === "in_review" || escalationStatus === "open"
+                          ? "text-amber-500 hover:bg-amber-500/10"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                    title={
+                      escalationStatus === "resolved"
+                        ? "Teacher answered"
+                        : escalationStatus === "in_review" || escalationStatus === "open"
+                          ? "Under teacher review"
+                          : "Ask teacher to review"
+                    }
+                    aria-label="Ask Teacher"
+                  >
+                    <GraduationCap className="h-3.5 w-3.5" />
+                    <span>
+                      {escalationStatus === "resolved"
+                        ? "Answered"
+                        : escalationStatus === "in_review" || escalationStatus === "open"
+                          ? "Under Review"
+                          : "Ask Teacher"}
+                    </span>
+                  </button>
+                </>
+              )}
+
+              {onExportPDF && (
+                <button
+                  onClick={onExportPDF}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg hover:bg-muted cursor-pointer ml-auto"
+                  title="Export conversation as PDF"
+                  aria-label="Export conversation as PDF"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">PDF</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

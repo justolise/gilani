@@ -134,7 +134,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col h-full bg-background w-full">
       {/* ── Mobile Top Bar ─────────────────────────────── */}
-      <div className="md:hidden flex items-center justify-between border-b border-border/60 px-4 h-14 shrink-0 bg-sidebar/95 dark:bg-[#191715]/95 backdrop-blur-xl">
+      <div className="md:hidden flex items-center justify-between border-b border-border/60 px-4 h-14 shrink-0 bg-sidebar/95 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -167,7 +167,7 @@ export default function SettingsPage() {
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* ── MOBILE LIST VIEW ─────────────────────────────────── */}
         {mobileView === "list" && (
-          <nav className="flex-1 md:hidden overflow-y-auto bg-sidebar/95 dark:bg-[#191715]/95">
+          <nav className="flex-1 md:hidden overflow-y-auto bg-sidebar/95">
             <div className="px-3 py-3 space-y-4">
               {TAB_GROUPS.map((group) => (
                 <div key={group.label} className="space-y-0.5">
@@ -219,7 +219,7 @@ export default function SettingsPage() {
           <div
             className="
               w-67.5 shrink-0 flex flex-col
-              bg-sidebar dark:bg-[#191715]
+              bg-sidebar
               border-r border-sidebar-border/80
               overflow-hidden
             "

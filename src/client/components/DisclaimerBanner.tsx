@@ -1,4 +1,3 @@
-// components/DisclaimerBanner.tsx
 import { AlertTriangle, X } from "lucide-react";
 import { useState } from "react";
 
@@ -8,20 +7,29 @@ export function DisclaimerBanner() {
   if (dismissed) return null;
 
   return (
-    <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-4">
-      <div className="flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">AI Disclaimer</p>
-          <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-            GilaniAI is an AI-powered study assistant. While we strive for accuracy, responses may
-            contain errors. Always verify important information with your teacher or official
-            textbooks. This tool supplements, but does not replace, professional education.
+    <div className="relative overflow-hidden rounded-2xl border border-amber-500/25 bg-amber-500/5 backdrop-blur-md p-3.5 sm:p-4 mb-5 shadow-sm transition-all duration-300">
+      <div className="flex items-start gap-3 sm:gap-3.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-500 dark:text-amber-400">
+          <AlertTriangle className="h-4 w-4" />
+        </div>
+        <div className="flex-1 min-w-0 pr-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              AI Study Companion Notice
+            </span>
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500/60" />
+          </div>
+          <p className="text-xs sm:text-[13px] text-muted-foreground mt-0.5 leading-relaxed">
+            GilaniAI provides AI-assisted tutoring grounded in your curriculum. While we strive for
+            accuracy, AI responses can occasionally contain errors. Always verify key exam concepts
+            with teachers or syllabus textbooks.
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setDismissed(true)}
-          className="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300 shrink-0"
+          className="rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0 cursor-pointer"
+          aria-label="Dismiss AI notice"
         >
           <X className="h-4 w-4" />
         </button>

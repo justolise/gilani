@@ -75,9 +75,9 @@ function NavProgressBar() {
         zIndex: 9999,
         height: "2px",
         width: `${width}%`,
-        transition: isLoading ? "width 0.12s ease-out" : "width 0.25s ease-out",
-        background: "linear-gradient(90deg, hsl(22 96% 45%), hsl(35 95% 55%))",
-        boxShadow: "0 0 8px hsl(22 96% 45% / 0.6)",
+        transition: isLoading ? "width 0.12s ease-out" : "width 0.28s ease-out",
+        background: "linear-gradient(90deg, #d4754a, #e8924a, #f3a05a)",
+        boxShadow: "0 0 12px rgba(212,117,74,0.7), 0 0 4px rgba(212,117,74,0.9)",
       }}
     />
   );
@@ -110,17 +110,19 @@ if (typeof window !== "undefined" && import.meta.env.VITE_SENTRY_DSN) {
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <p className="font-mono text-xs uppercase tracking-widest text-primary">404</p>
-        <h1 className="mt-3 font-serif text-4xl text-foreground">Page not found</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
+    <div className="flex min-h-screen items-center justify-center bg-[#0f1117] px-4">
+      <div className="max-w-md text-center space-y-4 animate-in-slide">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#d4754a]/30 bg-[#d4754a]/10 text-[#e8924a] text-xs font-bold tracking-widest uppercase">
+          404
+        </div>
+        <h1 className="font-serif text-4xl font-bold text-white tracking-tight">Page not found</h1>
+        <p className="text-sm text-white/40 leading-relaxed">
           This corner of the library is empty. Let's get you back to your studies.
         </p>
-        <div className="mt-6">
+        <div className="pt-2">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-2xl bg-[#d4754a] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#e8924a] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-[0_4px_20px_rgba(212,117,74,0.35)]"
           >
             Return home
           </Link>

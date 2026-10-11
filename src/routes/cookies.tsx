@@ -46,135 +46,81 @@ const COOKIE_TABLE = [
 ];
 
 const TYPE_COLOR: Record<string, string> = {
-  Essential: "bg-red-500/10 text-red-400 border border-red-500/20",
-  Preference: "bg-white/4 text-[#9ca3af] border border-white/8",
-  Functional: "bg-white/4 text-[#9ca3af] border border-white/8",
-  Analytics: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  Essential: "bg-red-500/10 text-red-500 border border-red-500/20",
+  Preference: "bg-muted text-muted-foreground border border-border/60",
+  Functional: "bg-muted text-muted-foreground border border-border/60",
+  Analytics: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
 };
 
 function CookiesPage() {
   return (
-    <div className="min-h-screen bg-[#0f1117] text-[#e2e4f0] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary">
       <LegalHeader />
-      <LegalHero label="Legal" title="Cookie Policy" subtitle="Last updated: June 2025" />
-      <main className="flex-grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
-        <div className="space-y-8">
+      <LegalHero
+        label="Cookies & Consent"
+        title="Cookie Policy"
+        subtitle="Last updated: June 2025"
+      />
+      <main className="grow mx-auto w-full max-w-3xl px-4 sm:px-8 py-10 sm:py-16">
+        <div className="space-y-8 rounded-3xl border border-border/60 bg-card/60 p-6 sm:p-10 backdrop-blur-md shadow-sm">
           <Section title="1. What Are Cookies?">
             <p>
-              Cookies are small text files placed on your device when you visit a website. GilaniAI
-              uses cookies and similar browser storage technologies (such as localStorage) to
-              provide a reliable, personalised experience.
+              Cookies are small text files stored on your device when you visit a website. They help
+              us remember your preferences, keep you signed in securely, and understand how you
+              interact with GilaniAI.
             </p>
           </Section>
-          <Section title="2. Types of Cookies We Use">
-            <ul>
-              <li>
-                <strong>Essential cookies:</strong> Required for the Service to function. Without
-                these, features like login and session management would not work.
-              </li>
-              <li>
-                <strong>Preference cookies:</strong> Store your chosen settings (e.g. dark mode) so
-                they persist between visits.
-              </li>
-              <li>
-                <strong>Functional cookies:</strong> Remember actions you've taken (e.g. dismissing
-                the AI disclaimer) to avoid repetitive prompts.
-              </li>
-              <li>
-                <strong>Analytics cookies:</strong> Collect anonymous, aggregated data on how users
-                interact with GilaniAI to help us improve the platform.
-              </li>
-            </ul>
-          </Section>
-          <Section title="3. Cookie Details">
-            <p>The table below lists the specific cookies GilaniAI currently sets:</p>
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mt-3 rounded-2xl border border-white/[0.08] bg-[#131722]">
-              <table className="w-full min-w-[500px] border-collapse text-xs">
+
+          <Section title="2. Cookies We Use">
+            <p className="mb-4">
+              Here is a summary of the cookies and local storage tokens we use:
+            </p>
+            <div className="overflow-x-auto rounded-2xl border border-border/60">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-white/6 bg-[#0f1117]/50">
-                    {["Cookie", "Type", "Purpose", "Duration", "Opt-out?"].map((h) => (
-                      <th
-                        key={h}
-                        className="text-left font-mono font-bold p-4 text-[#6b7280] uppercase tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    ))}
+                  <tr className="border-b border-border/60 bg-muted/40 font-mono text-[11px] text-foreground font-semibold">
+                    <th className="p-3">Name</th>
+                    <th className="p-3">Type</th>
+                    <th className="p-3">Purpose</th>
+                    <th className="p-3">Duration</th>
+                    <th className="p-3">Opt-out</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {COOKIE_TABLE.map((row) => (
-                    <tr
-                      key={row.name}
-                      className="border-b border-white/4 last:border-0 hover:bg-white/2 transition-colors"
-                    >
-                      <td className="p-4 font-mono text-[#E28743] font-semibold">{row.name}</td>
-                      <td className="p-4">
+                <tbody className="divide-y divide-border/40 font-sans text-muted-foreground">
+                  {COOKIE_TABLE.map((c) => (
+                    <tr key={c.name} className="hover:bg-muted/20 transition-colors">
+                      <td className="p-3 font-mono font-medium text-foreground whitespace-nowrap">
+                        {c.name}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
                         <span
-                          className={`rounded-full px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider font-semibold ${
-                            TYPE_COLOR[row.type] ?? "bg-white/4 text-[#9ca3af]"
-                          }`}
+                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${TYPE_COLOR[c.type] || "bg-muted text-muted-foreground"}`}
                         >
-                          {row.type}
+                          {c.type}
                         </span>
                       </td>
-                      <td className="p-4 text-[#9ca3af]">{row.purpose}</td>
-                      <td className="p-4 text-[#9ca3af] whitespace-nowrap">{row.duration}</td>
-                      <td className="p-4 text-[#9ca3af]">{row.canOpt}</td>
+                      <td className="p-3 leading-relaxed min-w-50">{c.purpose}</td>
+                      <td className="p-3 whitespace-nowrap font-mono text-[11px]">{c.duration}</td>
+                      <td className="p-3 whitespace-nowrap text-[11px]">{c.canOpt}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </Section>
-          <Section title="4. Third-Party Cookies">
+
+          <Section title="3. Managing Your Cookies">
             <p>
-              GilaniAI uses Supabase as our database and authentication provider. Supabase may set
-              cookies as part of the authentication process. We do not use Google Analytics,
-              Facebook Pixel, or other third-party advertising trackers.
+              You can control and manage cookies through your browser settings. Most browsers allow
+              you to block or delete cookies. However, disabling essential cookies may prevent you
+              from signing in or using core features of GilaniAI.
             </p>
           </Section>
-          <Section title="5. Managing Cookies">
-            <ul>
-              <li>
-                <strong>Browser settings:</strong> Most browsers allow you to block or delete
-                cookies via Settings → Privacy. Note that blocking essential cookies will prevent
-                you from staying logged in.
-              </li>
-              <li>
-                <strong>Clear site data:</strong> You can clear all cookies and localStorage data
-                for GilaniAI at any time. This will log you out.
-              </li>
-              <li>
-                <strong>Opt-out of analytics:</strong> If we add an analytics opt-out toggle, it
-                will appear in your account settings.
-              </li>
-            </ul>
-          </Section>
-          <Section title="6. localStorage and sessionStorage">
+
+          <Section title="4. Contact Us">
             <p>
-              In addition to cookies, GilaniAI uses browser localStorage to store your theme
-              preference (light/dark mode) and disclaimer acknowledgement. This data is stored only
-              on your device and is never transmitted to our servers.
-            </p>
-          </Section>
-          <Section title="7. Consent">
-            <p>
-              By continuing to use GilaniAI, you consent to our use of essential and functional
-              cookies. For analytics cookies, we rely on your continued use of the platform as
-              implied consent for anonymous, aggregated usage measurement.
-            </p>
-          </Section>
-          <Section title="8. Updates to This Policy">
-            <p>
-              We may update this Cookie Policy as the Service evolves. The "Last updated" date at
-              the top indicates when this policy was most recently revised.
-            </p>
-          </Section>
-          <Section title="9. Contact">
-            <p>
-              Questions about our use of cookies? Contact us at{" "}
-              <a href="mailto:support@gilaniai.site">support@gilaniai.site</a>.
+              If you have questions about our use of cookies, reach out to{" "}
+              <a href="mailto:privacy@gilaniai.site">privacy@gilaniai.site</a>.
             </p>
           </Section>
         </div>

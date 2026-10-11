@@ -2,9 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/client/supabase";
 import { deleteNote, retryNote } from "@/fns/notes.server-fns";
-import { processNoteChunks } from "@/fns/notes/process-chunks-client";
 import { GilaniLoader } from "@/client/components/GilaniLoader";
-import { UploadCloud, Search, Loader2 } from "lucide-react";
+import { UploadCloud, Search, Loader2, FileText, Sparkles, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError, getErrorMessage } from "@/shared/utils/async";
 import { AppHeader } from "@/client/components/layout/AppHeader";
@@ -100,101 +99,96 @@ function DocumentsRoute() {
   const onRetry = async (id: string) => {
     setRetryingId(id);
     try {
-      const { chunks } = await retryNote({ data: { noteId: id } });
-      setNotes((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, status: "processing", error_message: null } : n)),
-      );
-      await processNoteChunks(id, chunks);
-      const { data } = await supabase
-        .from("notes")
-        .select("id, title, summary, raw_text, key_concepts, status, error_message, created_at")
-        .eq("id", id)
-        .single();
-      if (data) setNotes((prev) => prev.map((n) => (n.id === id ? (data as any) : n)));
-      toast.success("Note reprocessed successfully");
+      await retryNote({ data: { noteId: id } });
+      toast.success("Re-processing note…");
+      fetchNotes(search, 0, false);
     } catch (err) {
-      toast.error(friendlyError(err as any, "Couldn't reprocess this note. Please try again."));
-      setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, status: "failed" } : n)));
+      toast.error(getErrorMessage(err, "Retry failed."));
     } finally {
       setRetryingId(null);
     }
   };
 
-  if (loading)
+  if (loading && notes.length === 0)
     return (
       <div className="h-full flex flex-col bg-background">
         <AppHeader
-          title="My Documents"
-          subtitle="Loading your study materials…"
+          title="Document Library"
+          subtitle="Loading your study notes…"
           actions={
             <button
               disabled
-              className="flex items-center justify-center gap-2 rounded-xl bg-primary/60 px-4 py-2 text-sm font-semibold text-primary-foreground min-h-[44px] opacity-75 cursor-not-allowed"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-primary/60 text-primary-foreground px-4 py-2 text-sm font-semibold opacity-75 cursor-not-allowed min-h-11"
             >
               <UploadCloud className="h-4 w-4" /> Upload Notes
             </button>
           }
         />
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <DocumentsSkeleton />
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            <DocumentsSkeleton />
+          </div>
         </div>
       </div>
     );
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background text-foreground">
       <AppHeader
-        title="My Documents"
-        subtitle={`${notes.length}${hasMore ? "+" : ""} document${notes.length !== 1 ? "s" : ""}`}
+        title="Document Library"
+        subtitle={`${notes.length}${hasMore ? "+" : ""} note${notes.length !== 1 ? "s" : ""}`}
         actions={
           <button
             onClick={() => setUploadOpen(true)}
-            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-2 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-xs active:scale-95 cursor-pointer min-h-11"
           >
-            <UploadCloud className="h-4 w-4" /> Upload Notes
+            <UploadCloud className="h-4 w-4" />
+            <span>Upload Notes</span>
           </button>
         }
       />
-      <div className="flex-1 overflow-y-auto p-4 lg:p-8">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div className="max-w-5xl mx-auto space-y-6">
           {(notes.length > 0 || search) && (
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search your documents…"
-                className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                placeholder="Search notes and curriculum summaries…"
+                className="w-full rounded-2xl border border-border/70 bg-card/70 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/60 transition-all backdrop-blur-md shadow-xs"
               />
             </div>
           )}
 
           {notes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center border-2 border-dashed border-border rounded-2xl bg-muted/20 mt-8">
-              <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <UploadCloud className="h-8 w-8 text-primary" />
+            <div className="flex flex-col items-center justify-center p-8 sm:p-14 text-center border border-dashed border-border/70 rounded-3xl bg-card/30 mt-6 space-y-4">
+              <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                <UploadCloud className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {search ? "No matching documents" : "No documents yet"}
-              </h3>
-              <p className="text-muted-foreground max-w-sm mb-6">
-                {search
-                  ? "Try a different search term."
-                  : "Upload a PDF, Word doc, image, or paste text — the AI will produce a full, exhaustive summary that keeps every keyword and explanation."}
-              </p>
+              <div>
+                <h3 className="text-xl font-bold text-foreground font-display">
+                  {search ? "No matching documents found" : "Your study library is empty"}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mt-1 leading-relaxed">
+                  {search
+                    ? "Try searching for another keyword or clear the search filter."
+                    : "Upload PDFs, Word documents, images, or textbook excerpts. GilaniAI analyzes and generates structured revision summaries."}
+                </p>
+              </div>
               {!search && (
                 <button
                   onClick={() => setUploadOpen(true)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity min-h-[44px] cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3 text-xs sm:text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
                 >
-                  <UploadCloud className="h-4 w-4" /> Upload Notes
+                  <Plus className="h-4 w-4" /> Upload Document
                 </button>
               )}
             </div>
           ) : (
             <>
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {notes.map((note) => (
                   <NoteCard
                     key={note.id}
@@ -207,15 +201,15 @@ function DocumentsRoute() {
                 ))}
               </div>
               {hasMore && (
-                <div className="flex justify-center pt-2">
+                <div className="flex justify-center pt-4">
                   <button
                     onClick={onLoadMore}
                     disabled={loadingMore}
-                    className="px-5 py-2.5 rounded-xl text-sm font-medium border border-border text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors disabled:opacity-40 min-h-[44px] cursor-pointer"
+                    className="px-6 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border border-border/70 bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground transition-all disabled:opacity-40 min-h-11 cursor-pointer"
                   >
                     <span className="inline-flex items-center gap-2">
-                      {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
-                      {loadingMore ? "Loading…" : "Load more"}
+                      {loadingMore && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                      {loadingMore ? "Loading more notes…" : "Load more notes"}
                     </span>
                   </button>
                 </div>
@@ -235,7 +229,7 @@ function DocumentsRoute() {
       {confirmDeleteId && (
         <ConfirmDialog
           title="Delete this document?"
-          description="This will permanently remove the document and its summary. This can't be undone."
+          description="This will permanently remove the document and its AI summary from your account. This action cannot be undone."
           confirmLabel="Delete"
           onConfirm={onConfirmDelete}
           onCancel={() => setConfirmDeleteId(null)}

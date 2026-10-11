@@ -29,7 +29,7 @@ export function AppHeader({
           aria-expanded={sidebarOpen}
           aria-label="Open navigation menu"
           title="Open navigation menu"
-          className="rounded-full p-2 text-muted-foreground transition-all duration-200 hover:bg-muted/60 hover:text-foreground active:scale-95 shrink-0 lg:hidden min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+          className="rounded-full p-2 text-muted-foreground transition-all duration-200 hover:bg-muted/60 hover:text-foreground active:scale-95 shrink-0 lg:hidden min-h-11 min-w-11 flex items-center justify-center cursor-pointer"
         >
           <Menu className="h-5 w-5" strokeWidth={2.25} />
         </button>
@@ -40,7 +40,7 @@ export function AppHeader({
       <div className="flex-1 flex flex-col justify-center items-center min-w-0 px-2 text-center">
         {centerContent}
         {!centerContent && title && (
-          <h1 className="text-base sm:text-lg font-semibold text-foreground truncate w-full text-center">
+          <h1 className="text-base sm:text-lg font-bold text-foreground font-display truncate w-full text-center">
             {title}
           </h1>
         )}
@@ -69,7 +69,7 @@ export function AppHeader({
         <button
           type="button"
           onClick={openCommandPalette}
-          className="sm:hidden flex items-center justify-center p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 min-h-[44px] min-w-[44px] cursor-pointer"
+          className="sm:hidden flex items-center justify-center p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 min-h-11 min-w-11 cursor-pointer"
           title="Search (⌘K)"
           aria-label="Quick search"
         >

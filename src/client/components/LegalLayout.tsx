@@ -17,10 +17,10 @@ export function LegalFooter() {
       : "/tutor";
 
   return (
-    <footer className="border-t border-white/[0.08] bg-[#0f1117] px-4 sm:px-8 pt-8 pb-[calc(2rem+var(--safe-bottom,0px))] pl-[var(--safe-left,0px)] pr-[var(--safe-right,0px)] transition-all">
+    <footer className="border-t border-border/60 bg-card/60 backdrop-blur-md px-4 sm:px-8 pt-8 pb-[calc(2rem+var(--safe-bottom,0px))] pl-(--safe-left,0px) pr-(--safe-right,0px) transition-all">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         <Logo to={user ? dashboardPath : "/"} size="sm" />
-        <div className="flex flex-wrap justify-center gap-6 text-xs text-[#9ca3af]">
+        <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
           {[
             { label: "About", to: "/about" },
             { label: "Privacy", to: "/privacy" },
@@ -29,12 +29,12 @@ export function LegalFooter() {
             { label: "FAQ", to: "/faq" },
             { label: "Contact", to: "/contact" },
           ].map(({ label, to }) => (
-            <Link key={label} to={to as any} className="hover:text-[#E28743] transition-colors">
+            <Link key={label} to={to as any} className="hover:text-primary transition-colors">
               {label}
             </Link>
           ))}
         </div>
-        <p className="text-xs text-[#6b7280]">
+        <p className="text-xs text-muted-foreground/80">
           © {new Date().getFullYear()} GilaniAI · Nairobi, Kenya
         </p>
       </div>
@@ -52,18 +52,22 @@ export function LegalHero({
   subtitle?: string;
 }) {
   return (
-    <div className="relative overflow-hidden border-b border-white/[0.08] py-12 sm:py-16 text-center">
+    <div className="relative overflow-hidden border-b border-border/60 py-14 sm:py-20 text-center bg-card/20">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_-10%,rgba(201,106,61,0.08),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_-10%,rgba(201,106,61,0.12),transparent_70%)]" />
       </div>
-      <div className="relative max-w-xl mx-auto px-4 sm:px-6 space-y-3">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#C96A3D]/25 bg-[#C96A3D]/10 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#E28743] mb-1">
+      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 space-y-4">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-primary mb-1 shadow-sm">
           <Sparkles className="h-3 w-3" />
           {label}
         </div>
-        <h1 className="font-serif text-3xl sm:text-4xl font-black text-white">{title}</h1>
+        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground font-display">
+          {title}
+        </h1>
         {subtitle && (
-          <p className="text-xs sm:text-sm text-[#9ca3af] leading-relaxed">{subtitle}</p>
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto">
+            {subtitle}
+          </p>
         )}
       </div>
     </div>
@@ -73,10 +77,10 @@ export function LegalHero({
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2 border-b border-white/[0.08] pb-2">
+      <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2 border-b border-border/60 pb-2.5 font-display">
         {title}
       </h2>
-      <div className="space-y-3.5 text-sm text-[#9ca3af] [&_ul]:pl-5 [&_ul]:space-y-2 [&_ul]:list-disc [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:text-white [&_a]:text-[#E28743] [&_a]:font-semibold [&_a]:hover:underline [&_a]:transition-colors">
+      <div className="space-y-3.5 text-sm sm:text-[15px] text-muted-foreground [&_ul]:pl-5 [&_ul]:space-y-2 [&_ul]:list-disc [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold [&_a]:text-primary [&_a]:font-semibold [&_a]:hover:underline [&_a]:transition-colors">
         {children}
       </div>
     </div>
