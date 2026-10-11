@@ -304,7 +304,9 @@ export const MessageList = React.memo(function MessageList({
       aria-label="Chat messages"
       aria-live="polite"
       className={`flex-1 min-h-0 overflow-y-auto px-2 py-4 sm:px-6 sm:py-6 ${
-        isRateLimited ? "pb-72" : "pb-48 lg:pb-36"
+        isRateLimited
+          ? "pb-[calc(20rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
+          : "pb-[calc(14rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
       }`}
     >
       <div
